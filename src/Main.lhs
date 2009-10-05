@@ -1,7 +1,15 @@
 
 The front end for the automated theorem proving Haskell port.
 
+* Pragmas 
+
+> {-# OPTIONS_GHC -fno-warn-unused-imports #-}
+
+* Signature
+
 > module Main ( main ) where 
+
+* Imports
 
 > import Prelude 
 
@@ -14,36 +22,38 @@ The front end for the automated theorem proving Haskell port.
 
 Basics
 
-> import qualified Lib
-> import qualified Lex
-> import qualified ListSet 
+> import qualified ATP.Util.Lib
+> import qualified ATP.Util.ListSet 
+> import qualified ATP.Util.Lex
+> import qualified ATP.Util.Parse
+> import qualified ATP.Util.Print
 
 Intro
 
-> import qualified IntroSyn
-> import qualified Intro
+> import qualified ATP.IntroSyn
+> import qualified ATP.Intro
 
 Formulas 
 
-> import qualified FormulaSyn
-> import qualified Formula
+-- > import qualified FormulaSyn
+-- > import qualified Formula
 
 Propositional logic
 
-> import qualified Prop 
-> import qualified PropExamples
-> import qualified DefCnf
-> import qualified Fol
-> import qualified TestFormulas
-> import qualified Dp
-> import qualified Herbrand
-> import qualified Unif
-> import qualified Skolem
-> import qualified Tableaux
-> import qualified Resolution
-> import qualified Prolog
-> import qualified Meson
+-- > import qualified Prop 
+-- > import qualified PropExamples
+-- > import qualified DefCnf
+-- > import qualified Fol
+-- > import qualified TestFormulas
+-- > import qualified Dp
+-- > import qualified Herbrand
+-- > import qualified Unif
+-- > import qualified Skolem
+-- > import qualified Tableaux
+-- > import qualified Resolution
 
+-- > import qualified Prolog
+-- > import qualified Meson
 -- > import qualified Equal
 -- > import qualified Cong
 -- > import qualified Rewrite
@@ -57,6 +67,8 @@ Propositional logic
 -- > import qualified Complex()
 -- > import qualified Interpolation()
 -- > import qualified Combining
+
+* Main
 
 > main :: IO ()
 > main = do putStrLn "Hello World!"

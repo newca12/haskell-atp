@@ -36,7 +36,6 @@ propositional variables.
 > import qualified ListSet
 > import FormulaSyn
 > import qualified Formula as F
-> import Formula((/\), (\/), (<=>))
 
 Propositions
 
@@ -130,10 +129,10 @@ Duality
 >   [$fol| ^_ |] -> fm
 >   [$fol| ~ $p |] -> [$fol| ~ $p' |]
 >     where p' = subdualize p
->   [$fol| $p /\ $q |] -> [$fol| $p \/ $q |]
+>   [$fol| $p /\ $q |] -> [$fol| $p' \/ $q' |]
 >     where p' = subdualize p
 >           q' = subdualize q
->   [$fol| $p \/ $q |] -> [$fol| $p /\ $q |]
+>   [$fol| $p \/ $q |] -> [$fol| $p' /\ $q' |]
 >     where p' = subdualize p
 >           q' = subdualize q
 >   _ -> error "Formula involves connectives ==> and <=>"
@@ -185,6 +184,7 @@ Negation normal form
 > nnf :: Formula -> Formula
 > nnf = nnf' . simplify
 
+> nnf' :: Formula -> Formula
 > nnf' fm = case fm of 
 >   [$fol| $p /\ $q |] -> [$fol| $p' /\ $q' |]
 >     where p' = nnf' p 
@@ -220,6 +220,7 @@ Negation normal form
 > nenf :: Formula -> Formula
 > nenf = nenf' . simplify 
 
+> nenf' :: Formula -> Formula
 > nenf' fm = case fm of 
 >   [$fol| ~~$p |] -> nenf' p
 >   [$fol| ~($p /\ $q) |] -> [$fol| $p' \/ $q' |] 

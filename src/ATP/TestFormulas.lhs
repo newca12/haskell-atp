@@ -1,4 +1,8 @@
 
+> {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
+
+Don't warn about missing signatures.  Everything here is a formula.
+
 > module TestFormulas where
 
 > import Prelude 

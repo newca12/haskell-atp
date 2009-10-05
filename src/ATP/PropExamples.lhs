@@ -35,9 +35,10 @@ p_m_n that we think of as 'm is connected to n' (or 'm knows n' etc.):
 >   let vertices = [1 .. n]
 >       yesgrps = map (ListSet.allSets 2) (ListSet.allSets s vertices)
 >       nogrps = map (ListSet.allSets 2) (ListSet.allSets t vertices) 
->       e [m, n] = Atom $ R ("p_" ++ show m ++ "_" ++ show n) [] in
->       (F.listDisj $ map (F.listConj . map e) yesgrps)
->       \/ (F.listDisj $ map (F.listConj . map (Not . e)) nogrps)
+>       e [m, n] = Atom $ R ("p_" ++ show m ++ "_" ++ show n) [] 
+>       e _ = error "Impossible" 
+>   in (F.listDisj $ map (F.listConj . map e) yesgrps)
+>        \/ (F.listDisj $ map (F.listConj . map (Not . e)) nogrps)
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Ripple carry adder

@@ -1,0 +1,62 @@
+
+name:           ATP
+version:        1.0.0
+cabal-version:  >= 1.6.0.3 && < 2
+build-type:     Simple
+license-file:   LICENSE
+author:         Sean McLaughlin <seanmcl@gmail.com>
+maintainer:	Sean McLaughlin <seanmcl@gmail.com>
+category:       Theorem provers
+
+synopsis:       A Haskell port of the code from John Harrison's book 
+                Handbook of Practical Logic and Automated Reasoning.
+
+description:    Haskell theorem proving algorithms.
+
+tested-with:    GHC == 6.10.4
+
+extra-source-files: README LICENSE
+
+executable atp
+
+  main-is:       Main.lhs
+
+  hs-source-dirs: src
+
+  extensions:    MultiParamTypeClasses
+                 ScopedTypeVariables
+                 TypeSynonymInstances
+                 OverlappingInstances
+                 FlexibleInstances
+                 DeriveDataTypeable
+                 TemplateHaskell
+                 QuasiQuotes
+
+  build-depends:  base >= 3.0.3.1,
+                  haskell98,
+                  containers,
+                  mtl,
+                  parsec,
+                  utf8-string >= 0.3.5,
+                  HUnit >= 1.2.2.0,
+                  pretty,
+                  QuickCheck >= 2.1.0.0,
+                  template-haskell,
+                  syb
+
+  ghc-options: -Wall 
+               -- These warnings are not turned on by -Wall
+               -fwarn-implicit-prelude 
+               -fwarn-monomorphism-restriction 
+               -fwarn-incomplete-record-updates 
+               -fwarn-tabs 
+               -fwarn-simple-patterns 
+               -- -Werror
+               -- Profiling 
+               -- -prof
+               -- -auto-all
+               -- Internal compiler checking
+               -- Remove literate comments with BirdPP
+               -- -pgmL BirdPP
+
+

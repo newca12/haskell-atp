@@ -77,8 +77,8 @@ Fold
 >     [$fol| $p /\ $q |] -> over2 p q
 >     [$fol| $p ==> $q |] -> over2 p q
 >     [$fol| $p <=> $q |] -> over2 p q
->     [$fol| forall $x. $p |] -> over1 p
->     [$fol| exists $x. $p |] -> over1 p
+>     [$fol| forall _. $p |] -> over1 p
+>     [$fol| exists _. $p |] -> over1 p
 >     _ -> b
 >     where over1 p = overatoms f p b
 >           over2 p q = overatoms f p (overatoms f q b)
@@ -128,7 +128,7 @@ the Prelude.)
 Sign of a formula
 
 > negative :: Formula -> Bool
-> negative [$fol| ~ $p |] = True
+> negative [$fol| ~ _ |] = True
 > negative _ = False
 
 > positive :: Formula -> Bool

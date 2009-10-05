@@ -2,23 +2,28 @@
 This file contains utility functions not provided by the Haskell
 standard library.  Most mirror functions in Harrison's lib.ml
 
-> module Lib ( -- Misc
->              time
->            , pow
->            , funpow
->            , decreasing
->              -- Lists
->            , findApply
->            , mapi
->            , allPairs
->            , distinctPairs
->            , all2
->              -- Strings
->            , substringIndex
->              -- Map
->            , (|->)
->            , (|=>)
->            ) where
+* Signature
+
+> module ATP.Util.Lib 
+>   ( time
+>   , pow
+>   , funpow
+>   , decreasing
+>     -- Lists
+>   , findApply
+>   , mapi
+>   , allPairs
+>   , distinctPairs
+>   , all2
+>     -- Strings
+>   , substringIndex
+>     -- Map
+>   , (↦)
+>   , (⟾)
+>   ) 
+> where
+
+* Imports
 
 > import Prelude
 > import qualified List 
@@ -28,9 +33,7 @@ standard library.  Most mirror functions in Harrison's lib.ml
 > import qualified Data.Map as Map
 > import Data.Map(Map)
 
--- -----------------------------------------------------------------------------
---  Misc                                                                        
--- -----------------------------------------------------------------------------
+* Misc
 
 > time :: IO a -> IO a
 > time a = do start <- Time.getCPUTime
@@ -48,18 +51,14 @@ standard library.  Most mirror functions in Harrison's lib.ml
 > pow x y = if y >= 0 then pow' x y 1 else error "negative power"
 
 > funpow :: Int -> (a -> a) -> a -> a
-> funpow n f x = if n < 0 then error "negative power" else funpow' n f x 
->   where funpow' 0 _ x = x
->         funpow' n f x = funpow (n-1) f (f x)
+> funpow n f x = iterate f x !! n
 
 For use with sort
 
 > decreasing :: Ord b => (a -> b) -> a -> a -> Ordering
 > decreasing f x y = compare (f x) (f y)
 
--- -----------------------------------------------------------------------------
---  Lists                                                                       
--- -----------------------------------------------------------------------------
+* Lists
 
 Return the first element of a list that returns Just.
 Equivalent to 
@@ -101,9 +100,7 @@ f xi yi --> True for all i < length xs
 > all2 f (x:xs) (y:ys) = f x y && all2 f xs ys
 > all2 _ _ _ = False
 
--- -----------------------------------------------------------------------------
---  Strings                                                                     
--- -----------------------------------------------------------------------------
+* Strings
 
 > substringIndex :: String -> String -> Maybe Int 
 > substringIndex s1 s2 = 
@@ -111,13 +108,11 @@ f xi yi --> True for all i < length xs
 >       ind n s = if take n s == s1 then Just n else ind (n+1) (tail s) in
 >   ind 0 s2
 
--- -----------------------------------------------------------------------------
---  Substitutions                                                               
--- -----------------------------------------------------------------------------
+* Substitutions
+ 
+> (↦) :: Ord a => a -> b -> Map a b -> Map a b
+> (↦) = Map.insert
 
-> (|->) :: Ord a => a -> b -> Map a b -> Map a b
-> (|->) = Map.insert
-
-> (|=>) :: Ord a => a -> b -> Map a b
-> (|=>) = Map.singleton 
+> (⟾) :: Ord a => a -> b -> Map a b
+> (⟾) = Map.singleton 
 

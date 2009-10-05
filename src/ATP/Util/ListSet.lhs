@@ -1,24 +1,32 @@
 
 Set operations on lists.
 
-> module ListSet ( ListSet
->                , setify
->                , uniq
->                , union
->                , intersect
->                , (\\)
->                , image
->                , insert
->                , unions
->                , subset
->                , psubset
->                , allSubsets
->                , allNonemptySubsets
->                , allSets
->                ) where
+* Signature
 
-> import Prelude 
+> module ATP.Util.ListSet 
+>   ( ListSet
+>   , setify
+>   , uniq
+>   , union
+>   , intersect
+>   , (\\)
+>   , image
+>   , insert
+>   , unions
+>   , subset
+>   , psubset
+>   , allSubsets
+>   , allNonemptySubsets
+>   , allSets
+>   ) 
+> where
+
+* Imports
+
+> import Prelude hiding (subtract)
 > import qualified List
+
+* Sets as lists
 
 > type ListSet a = [a]
 

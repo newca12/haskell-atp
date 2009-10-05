@@ -1,0 +1,70 @@
+
+{- -*- Mode: Haskell -*- -}
+
+-- -----------------------------------------------------------------------------
+--  Language                                                                    
+-- -----------------------------------------------------------------------------
+
+:set -XNamedFieldPuns
+:set -XRecordWildCards
+:set -XMultiParamTypeClasses
+:set -XFlexibleInstances
+:set -XOverlappingInstances
+:set -XFlexibleContexts
+:set -XTypeSynonymInstances
+:set -XScopedTypeVariables
+:set -XViewPatterns
+:set -XPatternGuards
+:set -XFunctionalDependencies
+:set -XUnicodeSyntax
+:set -XGeneralizedNewtypeDeriving
+:set -XUndecidableInstances
+:set -XRank2Types
+:set -XEmptyDataDecls
+:set -XForeignFunctionInterface
+:set -XNamedFieldPuns
+:set -XDeriveDataTypeable
+:set -XTemplateHaskell
+:set -XQuasiQuotes
+
+:set -i/usr1/seanmcl/save/projects/atp/src
+:set -i/Users/sean/save/projects/atp/src
+:set -fbreak-on-exception
+:set args "cvc" "⊤"
+:set -lcvc3 -lcvch
+
+-- -----------------------------------------------------------------------------
+--  File loading                                                                
+-- -----------------------------------------------------------------------------
+
+-- :load IntSyn Parse Print
+-- :module +System.IO.UTF8
+
+-- -----------------------------------------------------------------------------
+--  Options                                                                      
+-- -----------------------------------------------------------------------------
+
+:set +t
+-- :set prompt "> "
+:set prompt "Prelude> "
+
+-- -----------------------------------------------------------------------------
+--  Functions                                                                   
+-- -----------------------------------------------------------------------------
+
+:{
+let date _ = do { t <- Time.getClockTime 
+                ; print t
+                ; return "" }
+:}
+
+:def date date
+
+-- -----------------------------------------------------------------------------
+--  Test                                                                        
+-- -----------------------------------------------------------------------------
+
+:def iload (\_ -> return   ":load   IntSyn Parse Print Formula") 
+:def imodule (\_ -> return ":module IntSyn Parse Print Formula") 
+:def debug (\_ -> return ":module Language.Haskell.TH IntSyn Parse Print") 
+

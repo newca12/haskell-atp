@@ -31,7 +31,6 @@ Relations R ::= Var() | Var ( TS ) | Var | T = T | T < T
 
 > import Prelude 
 > import qualified Data.List as List
-> import qualified Data.Char as Char
 > import qualified Data.Map as Map
 > import Data.Map(Map)
 > import qualified Lib
@@ -40,25 +39,12 @@ Relations R ::= Var() | Var ( TS ) | Var | T = T | T < T
 > import ListSet((\\))
 > import FormulaSyn
 > import qualified Formula as F
-> import Formula((\/), (/\), (==>), (<=>))
 
 Terms 
 
 > isVar :: Term -> Bool
 > isVar (Var _) = True
 > isVar _ = False
-
-> instance Num Term where
->   t1 + t2 = Fn "+" [t1, t2]
->   t1 - t2 = Fn "-" [t1, t2]
->   t1 * t2 = Fn "*" [t1, t2]
->   negate t = Fn "-" [t]
->   abs _ = error "Unimplemented" 
->   signum _ = error "Unimplemented" 
->   fromInteger n = Fn (show n) []
-
-> instance Fractional Term where
->   fromRational r = Fn (show r) []
 
 Relations
   
@@ -137,16 +123,16 @@ Substitutions
 >       where a' = apply env a
 >     [$fol| ~ $p |] -> [$fol| ~ $p' |]
 >       where p' = apply env p
->     [$fol| $p /\ $q |] -> [$fol| $p /\ $q |]
+>     [$fol| $p /\ $q |] -> [$fol| $p' /\ $q' |]
 >       where p' = apply env p 
 >             q' = apply env q
->     [$fol| $p \/ $q |] -> [$fol| $p \/ $q |]
+>     [$fol| $p \/ $q |] -> [$fol| $p' \/ $q' |]
 >       where p' = apply env p 
 >             q' = apply env q
->     [$fol| $p ==> $q |] -> [$fol| $p ==> $q |]
+>     [$fol| $p ==> $q |] -> [$fol| $p' ==> $q' |]
 >       where p' = apply env p 
 >             q' = apply env q
->     [$fol| $p <=> $q |] -> [$fol| $p <=> $q |]
+>     [$fol| $p <=> $q |] -> [$fol| $p' <=> $q' |]
 >       where p' = apply env p 
 >             q' = apply env q
 >     [$fol| forall $x. $p |] -> applyq env All x p

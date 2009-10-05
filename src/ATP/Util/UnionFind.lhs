@@ -1,18 +1,25 @@
 
 Union-Find 
 
-> module UnionFind( 
->                  Partition,
->                  canonize,
->                  equivalent,
->                  unequal,
->                  equate,
->                  equated,
->                 ) where
+* Signature
+
+> module ATP.Util.UnionFind
+>   ( Partition
+>   , canonize,
+>   , equivalent
+>   , unequal
+>   , equate
+>   , equated
+>   ) 
+> where
   
+* Imports
+
 > import Prelude 
 > import qualified Data.Map as Map
 > import Data.Map(Map)
+
+* Union-Find
 
 > data Pnode a = Nonterminal a
 >              | Terminal a Int

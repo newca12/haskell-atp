@@ -1,14 +1,18 @@
 
-> module FormulaSyn ( Var, Vars
->                   , Formula(..)
->                   , Func, Term(..)
->                   , Pred, Rel(R)
->                   , Clause, Clauses
->                     -- Quotations
->                   , term, fol
->                   )
+* Signature
 
+> module FormulaSyn 
+>   ( Var, Vars
+>   , Formula(..)
+>   , Func, Term(..)
+>   , Pred, Rel(R)
+>   , Clause, Clauses
+>     -- Quotations
+>   , term, fol
+>   )
 > where
+
+* Imports
 
 > import Prelude 
 > import qualified Data.List as List
@@ -33,9 +37,11 @@ Quotations
 Printing 
 
 > import qualified Text.PrettyPrint.HughesPJClass as PP
-> import Text.PrettyPrint.HughesPJClass(Pretty(pPrint), (<+>), (<>), ($$))
+> import Text.PrettyPrint.HughesPJClass(Pretty(pPrint), (<+>), (<>))
 
-First order terms
+* Syntax
+
+○ Formulas
 
 > type Var = String
 
@@ -45,14 +51,26 @@ First order terms
 >           | Fn Func [Term]
 >   deriving (Eq, Ord, Data, Typeable)
 
-Relations
+> instance Num Term where
+>   t1 + t2 = Fn "+" [t1, t2]
+>   t1 - t2 = Fn "-" [t1, t2]
+>   t1 * t2 = Fn "*" [t1, t2]
+>   negate t = Fn "-" [t]
+>   abs _ = error "Unimplemented" 
+>   signum _ = error "Unimplemented" 
+>   fromInteger n = Fn (show n) []
+
+> instance Fractional Term where
+>   fromRational r = Fn (show r) []
+
+○ Relations
 
 > type Pred = String
 
 > data Rel = R Pred [Term]
 >   deriving (Eq, Ord, Data, Typeable)
 
-Formulas
+○ Formulas
 
 > data Formula = Atom Rel
 >              | Top
@@ -66,15 +84,13 @@ Formulas
 >              | Ex Var Formula
 >   deriving(Eq, Ord, Data, Typeable)
 
-Useful abbreviations
+○ Useful abbreviations
 
 > type Vars = [Var]
 > type Clause = [Formula]
 > type Clauses = [Clause]
 
--- -----------------------------------------------------------------------------
---  Parsing                                                                     
--- -----------------------------------------------------------------------------
+* Parsing
 
 Encode a quotation in an atom.  This avoids needing a separate data
 clause for antiquotes.
@@ -90,7 +106,7 @@ clause for antiquotes.
 > decode :: Rel -> Maybe String 
 > decode (R s _) = if isQuote s then Just s else Nothing
 
-Formulas
+○ Formulas
 
 > formula :: Parser Formula
 > formula = E.buildExpressionParser formulaTable atomicFormula <?> "formula" 
@@ -102,7 +118,6 @@ Formulas
 >                , [op "<=>" Iff E.AssocRight]
 >                ] 
 >   where op s f assoc = E.Infix (do { Lex.reservedOp s; return f }) assoc 
->         op1 s f = E.Prefix (do { Lex.reservedOp s; return f })
 
 > ident :: Parser String
 > ident = Lex.identifier <|> Lex.symbol "_"
@@ -144,7 +159,7 @@ Formulas
 >                    return $ Atom v
 >             <?> "atomic formula"
 
-Term 
+○ Terms
 
 > termp :: Parser Term
 > termp = E.buildExpressionParser termTable atomicTerm <?> "term" 
@@ -176,7 +191,7 @@ Term
 >                 return $ Var x
 >          <?> "atomic term"
 
-Relations
+○ Relations
 
 > parseRel :: Parser Rel
 > parseRel = 
@@ -209,9 +224,7 @@ Package it up.
 > parseTerm :: Monad m => String -> m Term
 > parseTerm = makeParser termp
 
--- -----------------------------------------------------------------------------
---  Quotations                                                                  
--- -----------------------------------------------------------------------------
+* Quotations
 
 %%% Top level quasiquoters
 
@@ -297,9 +310,7 @@ Patterns
 > boundP ('$':x) = TH.varP $ TH.mkName x
 > boundP x = TH.litP $ TH.stringL x
 
--- -----------------------------------------------------------------------------
---  Printing                                                                    
--- -----------------------------------------------------------------------------
+* Printing
 
 Formulas
 
@@ -326,15 +337,19 @@ Formulas
 > ppPrefixFm pr sym p = PP.text sym <> ppForm pr p
 
 > ppInfixFm :: Int -> String -> Formula -> Formula -> PP.Doc
-> ppInfixFm pr sym p q = PP.sep[PP.hsep[ppForm (pr+1) p, PP.text sym], ppForm pr q] 
+> ppInfixFm pr sym p q = PP.sep[PP.hsep[ppForm (pr+1) p, PP.text sym], 
+>                               ppForm pr q] 
 
 > ppQuant :: String -> (Vars, Formula) -> PP.Doc
 > ppQuant name (bvs, bod) = 
->   PP.hang (PP.text name <+> PP.sep (map PP.text bvs) <> PP.text ".") 2 (ppForm 0 bod)
+>   PP.hang 
+>     (PP.text name <+> PP.sep (map PP.text bvs) <> PP.text ".") 
+>       2 (ppForm 0 bod)
 
 > paren :: Bool -> (a -> b -> PP.Doc) -> a -> b -> PP.Doc
-> paren p f x y = let d = f x y in
->                   if p then PP.parens d else d
+> paren p f x y = 
+>   if p then PP.parens d else d
+>     where d = f x y 
 
 > stripQuant :: Formula -> (Vars, Formula)
 > stripQuant fm = case fm of 
