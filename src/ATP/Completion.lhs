@@ -1,34 +1,41 @@
 
-> module Completion ( overlaps
->                   , listcases
->                   , complete
->                   , completeAndSimplify
->                   , criticalPairs
->                   , normalizeAndOrient
->                   ) where
-                        
-> import Prelude 
-> import qualified Lib
-> import qualified List
-> import qualified Maybe
-> import qualified ListSet
-> import ListSet( (\\) )
-> import qualified Fol
-> import Fol(Fol(..), Term(..), Env)
-> import qualified Data.Map as Map
-> import qualified Formulas
-> import Formulas(Formula(..), Vars)
-> import qualified Unif
-> import qualified Equal
-> import qualified Rewrite
-> import qualified Order
+* Signature
 
-> renamePair :: (Formula Fol, Formula Fol) -> (Formula Fol, Formula Fol) 
+> module ATP.Completion
+>   ( overlaps
+>   , listcases
+>   , complete
+>   , completeAndSimplify
+>   , criticalPairs
+>   , normalizeAndOrient
+>   )
+> where
+
+* Imports
+
+> import Prelude 
+> import qualified Data.Maybe as Maybe
+> import qualified Data.List as List
+> import qualified Data.Map as Map
+
+> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.ListSet as Set
+> import ATP.Util.ListSet((\\))
+> import qualified ATP.FOL as FOL
+> import ATP.FormulaSyn
+> import qualified ATP.Unif as Unif
+> import qualified ATP.Equal as Equal
+> import qualified ATP.Rewrite as Rewrite
+> import qualified ATP.Order as Order
+
+* Completion
+
+> renamePair :: (Formula, Formula) -> (Formula, Formula) 
 > renamePair (fm1, fm2) = 
->   let fvs1 = Fol.fv fm1
->       fvs2 = Fol.fv fm2
+>   let fvs1 = FOL.fv fm1
+>       fvs2 = FOL.fv fm2
 >       (nms1, nms2) = splitAt (length fvs1) (map (Var . ("x" ++) . show) [0 .. length fvs1 + length fvs2 - 1]) in
->   (Fol.apply (Map.fromList (zip fvs1 nms1)) fm1, Fol.apply (Map.fromList (zip fvs2 nms2)) fm2)
+>   (FOL.apply (Map.fromList (zip fvs1 nms1)) fm1, FOL.apply (Map.fromList (zip fvs2 nms2)) fm2)
 
 > listcases :: (a -> (Env -> a -> b) -> [c]) 
 >           -> (Env -> [a] -> b) -> [a] -> [c] -> [c]
@@ -46,18 +53,18 @@
 >                   Nothing -> []
 >                   Just env -> [rfn env r])
 
-> crit1 :: Formula Fol -> Formula Fol -> [Formula Fol]
+> crit1 :: Formula -> Formula -> [Formula]
 > crit1 (Atom (R "=" [l1, r1])) (Atom (R "=" [l2, r2])) = 
->   overlaps (l1, r1) l2 (\i t -> Fol.apply i (Equal.mkEq t r2))
+>   overlaps (l1, r1) l2 (\i t -> FOL.apply i (Equal.mkEq t r2))
 > crit1 _ _ = error "Impossible" 
 
-> criticalPairs :: Formula Fol -> Formula Fol -> [Formula Fol]
+> criticalPairs :: Formula -> Formula -> [Formula]
 > criticalPairs fma fmb = 
 >   let (fm1, fm2) = renamePair (fma, fmb) in
 >   if fma == fmb then crit1 fm1 fm2
->   else ListSet.union (crit1 fm1 fm2) (crit1 fm2 fm1)
+>   else Set.union (crit1 fm1 fm2) (crit1 fm2 fm1)
 
-> normalizeAndOrient :: (Term -> Term -> Bool) -> [Formula Fol] -> Formula Fol -> Maybe (Term, Term)
+> normalizeAndOrient :: (Term -> Term -> Bool) -> [Formula] -> Formula -> Maybe (Term, Term)
 > normalizeAndOrient ord eqs (Atom (R "=" [s, t])) =
 >   let s' = Rewrite.rewrite eqs s 
 >       t' = Rewrite.rewrite eqs t in
@@ -66,14 +73,14 @@
 >   else Nothing 
 > normalizeAndOrient _ _ _ = error "Impossible" 
 
-> status :: ([Formula Fol], [Formula Fol], [Formula Fol]) -> [Formula Fol] -> IO ()
+> status :: ([Formula], [Formula], [Formula]) -> [Formula] -> IO ()
 > status (eqs, def, crs) eqs0 = 
 >   if eqs == eqs0 && not (length crs `mod` 1000 == 0) then return () else
 >   do print (show (length eqs) ++ " equations and " ++
 >             show (length crs) ++ " pending critical pairs + " ++
 >             show (length def) ++ " deferred")
 
-> complete :: (Term -> Term -> Bool) -> ([Formula Fol], [Formula Fol], [Formula Fol]) -> IO (Maybe [Formula Fol])
+> complete :: (Term -> Term -> Bool) -> ([Formula], [Formula], [Formula]) -> IO (Maybe [Formula])
 > complete ord (eqs, def, crits) =
 >   case crits of
 >     eq:ocrits -> 
@@ -90,20 +97,20 @@
 >             Nothing -> return Nothing
 >             Just e -> complete ord (eqs, def \\ [e], [e])
 
-> interreduce :: [Formula Fol] -> [Formula Fol] -> [Formula Fol]
+> interreduce :: [Formula] -> [Formula] -> [Formula]
 > interreduce dun (Atom (R "=" [l, r]) : oeqs) = 
 >   let dun' = if Rewrite.rewrite (dun ++ oeqs) l /= l then dun
 >              else Equal.mkEq l (Rewrite.rewrite (dun ++ oeqs) r) : dun in
 >   interreduce dun' oeqs
 > interreduce dun _ = reverse dun
 
-> completeAndSimplify :: Vars -> [Formula Fol] -> IO (Maybe [Formula Fol])
+> completeAndSimplify :: Vars -> [Formula] -> IO (Maybe [Formula])
 > completeAndSimplify wts eqs =
 >   let ord = Order.lpoGe (Order.weight wts)
 >       eqs' = map (\e -> case normalizeAndOrient ord [] e of 
 >                           Just (l, r) -> Equal.mkEq l r
 >                           Nothing -> error "Can't orient equation") eqs in
->   do eqs'' <- complete ord (eqs', [], ListSet.unions(Lib.allPairs criticalPairs eqs' eqs'))
+>   do eqs'' <- complete ord (eqs', [], Set.unions(Lib.allPairs criticalPairs eqs' eqs'))
 >      case eqs'' of
 >        Just eqs''' -> return $ Just (interreduce [] eqs''')
 >        Nothing -> return Nothing

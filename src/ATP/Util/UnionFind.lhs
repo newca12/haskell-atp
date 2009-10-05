@@ -5,7 +5,7 @@ Union-Find
 
 > module ATP.Util.UnionFind
 >   ( Partition
->   , canonize,
+>   , canonize
 >   , equivalent
 >   , unequal
 >   , equate
@@ -49,12 +49,12 @@ Union-Find
 > equate (a, b) (ptn @ (Partition f)) =
 >   let (a', na) = tryterminus ptn a
 >       (b', nb) = tryterminus ptn b 
->       map = if a' == b' then f 
->             else if na <= nb then
->               Map.insert a' (Nonterminal b') (Map.insert b' (Terminal b' (na + nb)) f)
->             else
->               Map.insert b' (Nonterminal a') (Map.insert a' (Terminal a' (na + nb)) f) in
->   Partition map
+>       m = if a' == b' then f 
+>           else if na <= nb then
+>                Map.insert a' (Nonterminal b') (Map.insert b' (Terminal b' (na + nb)) f)
+>                else
+>                Map.insert b' (Nonterminal a') (Map.insert a' (Terminal a' (na + nb)) f) in
+>   Partition m
 
 > unequal :: Partition a
 > unequal = Partition Map.empty

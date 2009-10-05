@@ -1,14 +1,17 @@
 
 * Signature
 
-> module FormulaSyn 
+> module ATP.FormulaSyn 
 >   ( Var, Vars
 >   , Formula(..)
 >   , Func, Term(..)
 >   , Pred, Rel(R)
 >   , Clause, Clauses
->     -- Quotations
->   , term, fol
+>   , Env
+>   , (¬), (∧), (∨), (⇔), (⊃), (¥), (∃), (⊤), (⊥)
+>     -- * Quotations
+>   , term
+>   , form
 >   )
 > where
 
@@ -17,16 +20,7 @@
 > import Prelude 
 > import qualified Data.List as List
 > import qualified Data.Maybe as Maybe
-
-Parsing 
-
-> import qualified Lex
-> import qualified Text.ParserCombinators.Parsec as P
-> import Text.ParserCombinators.Parsec (Parser, (<|>), (<?>))
-> import qualified Text.ParserCombinators.Parsec.Expr as E
- 
-Quotations
-
+> import Data.Map (Map)
 > import qualified Language.Haskell.TH as TH
 > import Language.Haskell.TH(ExpQ, PatQ)
 > import qualified Language.Haskell.TH.Quote as Q
@@ -34,10 +28,13 @@ Quotations
 > import qualified Data.Generics as G
 > import Data.Generics (Data, Typeable)
 
-Printing 
-
-> import qualified Text.PrettyPrint.HughesPJClass as PP
-> import Text.PrettyPrint.HughesPJClass(Pretty(pPrint), (<+>), (<>))
+> import qualified ATP.Util.Lex as Lex
+> import qualified ATP.Util.Parse as P
+> import ATP.Util.Parse (Parse, parse)
+> import qualified ATP.Util.TH as TH'
+> import ATP.Util.Parse (Parser, (<|>), (<?>))
+> import qualified ATP.Util.Print as PP
+> import ATP.Util.Print (Pretty(pPrint), (<+>), (<>))
 
 * Syntax
 
@@ -56,9 +53,9 @@ Printing
 >   t1 - t2 = Fn "-" [t1, t2]
 >   t1 * t2 = Fn "*" [t1, t2]
 >   negate t = Fn "-" [t]
+>   fromInteger n = Fn (show n) []
 >   abs _ = error "Unimplemented" 
 >   signum _ = error "Unimplemented" 
->   fromInteger n = Fn (show n) []
 
 > instance Fractional Term where
 >   fromRational r = Fn (show r) []
@@ -89,6 +86,41 @@ Printing
 > type Vars = [Var]
 > type Clause = [Formula]
 > type Clauses = [Clause]
+> type Env = Map Var Term
+
+* Infix ops
+
+> infixr 8 ∧
+> infixr 7 ∨
+> infixr 6 ⊃
+> infixr 5 ⇔
+
+> (⊤) :: Formula
+> (⊤) = Top
+
+> (⊥) :: Formula
+> (⊥) = Bot
+
+> (¬) :: Formula -> Formula 
+> (¬) = Not
+
+> (∧) :: Formula -> Formula -> Formula 
+> (∧) = And
+
+> (∨) :: Formula -> Formula -> Formula 
+> (∨) = Or
+
+> (⊃) :: Formula -> Formula -> Formula 
+> (⊃) = Imp
+
+> (⇔) :: Formula -> Formula -> Formula 
+> (⇔) = Iff
+
+> (¥) :: Var -> Formula -> Formula 
+> (¥) = All
+
+> (∃) :: Var -> Formula -> Formula 
+> (∃) = Ex
 
 * Parsing
 
@@ -106,88 +138,41 @@ clause for antiquotes.
 > decode :: Rel -> Maybe String 
 > decode (R s _) = if isQuote s then Just s else Nothing
 
-○ Formulas
-
-> formula :: Parser Formula
-> formula = E.buildExpressionParser formulaTable atomicFormula <?> "formula" 
-
-> formulaTable :: E.OperatorTable Char () Formula
-> formulaTable = [ [op "/\\" And E.AssocRight] 
->                , [op "\\/" Or  E.AssocRight]
->                , [op "==>" Imp E.AssocRight]
->                , [op "<=>" Iff E.AssocRight]
->                ] 
->   where op s f assoc = E.Infix (do { Lex.reservedOp s; return f }) assoc 
-
-> ident :: Parser String
-> ident = Lex.identifier <|> Lex.symbol "_"
-
 > var :: Parser Var
 > var = do Lex.symbol "$"
->          x <- ident
+>          x <- Lex.identifier
 >          return $ ("$" ++ x)
->   <|> ident
-
-> atomicFormula :: Parser Formula
-> atomicFormula = do Lex.reserved "true"
->                    return Top
->             <|> do Lex.reserved "false"
->                    return Bot
->             <|> do Lex.symbol "~"
->                    f <- atomicFormula
->                    return $ Not $ f
->             <|> do Lex.symbol "$"
->                    x <- ident
->                    return $ Atom $ encode ("$" ++ x)
->             <|> do Lex.symbol "^"
->                    x <- ident
->                    return $ Atom $ encode ("^" ++ x)
->             <|> do Lex.symbol "_"
->                    return $ Atom $ encode "$_"
->             <|> do Lex.reserved "forall"
->                    xs <- P.many1 var
->                    Lex.symbol "."
->                    b <- formula 
->                    return $ foldr All b xs
->             <|> do Lex.reserved "exists"
->                    xs <- P.many1 var
->                    Lex.symbol "."
->                    b <- formula 
->                    return $ foldr Ex b xs
->             <|> Lex.parens formula
->             <|> do v <- parseRel
->                    return $ Atom v
->             <?> "atomic formula"
+>   <|> Lex.identifier
 
 ○ Terms
 
 > termp :: Parser Term
-> termp = E.buildExpressionParser termTable atomicTerm <?> "term" 
+> termp = P.buildExpressionParser termTable atomicTerm <?> "term" 
 
-> termTable :: E.OperatorTable Char () Term
-> termTable = [ [op "^"  (fn "^")  E.AssocLeft] 
->             , [op "/"  (fn "/")  E.AssocLeft]
->             , [op "*"  (fn "*")  E.AssocRight]
->             , [op "-"  (fn "-")  E.AssocLeft]
->             , [op "+"  (fn "+")  E.AssocRight]
->             , [op "::" (fn "::") E.AssocRight]
+> termTable :: P.OperatorTable Char () Term
+> termTable = [ [op "^"  (fn "^")  P.AssocLeft] 
+>             , [op "/"  (fn "/")  P.AssocLeft]
+>             , [op "*"  (fn "*")  P.AssocRight]
+>             , [op "-"  (fn "-")  P.AssocLeft]
+>             , [op "+"  (fn "+")  P.AssocRight]
+>             , [op "::" (fn "::") P.AssocRight]
 >             ] 
->   where op s f assoc = E.Infix (do { Lex.reservedOp s; return f }) assoc 
->         fn op t1 t2 = Fn op [t1, t2]
+>   where op s f assoc = P.Infix (do { Lex.reservedOp s; return f }) assoc 
+>         fn f t1 t2 = Fn f [t1, t2]
 
 > atomicTerm :: Parser Term
 > atomicTerm = Lex.parens termp
->          <|> do n <- Lex.natural
->                 return $ Fn (show n) []
 >          <|> do Lex.reserved "nil" 
 >                 return $ Fn "nil" []
->          <|> do Lex.symbol "-" 
+>          <|> do Lex.reservedOp "-" 
 >                 t <- atomicTerm
 >                 return $ Fn "-" [t]
->          <|> P.try (do f <- ident
+>          <|> do n <- Lex.integer
+>                 return $ Fn (show n) []
+>          <|> P.try (do f <- Lex.identifier
 >                        ts <- Lex.parens $ P.sepBy termp (Lex.symbol ",")
 >                        return $ Fn f ts)
->          <|> do x <- ident
+>          <|> do x <- Lex.identifier
 >                 return $ Var x
 >          <?> "atomic term"
 
@@ -196,59 +181,88 @@ clause for antiquotes.
 > parseRel :: Parser Rel
 > parseRel = 
 >       P.try (do t1 <- termp
->                 op <- P.choice (map (P.try . Lex.symbol) ["=", ">=", ">", "<=", "<"])
+>                 op <- P.choice (map (P.try . Lex.symbol)
+>                                ["=", ">=", "≥", ">", "<=", "≤", "<"])
 >                 t2 <- termp
 >                 return $ R op [t1, t2])
->   <|> P.try (do p <- ident
+>   <|> P.try (do p <- Lex.identifier
 >                 ts <- Lex.parens $ P.sepBy termp (Lex.symbol ",")
 >                 return $ R p ts)
->   <|> do p <- ident
+>   <|> do p <- Lex.identifier
 >          return $ R p []
 >   <?> "relation"
 
+○ Formulas
+
+> formula :: Parser Formula
+> formula = P.buildExpressionParser formulaTable atomicFormula <?> "formula" 
+
+> formulaTable :: P.OperatorTable Char () Formula
+> formulaTable = [ [ op "∧" And P.AssocRight
+>                  , op "/\\" And P.AssocRight ] 
+>                , [ op "\\/" Or  P.AssocRight
+>                  , op "∨" Or  P.AssocRight ]
+>                , [ op "==>" Imp P.AssocRight
+>                  , op "⊃" Imp P.AssocRight ]
+>                , [ op "<=>" Iff P.AssocRight
+>                  , op "⇔" Iff P.AssocRight ]
+>                ] 
+>   where op s f assoc = P.Infix (do { Lex.reservedOp s; return f }) assoc 
+
+> atomicFormula :: Parser Formula
+> atomicFormula = do Lex.reserved "true" <|> Lex.reserved "⊤"
+>                    return Top
+>             <|> do Lex.reserved "false" <|> Lex.reserved "⊥"
+>                    return Bot
+>             <|> do (Lex.reserved "~" <|> Lex.reserved "¬")
+>                    f <- atomicFormula
+>                    return $ Not $ f
+>             <|> do Lex.symbol "$"
+>                    x <- Lex.identifier
+>                    return $ Atom $ encode ("$" ++ x)
+>             <|> do Lex.symbol "^"
+>                    x <- Lex.identifier
+>                    return $ Atom $ encode ("^" ++ x)
+>             <|> do Lex.symbol "_"
+>                    return $ Atom $ encode "$_"
+>             <|> do Lex.reserved "forall" <|> Lex.reserved "∀"
+>                    xs <- P.many1 var
+>                    Lex.symbol "."
+>                    b <- formula 
+>                    return $ foldr All b xs
+>             <|> do Lex.reserved "exists" <|> Lex.reserved "∃"
+>                    xs <- P.many1 var
+>                    Lex.symbol "."
+>                    b <- formula 
+>                    return $ foldr Ex b xs
+>             <|> do v <- parseRel
+>                    return $ Atom v
+>             <|> Lex.parens formula
+>             <?> "atomic formula"
+
 Package it up.
 
-> makeParser :: Monad m => Parser a -> String -> m a
-> makeParser p input = 
->   case P.runParser p' () "" input of
->     Left err -> fail $ show err
->     Right e -> return e
->  where p' = do Lex.whiteSpace
->                x <- p
->                P.eof 
->                return x
+> instance Parse Formula where
+>   parser = formula
 
-> parseFormula :: Monad m => String -> m Formula
-> parseFormula = makeParser formula
-
-> parseTerm :: Monad m => String -> m Term
-> parseTerm = makeParser termp
+> instance Parse Term where
+>   parser = termp
 
 * Quotations
 
-%%% Top level quasiquoters
-
-Formula 
-
-> fol :: QuasiQuoter
-> fol = QuasiQuoter quoteExpF quotePatF
-
-> quoteExpF :: String -> TH.ExpQ 
-> quoteExpF = quoteE . Maybe.fromJust . parseFormula 
-
-> quotePatF :: String -> TH.PatQ 
-> quotePatF = quoteP . Maybe.fromJust . parseFormula
-
-Term 
+** Terms
 
 > term :: QuasiQuoter
 > term = QuasiQuoter quoteExpT quotePatT
 
+> parseTerm :: String -> Term
+> parseTerm = Lex.makeParser termp
+
 > quoteExpT :: String -> TH.ExpQ 
-> quoteExpT = quoteT . Maybe.fromJust . parseTerm
+> quoteExpT = quoteT . parseTerm
 
 > quotePatT :: String -> TH.PatQ 
-> quotePatT = quoteT' . Maybe.fromJust . parseTerm
+> quotePatT = quoteT' . parseTerm
 
 > quoteT :: Data a => a -> TH.ExpQ
 > quoteT = Q.dataToExpQ (const Nothing)
@@ -256,9 +270,18 @@ Term
 > quoteT' :: Data a => a -> TH.PatQ
 > quoteT' = Q.dataToPatQ (const Nothing)
 
-%%% Basic quotations
+** Formulas
 
-Expressions
+> form :: QuasiQuoter
+> form = QuasiQuoter quoteExpF quotePatF
+
+> quoteExpF :: String -> TH.ExpQ 
+> quoteExpF = quoteE . parse
+
+> quotePatF :: String -> TH.PatQ 
+> quotePatF = quoteP . parse
+
+*** Expressions
 
 > quoteE :: Formula -> TH.ExpQ
 > quoteE = Q.dataToExpQ (G.mkQ Nothing quoteE')
@@ -269,21 +292,21 @@ Expressions
 >    case decode a of 
 >      Nothing -> Nothing
 >      Just q  -> Just $ antiE q
->   All x p -> Just $ foldl1 TH.appE [TH.conE (TH.mkName "All"), boundE x, quoteE p]
->   Ex x p -> Just $ foldl1 TH.appE [TH.conE (TH.mkName "Ex"), boundE x, quoteE p]
+>   All x p' -> Just $ TH'.conE "All" [boundE x, quoteE p']
+>   Ex x p' -> Just $ TH'.conE "Ex" [boundE x, quoteE p']
 >   _ -> Nothing
 
 > antiE :: String -> TH.ExpQ
 > antiE v = case v of
->   '$':back -> TH.varE $ TH.mkName back
->   '^':back -> TH.appE (TH.conE $ TH.mkName "Atom") (TH.varE $ TH.mkName back)
+>   '$':back -> TH'.varE back
+>   '^':back -> TH'.conE "Atom" [TH'.varE back]
 >   _ -> error ("Impossible: " ++ v) 
 
 > boundE :: Var -> TH.ExpQ
-> boundE ('$':x) = TH.varE $ TH.mkName x 
+> boundE ('$':x) = TH'.varE x 
 > boundE x = TH.stringE x
 
-Patterns 
+*** Patterns 
 
 > quoteP :: Formula -> TH.PatQ
 > quoteP = Q.dataToPatQ (G.mkQ Nothing quoteP')
@@ -294,23 +317,68 @@ Patterns
 >    case decode a of 
 >      Nothing -> Nothing
 >      Just q -> Just $ antiP q
->   All x p -> Just $ TH.conP (TH.mkName "All") [boundP x, quoteP p]
->   Ex x p -> Just $ TH.conP (TH.mkName "Ex") [boundP x, quoteP p]
+>   All x p' -> Just $ TH'.conP "All" [boundP x, quoteP p']
+>   Ex x p' -> Just $ TH'.conP "Ex" [boundP x, quoteP p']
 >   _ -> Nothing
 
 > antiP :: String -> TH.PatQ
 > antiP v = case v of
 >   "$_"  -> TH.wildP
->   '$':x -> TH.varP $ TH.mkName x
->   "^_"  -> TH.conP (TH.mkName "Atom") [TH.wildP]
->   '^':x -> TH.conP (TH.mkName "Atom") [TH.varP $ TH.mkName x]
+>   '$':x -> TH'.varP x
+>   "^_"  -> TH'.conP "Atom" [TH.wildP]
+>   '^':x -> TH'.conP "Atom" [TH'.varP x]
 >   _ -> error ("Impossible: " ++ v)
 
 > boundP :: Var -> TH.PatQ
-> boundP ('$':x) = TH.varP $ TH.mkName x
+> boundP ('$':x) = TH'.varP x
 > boundP x = TH.litP $ TH.stringL x
 
 * Printing
+
+Terms
+
+> instance Show Term where
+>   show = PP.prettyShow
+
+> instance Pretty Term where
+>   pPrint = ppTerm' 0
+
+> ppTerm' :: Int -> Term -> PP.Doc
+> ppTerm' prec t = case t of  
+>   Var x -> PP.text x
+>   Fn "^" [t1, t2] -> ppInfixTm True prec 24 "^" t1 t2
+>   Fn "/" [t1, t2] -> ppInfixTm True prec 22 "/" t1 t2
+>   Fn "*" [t1, t2] -> ppInfixTm True prec 20 "*" t1 t2
+>   Fn "-" [t1, t2] -> ppInfixTm True prec 18 "-" t1 t2
+>   Fn "+" [t1, t2] -> ppInfixTm True prec 16 "+" t1 t2
+>   Fn "::" [t1, t2] -> ppInfixTm True prec 14 "::" t1 t2
+>   Fn f [] -> PP.text f
+>   Fn f xs -> PP.text f <> ppArgs xs
+
+> ppArgs :: [Term] -> PP.Doc
+> ppArgs xs =
+>   PP.parens (PP.sep (PP.punctuate (PP.text ",") (map (ppTerm' 0) xs)))
+
+> ppInfixTm :: Bool -> Int -> Int -> String -> Term -> Term -> PP.Doc
+> ppInfixTm isleft oldprec newprec sym p q = 
+>   let pprec = if isleft then newprec else newprec + 1
+>       qprec = if isleft then newprec + 1 else newprec
+>       doc1 = ppTerm' pprec p
+>       doc2 = ppTerm' qprec q 
+>       doc = PP.sep[doc1, PP.text sym, doc2] in
+>   if oldprec > newprec then PP.parens doc else doc
+
+Relations
+
+> instance Show Rel where
+>     show = PP.prettyShow
+
+> instance Pretty Rel where
+>   pPrint (R p []) = PP.text p
+>   pPrint (R p args) = 
+>     if List.elem p ["=", "<", "<=", ">", ">="] && length args == 2 
+>     then ppInfixTm False 12 12 p (args !! 0) (args !! 1)
+>     else PP.text p <> ppArgs args
 
 Formulas
 
@@ -322,16 +390,16 @@ Formulas
 
 > ppForm :: Int -> Formula -> PP.Doc
 > ppForm pr f = case f of 
->   Bot -> PP.text "false"
->   Top -> PP.text "true"
+>   Bot -> PP.text "⊥"
+>   Top -> PP.text "⊤"
 >   Atom m -> pPrint m
->   Not p -> paren (pr > 10) (ppPrefixFm 10) "~" p
->   And p q -> paren (pr > 8) (ppInfixFm 8 "/\\") p q
->   Or p q -> paren (pr > 6) (ppInfixFm 6 "\\/") p q
->   Imp p q -> paren (pr > 4) (ppInfixFm 4 "==>") p q
->   Iff p q -> paren (pr > 2) (ppInfixFm 2 "<=>") p q
->   All _ _ -> paren (pr > 0) ppQuant "forall" (stripQuant f)
->   Ex _ _ -> paren (pr > 0) ppQuant "exists" (stripQuant f)
+>   Not p -> paren (pr > 10) (ppPrefixFm 10) "¬" p
+>   And p q -> paren (pr > 8) (ppInfixFm 8 "∧") p q
+>   Or p q -> paren (pr > 6) (ppInfixFm 6 "∨") p q
+>   Imp p q -> paren (pr > 4) (ppInfixFm 4 "⊃") p q
+>   Iff p q -> paren (pr > 2) (ppInfixFm 2 "⇔") p q
+>   All _ _ -> paren (pr > 0) ppQuant "∀" (stripQuant f)
+>   Ex _ _ -> paren (pr > 0) ppQuant "∃" (stripQuant f)
 
 > ppPrefixFm :: Int -> String -> Formula -> PP.Doc
 > ppPrefixFm pr sym p = PP.text sym <> ppForm pr p
@@ -352,56 +420,11 @@ Formulas
 >     where d = f x y 
 
 > stripQuant :: Formula -> (Vars, Formula)
-> stripQuant fm = case fm of 
+> stripQuant f = case f of 
 >   All x (yp@(All _ _)) -> (x:xs, q)
 >     where (xs,q) = stripQuant yp 
 >   Ex x (yp@(Ex _ _)) -> (x:xs, q)
 >     where (xs,q) = stripQuant yp 
 >   All x p -> ([x], p)
 >   Ex x p -> ([x], p)
->   _ -> ([], fm)
-
-Terms
-
-> instance Show Term where
->   show = PP.prettyShow
-
-> instance Pretty Term where
->   pPrint = ppTerm' 0
-
-> ppTerm' :: Int -> Term -> PP.Doc
-> ppTerm' prec tm = case tm of  
->   Var x -> PP.text x
->   Fn "^" [tm1, tm2] -> ppInfixTm True prec 24 "^" tm1 tm2
->   Fn "/" [tm1, tm2] -> ppInfixTm True prec 22 "/" tm1 tm2
->   Fn "*" [tm1, tm2] -> ppInfixTm True prec 20 "*" tm1 tm2
->   Fn "-" [tm1, tm2] -> ppInfixTm True prec 18 "-" tm1 tm2
->   Fn "+" [tm1, tm2] -> ppInfixTm True prec 16 "+" tm1 tm2
->   Fn "::" [tm1, tm2] -> ppInfixTm True prec 14 "::" tm1 tm2
->   Fn f [] -> PP.text f
->   Fn f xs -> PP.text f <> ppArgs xs
-
-> ppArgs :: [Term] -> PP.Doc
-> ppArgs xs =
->   PP.parens (PP.sep (PP.punctuate (PP.text ",") (map (ppTerm' 0) xs)))
-
-> ppInfixTm :: Bool -> Int -> Int -> String -> Term -> Term -> PP.Doc
-> ppInfixTm isleft oldprec newprec sym p q = 
->   let pprec = if isleft then newprec else newprec + 1
->       qprec = if isleft then newprec + 1 else newprec
->       doc1 = ppTerm' pprec p
->       doc2 = ppTerm' qprec q 
->       doc = PP.sep[doc1, PP.text sym, doc2] in
->   if oldprec > newprec then PP.parens doc else doc
-
-Fol
-
-> instance Show Rel where
->     show = PP.prettyShow
-
-> instance Pretty Rel where
->   pPrint (R p []) = PP.text p
->   pPrint (R p args) = 
->     if List.elem p ["=", "<", "<=", ">", ">="] && length args == 2 
->     then ppInfixTm False 12 12 p (args !! 0) (args !! 1)
->     else PP.text p <> ppArgs args
+>   _ -> ([], f)

@@ -1,11 +1,17 @@
 
 Definitional CNF
 
-> module DefCnf ( maxVarIndex
->               , defcnf
->               , defcnf1
->               , defcnfs
->               ) where
+* Signature
+
+> module ATP.DefCNF 
+>   ( maxVarIndex
+>   , defcnf
+>   , defcnf1
+>   , defcnfs
+>   ) 
+> where
+
+* Imports
 
 > import Prelude 
 > import qualified Char
@@ -13,11 +19,12 @@ Definitional CNF
 > import qualified Data.Map as Map
 > import Data.Map(Map)
 
-> import qualified ListSet
-> import FormulaSyn
-> import qualified Formula as F
-> import Formula((<=>))
-> import qualified Prop 
+> import qualified ATP.Util.ListSet as Set
+> import ATP.FormulaSyn
+> import qualified ATP.Formula as F
+> import qualified ATP.Prop as Prop
+
+* CNF
 
 For the new propositional variables we will use stylized names of the form
 p_n. The following function returns such an atom as well as the incremented
@@ -66,7 +73,7 @@ the new counter after the call to mkprop.
 >       fm' = op fm1 fm2 in
 >   case Map.lookup fm' defs2 of
 >     Just (v,_) -> (v, defs2, n2)
->     Nothing -> (v, Map.insert fm' (v, v <=> fm') defs2, n3)
+>     Nothing -> (v, Map.insert fm' (v, v ⇔ fm') defs2, n3)
 >       where (v, n3) = mkprop n2
 
 We need to make sure that none of our newly introduced atoms already
@@ -98,7 +105,7 @@ the resulting CNF in the set-of-sets representation:
 >       n = 1 + F.overatoms (maxVarIndex "p_" . show) fm' 0
 >       (fm'', defs, _) = fn (fm', Map.empty, n) 
 >       deflist = map (snd . snd) (Map.toList defs) in
->   ListSet.unions(Prop.simpcnf fm'' : map Prop.simpcnf deflist)
+>   Set.unions(Prop.simpcnf fm'' : map Prop.simpcnf deflist)
 
 Our first definitional CNF function just applies this to maincnf and converts
 the result back to a formula:
@@ -162,4 +169,6 @@ the intermediate result.
 %%%%%%%%%%%%%
 %%% Test
 
-defcnf [$prop| (p \/ (q /\ ~r)) /\ s |]
+ import qualified Codec.Binary.UTF8.String as UString
+
+S.putStrLn $ render $ pPrint $ defcnf [$form| (p ∨ (q ∧ ¬ r)) ∧ s |]

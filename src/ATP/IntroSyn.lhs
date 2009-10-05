@@ -10,6 +10,19 @@ Var = [a-zA-Z][a-zA-Z0-9]*
 
 Note that by this grammar, '+' and '*' are right associative.
 
+Expressions can be constructed using Template Haskell syntax.
+E.g.
+
+[$exp| 1 + 2 |]
+[$exp| x + 2 * y |]
+
+In pattern matching, to antiquote an Expr, use $e.  To antiquote a
+Const use ^c. E.g.
+
+case e of
+ [$expr| $x + $y |] -> (x, y)
+ [$expr| ^n + ^m |] -> n + m
+
 * Signature
 
 Note that we only export the abstract syntax and the quasiquoter,
@@ -33,7 +46,8 @@ so the module can be imported unqualified.
 
 > import qualified ATP.Util.Lex as Lex
 > import qualified ATP.Util.Parse as P
-> import ATP.Util.Parse (Parser, (<|>), (<?>))
+> import qualified ATP.Util.TH as TH'
+> import ATP.Util.Parse (Parse, Parser, (<|>), (<?>))
 > import qualified ATP.Util.Print as PP
 > import ATP.Util.Print(Pretty, (<+>))
 
@@ -51,6 +65,9 @@ Add (Mul (Const 2) (Var "x")) (Var "y")
 
 * Parsing
 
+> instance Parse Expr where
+>   parser = parseExpr
+
 > parseExpr :: Parser Expr
 > parseExpr = P.buildExpressionParser table atomic <?> "expr" 
 
@@ -59,8 +76,6 @@ Add (Mul (Const 2) (Var "x")) (Var "y")
 >         , [op "+" Add P.AssocRight]
 >         ] 
 >   where op s f assoc = P.Infix (do{ Lex.reservedOp s; return f }) assoc 
-
-To antiquote an Expr, use $e.  To antiquote a Const use ^c.
 
 > antiExpr :: Parser Expr
 > antiExpr = do Lex.symbol "$"
@@ -97,25 +112,25 @@ for Exprs.
 
 Quote as an expression.
 
-> antiExprExp :: Expr -> Maybe (TH.Q TH.Exp)
+> antiExprExp :: Expr -> Maybe TH.ExpQ
 > antiExprExp (Var v) = 
 >   case v of 
->     '$':back -> Just $ TH.varE (TH.mkName back)
->     '^':back -> Just $ TH.appE (TH.conE $ TH.mkName "Const") (TH.varE $ TH.mkName back) 
->     _ -> error "Impossible" 
+>     '$':back -> Just $ TH'.varE back
+>     '^':back -> Just $ TH'.conE "Const" [TH'.varE back]
+>     _ -> Just $ TH'.varE v
 > antiExprExp _ = Nothing
 
 Quote as a pattern.
 
 > quoteExprPat s = Q.dataToPatQ (const Nothing `G.extQ` antiExprPat) (parse s)
 
-> antiExprPat :: Expr -> Maybe (TH.Q TH.Pat)
+> antiExprPat :: Expr -> Maybe TH.PatQ
 > antiExprPat (Var v) = 
 >   case v of 
->     '$':back -> Just $ TH.varP (TH.mkName back)
->     '^':back -> Just $ TH.conP (TH.mkName "Const") [TH.varP (TH.mkName back)]
+>     '$':back -> Just $ TH'.varP back
+>     '^':back -> Just $ TH'.conP "Const" [TH'.varP back]
 >     "_" -> Just $ TH.wildP
->     _ -> error "Impossible" 
+>     _ -> Just $ TH'.varP v
 > antiExprPat _ = Nothing
 
 * Printing

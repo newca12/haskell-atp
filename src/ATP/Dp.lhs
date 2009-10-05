@@ -1,24 +1,28 @@
 
 The Davis-Putnam and Davis-Putnam-Loveland-Logemann procedures.
 
-> module Dp ( dp
->           , dptaut
->           , dpll
->           , dplltaut
->           ) where
+* Signature
 
-Imports
+> module ATP.DP
+>   ( dp
+>   , dptaut
+>   , dpll
+>   , dplltaut
+>   ) 
+> where
+
+* Imports
 
 > import Prelude 
-> import qualified List 
+> import qualified Data.List as List
 
-> import qualified Lib 
-> import qualified ListSet
-> import ListSet((\\))
-> import FormulaSyn
-> import qualified Formula as F
-> import qualified DefCnf 
-> import qualified Prop
+> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.ListSet as Set
+> import ATP.Util.ListSet((\\))
+> import ATP.FormulaSyn
+> import qualified ATP.Formula as F
+> import qualified ATP.DefCNF as CNF
+> import qualified ATP.Prop as Prop
 
 The One Literal Rule
 
@@ -45,7 +49,7 @@ clauses by deleting other literals.
 > oneLiteralRule clauses = 
 >   case List.find (\cl -> length cl == 1) clauses of
 >     Nothing -> Nothing
->     Just [u] -> Just (ListSet.image (\\ [u']) clauses1) 
+>     Just [u] -> Just (Set.image (\\ [u']) clauses1) 
 >       where u' = F.opp u
 >             clauses1 = filter (not . elem u) clauses 
 >     _ -> error "Impossible" 
@@ -73,14 +77,14 @@ clauses.
 
 > affirmativeNegativeRule :: Clauses -> Maybe Clauses
 > affirmativeNegativeRule clauses = 
->   let (neg', pos) = List.partition F.negative (ListSet.unions clauses)
+>   let (neg', pos) = List.partition F.negative (Set.unions clauses)
 >       neg = map F.opp neg'
 >       posOnly = pos \\ neg
 >       negOnly = neg \\ pos
->       pure = ListSet.union posOnly (map F.opp negOnly) in
+>       pure = Set.union posOnly (map F.opp negOnly) in
 >   case pure of
 >     [] -> Nothing
->     _ -> Just (filter (\cl -> ListSet.intersect cl pure == []) clauses)
+>     _ -> Just (filter (\cl -> Set.intersect cl pure == []) clauses)
 
 Rule for eliminating atomic formulas
 
@@ -110,7 +114,7 @@ and perhaps desirable.)
 
 > resolutionRule :: Clauses -> Clauses
 > resolutionRule clauses = 
->   let pvs = filter F.positive (ListSet.unions clauses)
+>   let pvs = filter F.positive (Set.unions clauses)
 >       lblows = map (findBlowup clauses) pvs
 >       (_, p) = List.minimum lblows in
 >   resolveOn p clauses
@@ -122,8 +126,8 @@ and perhaps desirable.)
 >       (neg, other) = List.partition (elem p') notpos
 >       pos' = map (filter (/= p)) pos
 >       neg' = map (filter (/= p')) neg
->       res0 = Lib.allPairs ListSet.union pos' neg' in
->   ListSet.union other (filter (not . Prop.trivial) res0)
+>       res0 = Lib.allPairs Set.union pos' neg' in
+>   Set.union other (filter (not . Prop.trivial) res0)
 
 Davis-Putnam procedure
 
@@ -147,7 +151,7 @@ of atoms unchanged but reduces the total size of the clauses.
 >                  Nothing -> dp(resolutionRule clauses)
 
 > dpsat :: Formula -> Bool
-> dpsat = dp . DefCnf.defcnfs
+> dpsat = dp . CNF.defcnfs
 
 > dptaut :: Formula -> Bool
 > dptaut = not . dpsat . Not
@@ -192,14 +196,14 @@ replaced by a case-split:
 >                  case affirmativeNegativeRule clauses of
 >                  Just clauses' -> dpll clauses'
 >                  Nothing -> 
->                    let pvs = filter F.positive (ListSet.unions clauses) 
+>                    let pvs = filter F.positive (Set.unions clauses) 
 >                        lcounts = map (findCount clauses) pvs 
 >                        (_, p) = List.maximum lcounts in
->                    dpll (ListSet.insert [p] clauses) 
->                    || dpll (ListSet.insert [F.opp p] clauses)
+>                    dpll (Set.insert [p] clauses) 
+>                    || dpll (Set.insert [F.opp p] clauses)
 
 > dpllsat :: Formula -> Bool
-> dpllsat = dpll . DefCnf.defcnfs
+> dpllsat = dpll . CNF.defcnfs
 
 > dplltaut :: Formula -> Bool
 > dplltaut = not . dpllsat . Not

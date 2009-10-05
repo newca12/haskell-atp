@@ -1,21 +1,25 @@
 
-> module PropExamples ( ramsey
->                     , mkIndex
->                     , carry
->                     , ripplecarry
->                     , mkAdderTest
->                     , halfAdder
->                     , mux
->                     , prime
->                     ) where
+* Signature
+
+> module ATP.PropExamples
+>   ( ramsey
+>   , mkIndex
+>   , carry
+>   , ripplecarry
+>   , mkAdderTest
+>   , halfAdder
+>   , mux
+>   , prime
+>   )
+> where
+
+* Imports
 
 > import Prelude 
-
-> import qualified ListSet
-> import FormulaSyn
-> import qualified Formula as F
-> import Formula((<=>), (/\), (\/), (==>))
-> import qualified Prop 
+> import qualified ATP.Util.ListSet as Set 
+> import ATP.FormulaSyn
+> import qualified ATP.Formula as F
+> import qualified ATP.Prop as P
 
 %%%%%%%%%%%%%%%%%%%%
 %%% Ramsey's Theorem 
@@ -33,12 +37,12 @@ p_m_n that we think of as 'm is connected to n' (or 'm knows n' etc.):
 > ramsey :: Int -> Int -> Int -> Formula 
 > ramsey s t n = 
 >   let vertices = [1 .. n]
->       yesgrps = map (ListSet.allSets 2) (ListSet.allSets s vertices)
->       nogrps = map (ListSet.allSets 2) (ListSet.allSets t vertices) 
->       e [m, n] = Atom $ R ("p_" ++ show m ++ "_" ++ show n) [] 
+>       yesgrps = map (Set.allSets 2) (Set.allSets s vertices)
+>       nogrps = map (Set.allSets 2) (Set.allSets t vertices) 
+>       e [m, n'] = Atom $ R ("p_" ++ show m ++ "_" ++ show n') [] 
 >       e _ = error "Impossible" 
 >   in (F.listDisj $ map (F.listConj . map e) yesgrps)
->        \/ (F.listDisj $ map (F.listConj . map (Not . e)) nogrps)
+>        ∨ (F.listDisj $ map (F.listConj . map ((¬) . e)) nogrps)
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Ripple carry adder
@@ -64,17 +68,17 @@ by ¬(x , y) or x , ¬y and abbreviate XOR. We can implement functions
 in OCaml corresponding to these operations as follows:
 
 > halfsum :: Formula -> Formula -> Formula 
-> halfsum x y = x <=> Not y
+> halfsum x y = x ⇔ (¬) y
 
 > halfcarry :: Formula -> Formula -> Formula 
-> halfcarry = (/\)
+> halfcarry = (∧)
 
 and now we can assert the appropriate relation between the input and output
 wires of a half adder as follows:
 
 > halfAdder :: Formula -> Formula -> Formula 
 >           -> Formula -> Formula
-> halfAdder x y s c = (s <=> halfsum x y) /\ (c <=> halfcarry x y)
+> halfAdder x y s c = (s ⇔ halfsum x y) ∧ (c ⇔ halfcarry x y)
 
 The use of ‘half’ emphasizes that this is only part of what we need. Except
 for the rightmost digit position, we need to add three bits, not just two,
@@ -93,7 +97,7 @@ x y z c s
 and one possible implementation as gates is the following:
 
 > carry :: Formula -> Formula -> Formula -> Formula
-> carry x y z = (x /\ y) \/ ((x \/ y) /\ z)
+> carry x y z = (x ∧ y) ∨ ((x ∨ y) ∧ z)
 
 'sum' is in the Haskell Prelude
 
@@ -102,7 +106,7 @@ and one possible implementation as gates is the following:
 
 > fa :: Formula -> Formula -> Formula -> Formula 
 >    -> Formula -> Formula
-> fa x y z s c = (s <=> csum x y z) /\ (c <=> carry x y z)
+> fa x y z s c = (s ⇔ csum x y z) ∧ (c ⇔ carry x y z)
 
 It is now straightforward to put multiple full-adders together into an nbit
 adder, which moreover allows a carry propagation in at the low end
@@ -138,7 +142,7 @@ formula:
 
 > ripplecarry0 :: Wire -> Wire -> Wire -> Wire -> Wire
 > ripplecarry0 x y c out n =
->   Prop.simplify (ripplecarry x y (\i -> if i == 0 then Bot else c i) out n)
+>   P.simplify (ripplecarry x y (\i -> if i == 0 then Bot else c i) out n)
 
 The term ‘ripple carry’ adder is used because the carry flows through the
 full adders from right to left. In practical circuits, there is a propagation
@@ -157,14 +161,14 @@ ripplecarry0, this time forcing a carry-in of 1:
 
 > ripplecarry1 :: Wire -> Wire -> Wire -> Wire -> Wire
 > ripplecarry1 x y c out n =
->   Prop.simplify
+>   P.simplify
 >    (ripplecarry x y (\i -> if i == 0 then Top else c i) out n)
 
 and we will be selecting between the two alternatives when we do carry
 propagation using a multiplexer:
 
 > mux :: Formula -> Formula -> Formula -> Formula 
-> mux sel in0 in1 = (Not sel /\ in0) \/ (sel /\ in1)
+> mux sel in0 in1 = ((¬) sel ∧ in0) ∨ (sel ∧ in1)
 
 Now the overall function can be implemented recursively, using an auxiliary
 function to offset the indices in an array of bits:
@@ -185,11 +189,11 @@ k or the total number of bits n, whichever is smaller:
 >             -> Wire -> Int -> Int -> Formula
 > carryselect x y c0 c1 s0 s1 c s n k =
 >   let k' = min n k 
->       fm = (ripplecarry0 x y c0 s0 k' /\ ripplecarry1 x y c1 s1 k') 
->            /\ (c k' <=> mux (c 0) (c0 k') (c1 k')) 
->            /\ conjoin (\i -> s i <=> mux (c 0) (s0 i) (s1 i)) [0 .. k'-1] in
+>       fm = (ripplecarry0 x y c0 s0 k' ∧ ripplecarry1 x y c1 s1 k') 
+>            ∧ (c k' ⇔ mux (c 0) (c0 k') (c1 k')) 
+>            ∧ conjoin (\i -> s i ⇔ mux (c 0) (s0 i) (s1 i)) [0 .. k'-1] in
 >   if k' < k then fm else
->      fm /\ carryselect
+>      fm ∧ carryselect
 >           (offset k x) (offset k y) (offset k c0) (offset k c1)
 >           (offset k s0) (offset k s1) (offset k c) (offset k s)
 >           (n - k) k
@@ -211,10 +215,10 @@ methods.
 >   let [x, y, c, s, c0, s0, c1, s1, c2, s2] = 
 >         map mkIndex ["x", "y", "c", "s", "c0", 
 >                      "s0", "c1", "s1", "c2", "s2"] in
->   (carryselect x y c0 c1 s0 s1 c s n k /\ Not(c 0) /\
->   (ripplecarry0 x y c2 s2 n) ==> 
->      (c n <=> c2 n) 
->      /\ conjoin (\i -> s i <=> s2 i) [0 .. n-1])
+>   (carryselect x y c0 c1 s0 s1 c s n k ∧ (¬) (c 0) ∧
+>   (ripplecarry0 x y c2 s2 n) ⊃ 
+>      (c n ⇔ c2 n) 
+>      ∧ conjoin (\i -> s i ⇔ s2 i) [0 .. n-1])
 
 Now that we can add n-bit numbers, we can multiply them using repeated
 addition. Once again, the traditional algorithm can be applied. Consider
@@ -273,13 +277,13 @@ directly to the output
 
 > multiplier :: Wire2 -> Wire2 -> Wire2 -> Wire -> Wire
 > multiplier x u v out n =
->   if n == 1 then (out 0 <=> x 0 0) /\ Not(out 1) else
->   Prop.simplify
->    ((out 0 <=> x 0 0) 
->     /\ rippleshift
+>   if n == 1 then (out 0 ⇔ x 0 0) ∧ (¬) (out 1) else
+>   P.simplify
+>    ((out 0 ⇔ x 0 0) 
+>     ∧ rippleshift
 >          (\i -> if i == n-1 then Bot else x 0 (i + 1))
->          (x 1) (v 2) (out 1) (u 2) n /\
->             (if n == 2 then (out 2 <=> u 2 0) /\ (out 3 <=> u 2 1) else
+>          (x 1) (v 2) (out 1) (u 2) n ∧
+>             (if n == 2 then (out 2 ⇔ u 2 0) ∧ (out 3 ⇔ u 2 1) else
 >             conjoin (\k -> rippleshift (u k) (x k) (v(k + 1)) (out k)
 >                                 (if k == n-1 then \i -> out(n + i)
 >                                  else u(k + 1)) n) [2 .. n-1]))
@@ -304,7 +308,7 @@ are 1 or 0 respectively:
 
 > congruentTo :: Wire -> Wire2
 > congruentTo x m n =
->   conjoin (\i -> if bit i m then x i else Not(x i)) [0 .. n-1]
+>   conjoin (\i -> if bit i m then x i else (¬) (x i)) [0 .. n-1]
 
 Now, if a number p is composite and requires at most n bits to store, it
 must have a factorization with both factors at least 2, hence both  p/2 and
@@ -319,9 +323,9 @@ give a tautology precisely if p is prime.
 > prime :: Int -> Formula
 > prime p =
 >   let [x, y, out] = map mkIndex ["x", "y", "out"] 
->       m i j = x i /\ y j
+>       m i j = x i ∧ y j
 >       [u, v] = map mkIndex2 ["u", "v"] 
 >       n = bitLength p in
->   Not(multiplier m u v out (n - 1) /\
->       congruentTo out p (max n (2 * n - 2)))
+>   (¬) (multiplier m u v out (n - 1) ∧
+>         congruentTo out p (max n (2 * n - 2)))
 

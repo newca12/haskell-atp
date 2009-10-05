@@ -1,32 +1,40 @@
 
-> module Resolution ( rename
->                   , termMatch
->                   , resolveClauses
->                   , incorporate
->                   , basicResolution
->                   , resolution
->                   , positiveResolution
->                   , sosResolution
->                   ) where
-                        
+* Signature
+
+> module ATP.Resolution 
+>   ( rename
+>   , termMatch
+>   , resolveClauses
+>   , incorporate
+>   , basicResolution
+>   , resolution
+>   , positiveResolution
+>   , sosResolution
+>   ) 
+> where
+
+* Imports
+
 > import Prelude 
-> import qualified List 
-> import List((\\))
-> import qualified Maybe
+> import qualified Data.List as List
+> import qualified Data.Maybe as Maybe
 > import qualified Data.Map as Map
 > import qualified Text.Printf as T
 
-> import qualified Lib
-> import Lib((|->))
-> import qualified ListSet
-> import FormulaSyn
-> import qualified Formula as F
-> import qualified Prop
-> import qualified Fol
-> import Fol(Env)
-> import qualified Skolem
-> import qualified Unif
-> import qualified Tableaux
+> import qualified ATP.Util.Lib as Lib
+> import ATP.Util.Lib((↦))
+> import qualified ATP.Util.ListSet as Set
+> import ATP.Util.ListSet ((\\))
+> import ATP.FormulaSyn
+> import qualified ATP.Formula as F
+> import qualified ATP.Prop as Prop
+> import qualified ATP.FOL as FOL
+> import ATP.FOL(Env)
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Unif as Unif
+> import qualified ATP.Tableaux as Tableaux
+
+* Resolution
 
 In contrast with the top-down method of tableaux, all variable assignments
 are local, so we actually want to translate the results of unification into
@@ -50,9 +58,9 @@ the following function, which adds a prefix to each variable name in a clause:
 
 > rename :: String -> Clause -> Clause
 > rename pfx cls =
->   let fvs = Fol.fv(F.listDisj cls)
+>   let fvs = FOL.fv(F.listDisj cls)
 >       vvs = map (Var . (pfx ++)) fvs in
->             map (Fol.apply (Map.fromList (zip fvs vvs))) cls
+>             map (FOL.apply (Map.fromList (zip fvs vvs))) cls
 
 We find all resolvents of two clauses cl1 and cl2 via an auxiliary function
 that takes a particular literal p in cl1 and an accumulator acc of results
@@ -71,13 +79,13 @@ and add it into the accumulator:
 >     [] -> acc 
 >     ps2 -> foldr foldFn acc pairs
 >       where ps1 = filter (\q -> q /= p && unifiable p q) cl1
->             pairs = Lib.allPairs (,) (map (p:) (ListSet.allSubsets ps1))
->                                                (ListSet.allNonemptySubsets ps2) 
+>             pairs = Lib.allPairs (,) (map (p:) (Set.allSubsets ps1))
+>                                                (Set.allNonemptySubsets ps2) 
 >             foldFn (s1, s2) sof = 
 >               case mgu (s1 ++ map F.opp s2) Map.empty of
 >                 Just env' -> 
->                   let cs = ListSet.union (cl1 \\ s1) (cl2 \\ s2) in
->                   ListSet.image (Fol.apply env') cs : sof
+>                   let cs = Set.union (cl1 \\ s1) (cl2 \\ s2) in
+>                   Set.image (FOL.apply env') cs : sof
 >                 Nothing -> sof 
 
 The overall function to generate all possible resolvents of a set of clauses
@@ -110,7 +118,7 @@ algorithm.)
 >   [] -> T.printf "No proof found\n"
 >   cl:ros -> do { T.printf (show (length used) ++ " used; " ++
 >                            show (length unused) ++ " unused.\n")
->                ; let used' = ListSet.insert cl used 
+>                ; let used' = Set.insert cl used 
 >                      news = List.concat (map (resolveClauses cl) used') in
 >                  if elem [] news then return () else basicResloop (used',ros++news)
 >                }
@@ -123,7 +131,7 @@ main loop.
 
 > basicResolution :: Formula -> IO ()
 > basicResolution fm = 
->   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
+>   let fm1 = Skolem.askolemize $ Not $ FOL.generalize fm in
 >   do mapM_ (pureBasicResolution . F.listConj) (Prop.simpdnf fm1)
 >      T.printf "Solution found!\n"
 
@@ -149,7 +157,7 @@ that of unify.
 >     (Fn f fargs, Fn g gargs) | (f == g && length fargs == length gargs) ->
 >            termMatch env (zip fargs gargs ++ oth)
 >     (Var x, t) -> case Map.lookup x env of 
->                     Nothing -> termMatch ((x |-> t) env) oth
+>                     Nothing -> termMatch ((x ↦ t) env) oth
 >                     Just t' | t == t' -> termMatch env oth
 >                     _ -> Nothing
 >     _ -> Nothing
@@ -210,7 +218,7 @@ at the end.
 >   [] -> T.printf "No proof found\n"
 >   cl:ros -> do { T.printf (show (length used) ++ " used; " ++
 >                            show (length unused) ++ " unused.\n")
->                ; let used' = ListSet.insert cl used 
+>                ; let used' = Set.insert cl used 
 >                      news = List.concat (map (resolveClauses cl) used') in
 >                  if elem [] news then return () 
 >                  else resloop (used',foldr (incorporate cl) ros news)
@@ -224,7 +232,7 @@ main loop.
 
 > resolution :: Formula -> IO ()
 > resolution fm = 
->   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
+>   let fm1 = Skolem.askolemize $ Not $ FOL.generalize fm in
 >   do mapM_ (pureResolution . F.listConj) (Prop.simpdnf fm1)
 >      T.printf "Solution found!\n"
 
@@ -250,7 +258,7 @@ then define the positive variant of pure resolution in the same way:
 >   [] -> T.printf "No proof found\n"
 >   cl:ros -> do { T.printf (show (length used) ++ " used; " ++
 >                            show (length unused) ++ " unused.\n")
->                ; let used' = ListSet.insert cl used 
+>                ; let used' = Set.insert cl used 
 >                      news = List.concat (map (presolveClauses cl) used') in
 >                  if elem [] news then return () 
 >                  else positiveResloop (used',foldr (incorporate cl) ros news)
@@ -267,7 +275,7 @@ main loop.
 
 > positiveResolution :: Formula -> IO ()
 > positiveResolution fm = 
->   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
+>   let fm1 = Skolem.askolemize $ Not $ FOL.generalize fm in
 >   do mapM_ (purePositiveResolution . F.listConj) (Prop.simpdnf fm1)
 >      T.printf "Solution found!\n"
 
@@ -292,7 +300,7 @@ make the following modification:
 
 > sosResolution :: Formula -> IO ()
 > sosResolution fm = 
->   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
+>   let fm1 = Skolem.askolemize $ Not $ FOL.generalize fm in
 >   do mapM_ (pureSosResolution . F.listConj) (Prop.simpdnf fm1)
 >      T.printf "Solution found!\n"
 

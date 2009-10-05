@@ -1,28 +1,34 @@
 
 Congruence closure.
 
-> module Cong ( ccsatisfiable
->             , ccvalid
->             ) where
+* Signature
 
+> module ATP.Cong
+>   ( ccsatisfiable
+>   , ccvalid
+>   )
+> where
+
+* Imports
                         
 > import Prelude 
-> import qualified List
-> import qualified Maybe
-> import Data.Map(Map)
+> import qualified Data.List as List
+> import qualified Data.Maybe as Maybe
 > import qualified Data.Map as Map
+> import Data.Map(Map)
 
-> import qualified Lib
-> import qualified ListSet
-> import qualified UnionFind 
-> import UnionFind(Partition)
-> import qualified Formulas 
-> import Formulas(Formula(..))
-> import qualified Prop
-> import qualified Fol
-> import Fol(Fol(..),Term(..))
-> import qualified Skolem
-> import qualified Equal
+> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.ListSet as Set
+> import qualified ATP.Util.UnionFind as UF
+> import ATP.Util.UnionFind(Partition)
+> import ATP.FormulaSyn
+> import qualified ATP.Formula as F
+> import qualified ATP.Prop as Prop
+> import qualified ATP.FOL as FOL
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Equal as Equal
+
+* Congruence closure
 
 In what follows, we assume some set G of terms that is closed under
 subterms, i.e. if t \in G and s is a subterm of t then s \in G. The following can
@@ -31,7 +37,7 @@ of a term:
 
 > subterms :: Term -> [Term]
 > subterms tm = case tm of
->   (Fn _f args) -> foldr (ListSet.union . subterms) [tm] args
+>   (Fn _f args) -> foldr (Set.union . subterms) [tm] args
 >   _ -> [tm]
 
 Our implementation of congruence closure will take an existing congruence
@@ -50,7 +56,7 @@ immediate subterms are already equivalent:
 
 > congruent :: Partition Term -> (Term, Term) -> Bool
 > congruent eqv (s,t) = case (s,t) of
->   (Fn f fargs, Fn g gargs) -> f == g && Lib.all2 (UnionFind.equivalent eqv) fargs gargs
+>   (Fn f fargs, Fn g gargs) -> f == g && Lib.all2 (UF.equivalent eqv) fargs gargs
 >   _ -> False
 
 For the main algorithm, as well as the equivalence relation itself eqv, we
@@ -73,19 +79,19 @@ single congruence step.
 
 > emerge :: (Term, Term) -> (Partition Term, Map Term [Term]) 
 >           -> (Partition Term, Map Term [Term]) 
-> emerge (s,t) (eqv,pfn) =
->   let s' = UnionFind.canonize eqv s 
->       t' = UnionFind.canonize eqv t in
+> emerge (s,t) (eqv, pfn) =
+>   let s' = UF.canonize eqv s 
+>       t' = UF.canonize eqv t in
 >   if s' == t' then (eqv,pfn) else
 >   let sp = Maybe.fromMaybe [] (Map.lookup s' pfn)
 >       tp = Maybe.fromMaybe [] (Map.lookup t' pfn) 
->       eqv' = UnionFind.equate (s,t) eqv 
->       st' = UnionFind.canonize eqv' s' 
->       pfn' = Map.insert st' (ListSet.union sp tp) pfn in
->   foldr (\(u,v) (eqv,pfn) ->
->                if congruent eqv (u,v) then emerge (u,v) (eqv,pfn)
->                else (eqv,pfn))
->         (eqv',pfn') (Lib.allPairs (,) sp tp)
+>       eqv' = UF.equate (s,t) eqv 
+>       st' = UF.canonize eqv' s' 
+>       pfn' = Map.insert st' (Set.union sp tp) pfn 
+>   in foldr (\(u,v) (eq, pf) ->
+>                if congruent eq (u,v) then emerge (u,v) (eq, pf)
+>                else (eq, pf))
+>         (eqv', pfn') (Lib.allPairs (,) sp tp)
 
 To set up the initial ‘predecessor’ function we use the following, which
 updates an existing function pfn with a new mapping for each immediate
@@ -94,8 +100,8 @@ subterm s of a term t:
 > predecessors :: Term -> Map Term [Term] -> Map Term [Term] 
 > predecessors t pfn = case t of
 >   Fn _f a -> foldr (\s m -> let tms = Maybe.fromMaybe [] (Map.lookup s m) in
->                            Map.insert s (ListSet.insert t tms) m)
->                    pfn (ListSet.setify a)
+>                            Map.insert s (Set.insert t tms) m)
+>                    pfn (Set.setify a)
 >   _ -> pfn
 
 Hence, the following tests if a list fms of ground equations and inequations
@@ -109,20 +115,20 @@ unequal, and iteratively calling emerge over all the positive equations.
 Then it is tested whether all the lefts and rights of all the negated equations
 are inequivalent.
 
-> ccsatisfiable :: [Formula Fol] -> Bool
+> ccsatisfiable :: [Formula] -> Bool
 > ccsatisfiable fms = 
->   let (pos, neg) = List.partition Formulas.positive fms 
+>   let (pos, neg) = List.partition F.positive fms 
 >       eqps = map Equal.destEq pos
->       eqns = map (Equal.destEq . Formulas.opp) neg
+>       eqns = map (Equal.destEq . F.opp) neg
 >       lrs = map fst eqps ++ map snd eqps ++ map fst eqns ++ map snd eqns
->       pfn = foldr predecessors Map.empty (ListSet.unions $ map subterms lrs)
->       (eqv, _) = foldr emerge (UnionFind.unequal, pfn) eqps in
->   all (\(l, r) -> not $ UnionFind.equivalent eqv l r) eqns
+>       pfn = foldr predecessors Map.empty (Set.unions $ map subterms lrs)
+>       (eqv, _) = foldr emerge (UF.unequal, pfn) eqps in
+>   all (\(l, r) -> not $ UF.equivalent eqv l r) eqns
 
 The overall decision procedure now becomes the following:
 
-> ccvalid :: Formula Fol -> Bool
+> ccvalid :: Formula -> Bool
 > ccvalid fm = 
->   let fms = Prop.simpdnf $ Skolem.askolemize $ Not $ Fol.generalize fm in
+>   let fms = Prop.simpdnf $ Skolem.askolemize $ Not $ FOL.generalize fm in
 >   not $ any ccsatisfiable fms
 

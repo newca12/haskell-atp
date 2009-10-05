@@ -1,28 +1,34 @@
 
-> module Cooper ( zero
->               , one
->               , isNumeral
->               , numeral1
->               , numeral2
->               , destNumeral
->               , integerQelim
->               , naturalQelim
->               )
->   where
+* Signature
+
+> module ATP.Cooper
+>   ( zero
+>   , one
+>   , isNumeral
+>   , numeral1
+>   , numeral2
+>   , destNumeral
+>   , integerQelim
+>   , naturalQelim
+>   )
+> where
+
+* Imports
 
 > import Prelude 
-> import qualified List
-> import qualified Char
+> import qualified Data.Char as Char
+> import qualified Data.List as List
 > import qualified Ratio
-> import Ratio ( (%) )
-> import qualified ListSet
-> import qualified Formulas as F
-> import Formulas(Formula(..), (/\), (\/), (==>), (<=>), Vars, Var, Sym)
-> import qualified Fol
-> import Fol(Fol(R), Term(..))
-> import qualified Skolem
-> import qualified Qelim
-> import qualified Order
+> import Ratio ((%))
+
+> import qualified ATP.Util.ListSet as Set
+> import ATP.FormulaSyn
+> import qualified ATP.Formula as F
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Qelim as Qelim
+> import qualified ATP.Order as Order
+
+* Cooper
 
 > zero :: Term
 > zero = fromInteger 0
@@ -101,10 +107,10 @@
 >    Fn "*" [s, t] -> linearMul (lint vars s) (lint vars t)
 >    _ -> if isNumeral tm then tm else error "lint: unknown term"
 
-> mkatom :: Vars -> Sym -> Term -> Formula Fol 
+> mkatom :: Vars -> Pred -> Term -> Formula 
 > mkatom vars p t = Atom (R p [zero, lint vars t])
 
-> linform :: Vars -> Formula Fol -> Formula Fol 
+> linform :: Vars -> Formula -> Formula 
 > linform vars fm =
 >  case fm of
 >    Atom(R "divides" [c, t]) ->
@@ -116,14 +122,14 @@
 >    Atom(R ">=" [s, t]) -> mkatom vars "<" (s + one - t)
 >    _ -> fm 
 
-> posineq :: Formula Fol -> Formula Fol 
+> posineq :: Formula -> Formula 
 > posineq fm =
 >   case fm of
 >     Not(Atom(R "<" [Fn "0" [], t])) ->
 >       Atom(R "<" [zero, linearSub [] one t])
 >     _ -> fm
     
-> formlcm :: Term -> Formula Fol -> Integer
+> formlcm :: Term -> Formula -> Integer
 > formlcm x (Atom(R _ [_, Fn "+" [Fn "*" [c, y], _]])) | y == x =
 >   abs $ rati $ destNumeral c
 > formlcm x (Not(p)) = formlcm x p
@@ -131,7 +137,7 @@
 > formlcm x (Or p q) = lcm (formlcm x p) (formlcm x q)   
 > formlcm _ _ = 1
 
-> adjustcoeff :: Term -> Integer -> Formula Fol -> Formula Fol 
+> adjustcoeff :: Term -> Integer -> Formula -> Formula 
 > adjustcoeff x l fm = 
 >  case fm of
 >    Atom(R p [d, Fn "+" [Fn "*" [c, y], z]]) | y == x ->
@@ -140,30 +146,30 @@
 >          xtm = fromInteger (m `div` n) * x in
 >      Atom(R p [linearCmul (toRational $ abs m) d, xtm + linearCmul (irat n) z])
 >    Not p -> Not(adjustcoeff x l p)
->    And p q -> adjustcoeff x l p /\ adjustcoeff x l q
->    Or p q -> adjustcoeff x l p \/ adjustcoeff x l q
+>    And p q -> adjustcoeff x l p ∧ adjustcoeff x l q
+>    Or p q -> adjustcoeff x l p ∨ adjustcoeff x l q
 >    _ -> fm
 
-> unitycoeff :: Term -> Formula Fol -> Formula Fol 
+> unitycoeff :: Term -> Formula -> Formula 
 > unitycoeff x fm = 
 >   let l = formlcm x fm
 >       fm' = adjustcoeff x l fm in
 >   if l == 1 then fm' else
 >   let xp = one * x + zero in
->   Atom (R "divides" [fromInteger l, xp]) /\ adjustcoeff x l fm
+>   Atom (R "divides" [fromInteger l, xp]) ∧ adjustcoeff x l fm
 
-> minusinf :: Term -> Formula Fol -> Formula Fol 
+> minusinf :: Term -> Formula -> Formula 
 > minusinf x fm =
 >  case fm of
 >    Atom(R "=" [Fn "0" [], Fn "+" [Fn "*" [Fn "1" [], y], _]]) | y == x -> Bot
 >    Atom(R "<" [Fn "0" [], Fn "+" [Fn "*" [pm1, y], _]]) | y == x -> 
 >      if pm1 == one then Bot else Top
 >    Not(p) -> Not(minusinf x p)
->    And p q -> minusinf x p /\ minusinf x q
->    Or p q -> minusinf x p \/ minusinf x q
+>    And p q -> minusinf x p ∧ minusinf x q
+>    Or p q -> minusinf x p ∨ minusinf x q
 >    _ -> fm
 
-> divlcm :: Term -> Formula Fol -> Integer
+> divlcm :: Term -> Formula -> Integer
 > divlcm x fm =
 >  case fm of
 >    Atom(R "divides" [d, Fn "+" [Fn "*" [_, y], _]]) | y == x ->
@@ -173,7 +179,7 @@
 >    Or p q -> lcm (divlcm x p) (divlcm x q)
 >    _ -> 1
 
-> bset :: Term -> Formula Fol -> [Term]
+> bset :: Term -> Formula -> [Term]
 > bset x fm =
 >   case fm of 
 >     Not(Atom (R "=" [Fn "0" [], Fn "+" [Fn "*" [Fn "1" [], y], a]])) | y == x -> 
@@ -183,23 +189,23 @@
 >     Atom(R "<" [Fn "0" [], Fn "+" [Fn "*" [Fn "1" [], y], a]]) | y == x -> 
 >       [linearNeg a]
 >     Not p -> bset x p
->     And p q -> ListSet.union (bset x p) (bset x q)
->     Or p q -> ListSet.union (bset x p) (bset x q)
+>     And p q -> Set.union (bset x p) (bset x q)
+>     Or p q -> Set.union (bset x p) (bset x q)
 >     _ -> []
 
-> linrep :: Vars -> Term -> Term -> Formula Fol -> Formula Fol 
+> linrep :: Vars -> Term -> Term -> Formula -> Formula 
 > linrep vars x t fm =
 >  case fm of
 >    Atom(R p [d, Fn "+" [Fn "*" [c,y],a]]) | y == x ->
 >      let ct = linearCmul (destNumeral c) t in
 >        Atom(R p [d, linearAdd vars ct a])
 >    Not p -> Not(linrep vars x t p)
->    And p q -> linrep vars x t p /\ linrep vars x t q
->    Or p q -> linrep vars x t p \/ linrep vars x t q
+>    And p q -> linrep vars x t p ∧ linrep vars x t q
+>    Or p q -> linrep vars x t p ∨ linrep vars x t q
 >    _ -> fm
 
-> cooper :: Vars -> Formula Fol -> Formula Fol 
-> cooper vars (Exists x0 p0) =
+> cooper :: Vars -> Formula -> Formula 
+> cooper vars (Ex x0 p0) =
 >   let x = Var x0
 >       p = unitycoeff x p0
 >       p_inf = Skolem.simplify (minusinf x p) 
@@ -213,7 +219,7 @@
 >   F.listDisj (map stage js)
 > cooper _ _ = error "cooper: not an existential formula"
 
-> operations :: [(Sym, Integer -> Integer -> Bool)]
+> operations :: [(Pred, Integer -> Integer -> Bool)]
 > operations = [("=",(==)), 
 >               ("<",(<)),
 >               (">",(>)), 
@@ -221,7 +227,7 @@
 >               (">=",(>=)),
 >               ("divides", \x y -> y `mod` x == 0)]
 
-> evalc :: Formula Fol -> Formula Fol 
+> evalc :: Formula -> Formula 
 > evalc = F.onatoms
 >  (\at@(R p [s, t]) -> case List.lookup p operations of
 >                         Just op -> if isNumeral s && isNumeral t then 
@@ -229,22 +235,22 @@
 >                                    else Atom at
 >                         Nothing -> Atom at)
 
-> integerQelim :: Formula Fol -> Formula Fol 
+> integerQelim :: Formula -> Formula 
 > integerQelim = 
 >  Skolem.simplify . evalc .
 >     Qelim.liftQelim linform (Qelim.cnnf posineq . evalc) cooper
 
-> relativize :: (Var -> Formula Fol) -> Formula Fol -> Formula Fol 
+> relativize :: (Var -> Formula) -> Formula -> Formula 
 > relativize r fm =
 >  case fm of
->    Not p -> Not(relativize r p)
->    And p q -> relativize r p /\ relativize r q
->    Or p q -> relativize r p \/ relativize r q
->    Imp p q -> relativize r p ==> relativize r q
->    Iff p q -> relativize r p <=> relativize r q
->    Forall x p -> Forall x (r x ==> relativize r p)
->    Exists x p -> Exists x (r x /\ relativize r p)
+>    Not p -> (¬) $ relativize r p
+>    And p q -> relativize r p ∧ relativize r q
+>    Or p q -> relativize r p ∨ relativize r q
+>    Imp p q -> relativize r p ⊃ relativize r q
+>    Iff p q -> relativize r p ⇔ relativize r q
+>    All x p -> (¥) x (r x ⊃ relativize r p)
+>    Ex x p -> (∃) x (r x ∧ relativize r p)
 >    _ -> fm
 
-> naturalQelim :: Formula Fol -> Formula Fol 
+> naturalQelim :: Formula -> Formula 
 > naturalQelim = integerQelim . relativize (\x -> Atom(R "<=" [zero, Var x]))

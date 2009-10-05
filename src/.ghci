@@ -34,19 +34,12 @@
 :set -lcvc3 -lcvch
 
 -- -----------------------------------------------------------------------------
---  File loading                                                                
--- -----------------------------------------------------------------------------
-
--- :load IntSyn Parse Print
--- :module +System.IO.UTF8
-
--- -----------------------------------------------------------------------------
 --  Options                                                                      
 -- -----------------------------------------------------------------------------
 
 :set +t
 -- :set prompt "> "
-:set prompt "Prelude> "
+-- :set prompt "Prelude> "
 
 -- -----------------------------------------------------------------------------
 --  Functions                                                                   
@@ -64,7 +57,11 @@ let date _ = do { t <- Time.getClockTime
 --  Test                                                                        
 -- -----------------------------------------------------------------------------
 
-:def iload (\_ -> return   ":load   IntSyn Parse Print Formula") 
-:def imodule (\_ -> return ":module IntSyn Parse Print Formula") 
-:def debug (\_ -> return ":module Language.Haskell.TH IntSyn Parse Print") 
+:def imodule (\_ -> return ":module ATP.Util.Print") 
 
+-- -----------------------------------------------------------------------------
+--  File loading                                                                
+-- -----------------------------------------------------------------------------
+
+-- :load ATP.Util.Print
+-- :module +ATP.Util.Print

@@ -2,40 +2,46 @@
 Propositional Logic.  Atomic propositions are simply
 propositional variables.
 
-> module Prop ( eval
->             , atoms
->             , apply
->             , distrib
->             , simplify
->             , simplify1
->             , truthtable
->             , unsatisfiable
->             , satisfiable
->             , dualize
->             , trivial
->             , tautology
->             , occurrences
->             , subsume
->             , nnf
->             , nenf
->             , simpcnf
->             , cnf
->             , purednf
->             , simpdnf
->             , dnf
->             ) where
+* Signature
+
+> module ATP.Prop 
+>   ( eval
+>   , atoms
+>   , apply
+>   , distrib
+>   , simplify
+>   , simplify1
+>   , truthtable
+>   , unsatisfiable
+>   , satisfiable
+>   , dualize
+>   , trivial
+>   , tautology
+>   , occurrences
+>   , subsume
+>   , nnf
+>   , nenf
+>   , simpcnf
+>   , cnf
+>   , purednf
+>   , simpdnf
+>   , dnf
+>   ) 
+> where
+
+* Imports
 
 > import Prelude 
 > import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
-> import qualified Text.PrettyPrint.HughesPJClass as PP
-> import Text.PrettyPrint.HughesPJClass ( ($+$) )
 
-> import qualified Lib 
-> import qualified ListSet
-> import FormulaSyn
-> import qualified Formula as F
+> import qualified ATP.Util.Print as PP
+> import ATP.Util.Print ( ($+$) )
+> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.ListSet as Set
+> import ATP.FormulaSyn 
+> import qualified ATP.Formula as F
 
 Propositions
 
@@ -48,14 +54,14 @@ Evaluate a formula in a mapping of variables to truth values.
 
 > eval :: Formula -> (Rel -> Bool) -> Bool
 > eval fm v = case fm of
->   [$fol| true |]      -> True
->   [$fol| false |]     -> False
->   [$fol| ^a |]        -> v a
->   [$fol| ~ $p |]      -> not (eval p v)
->   [$fol| $p /\ $q |]  -> eval p v && eval q v
->   [$fol| $p \/ $q |]  -> eval p v || eval q v
->   [$fol| $p ==> $q |] -> not (eval p v) || (eval q v)
->   [$fol| $p <=> $q |] -> eval p v == eval q v
+>   [$form| true |]      -> True
+>   [$form| false |]     -> False
+>   [$form| ^a |]        -> v a
+>   [$form| ~ $p |]      -> not (eval p v)
+>   [$form| $p ∧ $q |]  -> eval p v && eval q v
+>   [$form| $p ∨ $q |]  -> eval p v || eval q v
+>   [$form| $p ⊃ $q |] -> not (eval p v) || (eval q v)
+>   [$form| $p ⇔ $q |] -> eval p v == eval q v
 >   _ -> error "quantifier in prop eval"
 
 Return all atoms in a formula.
@@ -124,59 +130,59 @@ Duality
 
 > subdualize :: Formula -> Formula 
 > subdualize fm = case fm of
->   [$fol| false |] -> [$fol| true |]
->   [$fol| true |] -> [$fol| false |]
->   [$fol| ^_ |] -> fm
->   [$fol| ~ $p |] -> [$fol| ~ $p' |]
+>   [$form| false |] -> [$form| true |]
+>   [$form| true |] -> [$form| false |]
+>   [$form| ^_ |] -> fm
+>   [$form| ~ $p |] -> [$form| ~ $p' |]
 >     where p' = subdualize p
->   [$fol| $p /\ $q |] -> [$fol| $p' \/ $q' |]
->     where p' = subdualize p
->           q' = subdualize q
->   [$fol| $p \/ $q |] -> [$fol| $p' /\ $q' |]
+>   [$form| $p ∧ $q |] -> [$form| $p' ∨ $q' |]
 >     where p' = subdualize p
 >           q' = subdualize q
->   _ -> error "Formula involves connectives ==> and <=>"
+>   [$form| $p ∨ $q |] -> [$form| $p' ∧ $q' |]
+>     where p' = subdualize p
+>           q' = subdualize q
+>   _ -> error "Formula involves connectives ⊃ and ⇔"
 
 Simplification
 
 > simplify :: Formula -> Formula
 > simplify fm = case fm of
->   [$fol| ~ $p |] -> simplify1 [$fol| ~ $p' |]
+>   [$form| ~ $p |] -> simplify1 [$form| ~ $p' |]
 >     where p' = simplify p
->   [$fol| $p /\ $q |] -> simplify1 [$fol| $p' /\ $q' |]
->     where p' = simplify p
->           q' = simplify q
->   [$fol| $p \/ $q |] -> simplify1 [$fol| $p' \/ $q' |]
+>   [$form| $p ∧ $q |] -> simplify1 [$form| $p' ∧ $q' |]
 >     where p' = simplify p
 >           q' = simplify q
->   [$fol| $p ==> $q |] -> simplify1 [$fol| $p' ==> $q' |]
+>   [$form| $p ∨ $q |] -> simplify1 [$form| $p' ∨ $q' |]
 >     where p' = simplify p
 >           q' = simplify q
->   [$fol| $p <=> $q |] -> simplify1 [$fol| $p' <=> $q' |]
+>   [$form| $p ⊃ $q |] -> simplify1 [$form| $p' ⊃ $q' |]
+>     where p' = simplify p
+>           q' = simplify q
+>   [$form| $p ⇔ $q |] -> simplify1 [$form| $p' ⇔ $q' |]
 >     where p' = simplify p
 >           q' = simplify q
 >   _ -> fm
 
 > simplify1 :: Formula -> Formula
 > simplify1 fm = case fm of
->   [$fol| ~ false |] -> [$fol| true |]
->   [$fol| ~ true |] -> [$fol| false |]
->   [$fol| false /\ _ |] -> [$fol| false |]
->   [$fol| _ /\ false |] -> [$fol| false |]
->   [$fol| true /\ $q |] -> q
->   [$fol| $p /\ true |] -> p
->   [$fol| false \/ $q |] -> q
->   [$fol| $p \/ false |] -> p
->   [$fol| true \/ _ |] -> [$fol| true |]
->   [$fol| _ \/ true |] -> [$fol| true |]
->   [$fol| false ==> _ |] -> [$fol| true |]
->   [$fol| $p ==> false |] ->  [$fol| ~ $p |]
->   [$fol| true ==> $q |] -> q
->   [$fol| _ ==> true |] ->  [$fol| true |]
->   [$fol| false <=> $q |] -> [$fol| ~ $q |]
->   [$fol| $p <=> false |] -> [$fol| ~ $p |]
->   [$fol| true <=> $q |] -> q
->   [$fol| $p <=> true |] -> p
+>   [$form| ~ false |] -> [$form| true |]
+>   [$form| ~ true |] -> [$form| false |]
+>   [$form| false ∧ _ |] -> [$form| false |]
+>   [$form| _ ∧ false |] -> [$form| false |]
+>   [$form| true ∧ $q |] -> q
+>   [$form| $p ∧ true |] -> p
+>   [$form| false ∨ $q |] -> q
+>   [$form| $p ∨ false |] -> p
+>   [$form| true ∨ _ |] -> [$form| true |]
+>   [$form| _ ∨ true |] -> [$form| true |]
+>   [$form| false ⊃ _ |] -> [$form| true |]
+>   [$form| $p ⊃ false |] ->  [$form| ~ $p |]
+>   [$form| true ⊃ $q |] -> q
+>   [$form| _ ⊃ true |] ->  [$form| true |]
+>   [$form| false ⇔ $q |] -> [$form| ~ $q |]
+>   [$form| $p ⇔ false |] -> [$form| ~ $p |]
+>   [$form| true ⇔ $q |] -> q
+>   [$form| $p ⇔ true |] -> p
 >   _ -> fm
 
 Negation normal form
@@ -186,35 +192,35 @@ Negation normal form
 
 > nnf' :: Formula -> Formula
 > nnf' fm = case fm of 
->   [$fol| $p /\ $q |] -> [$fol| $p' /\ $q' |]
+>   [$form| $p ∧ $q |] -> [$form| $p' ∧ $q' |]
 >     where p' = nnf' p 
 >           q' = nnf' q
->   [$fol| $p \/ $q |] -> [$fol| $p' \/ $q' |]
+>   [$form| $p ∨ $q |] -> [$form| $p' ∨ $q' |]
 >     where p' = nnf' p 
 >           q' = nnf' q
->   [$fol| $p ==> $q |] -> [$fol| ~ $p' \/ $q' |]
->     where p' = nnf' [$fol| ~ $p |]
+>   [$form| $p ⊃ $q |] -> [$form| ~ $p' ∨ $q' |]
+>     where p' = nnf' [$form| ~ $p |]
 >           q' = nnf' q
->   [$fol| $p <=> $q |] -> [$fol| $p' /\ $q' \/ $p'' /\ $q'' |]
+>   [$form| $p ⇔ $q |] -> [$form| $p' ∧ $q' ∨ $p'' ∧ $q'' |]
 >     where p' = nnf' p
 >           q' = nnf' q
->           p'' = nnf' [$fol| ~ $p |]
->           q'' = nnf' [$fol| ~ $q |]
->   [$fol| ~ ~ $p |] -> nnf' p
->   [$fol| ~ ($p /\ $q) |] -> [$fol| $p' \/ $q' |]
->     where p' = nnf' [$fol| ~ $p |]
->           q' = nnf' [$fol| ~ $q |]
->   [$fol| ~ ($p \/ $q) |] -> [$fol| $p' /\ $q' |]
->     where p' = nnf' [$fol| ~ $p |]
->           q' = nnf' [$fol| ~ $q |]
->   [$fol| ~ ($p ==> $q) |] -> [$fol| $p' /\ $q' |]
+>           p'' = nnf' [$form| ~ $p |]
+>           q'' = nnf' [$form| ~ $q |]
+>   [$form| ~ ~ $p |] -> nnf' p
+>   [$form| ~ ($p ∧ $q) |] -> [$form| $p' ∨ $q' |]
+>     where p' = nnf' [$form| ~ $p |]
+>           q' = nnf' [$form| ~ $q |]
+>   [$form| ~ ($p ∨ $q) |] -> [$form| $p' ∧ $q' |]
+>     where p' = nnf' [$form| ~ $p |]
+>           q' = nnf' [$form| ~ $q |]
+>   [$form| ~ ($p ⊃ $q) |] -> [$form| $p' ∧ $q' |]
 >     where p' = nnf' p
->           q' = nnf' [$fol| ~ $q |]
->   [$fol| ~ ($p <=> $q) |] -> [$fol| $p' /\ $q'' \/ $p'' /\ $q' |]
+>           q' = nnf' [$form| ~ $q |]
+>   [$form| ~ ($p ⇔ $q) |] -> [$form| $p' ∧ $q'' ∨ $p'' ∧ $q' |]
 >     where p' = nnf' p
 >           q' = nnf' q
->           p'' = nnf' [$fol| ~ $p |]
->           q'' = nnf' [$fol| ~ $q |]
+>           p'' = nnf' [$form| ~ $p |]
+>           q'' = nnf' [$form| ~ $q |]
 >   _ -> fm
 
 > nenf :: Formula -> Formula
@@ -222,29 +228,29 @@ Negation normal form
 
 > nenf' :: Formula -> Formula
 > nenf' fm = case fm of 
->   [$fol| ~~$p |] -> nenf' p
->   [$fol| ~($p /\ $q) |] -> [$fol| $p' \/ $q' |] 
->     where p' = nenf' [$fol| ~ $p |]
->           q' = nenf' [$fol| ~ $q |]
->   [$fol| ~($p \/ $q) |] -> [$fol| $p' /\ $q' |] 
->     where p' = nenf' [$fol| ~ $p |]
->           q' = nenf' [$fol| ~ $q |]
->   [$fol| ~($p ==> $q) |] -> [$fol| $p' /\ $q' |] 
+>   [$form| ~~$p |] -> nenf' p
+>   [$form| ~($p ∧ $q) |] -> [$form| $p' ∨ $q' |] 
+>     where p' = nenf' [$form| ~ $p |]
+>           q' = nenf' [$form| ~ $q |]
+>   [$form| ~($p ∨ $q) |] -> [$form| $p' ∧ $q' |] 
+>     where p' = nenf' [$form| ~ $p |]
+>           q' = nenf' [$form| ~ $q |]
+>   [$form| ~($p ⊃ $q) |] -> [$form| $p' ∧ $q' |] 
 >     where p' = nenf' p
->           q' = nenf' [$fol| ~ $q |]
->   [$fol| ~($p <=> $q) |] -> [$fol| $p' <=> $q' |] 
+>           q' = nenf' [$form| ~ $q |]
+>   [$form| ~($p ⇔ $q) |] -> [$form| $p' ⇔ $q' |] 
 >     where p' = nenf' p
->           q' = nenf' [$fol| ~ $q |]
->   [$fol| $p /\ $q |] -> [$fol| $p' /\ $q' |] 
->     where p' = nenf' p
->           q' = nenf' q
->   [$fol| $p \/ $q |] -> [$fol| $p' \/ $q' |] 
+>           q' = nenf' [$form| ~ $q |]
+>   [$form| $p ∧ $q |] -> [$form| $p' ∧ $q' |] 
 >     where p' = nenf' p
 >           q' = nenf' q
->   [$fol| $p ==> $q |] -> [$fol| $p' \/ $q' |] 
->     where p' = nenf' [$fol| ~ $p |]
+>   [$form| $p ∨ $q |] -> [$form| $p' ∨ $q' |] 
+>     where p' = nenf' p
 >           q' = nenf' q
->   [$fol| $p <=> $q |] -> [$fol| $p' <=> $q' |] 
+>   [$form| $p ⊃ $q |] -> [$form| $p' ∨ $q' |] 
+>     where p' = nenf' [$form| ~ $p |]
+>           q' = nenf' q
+>   [$form| $p ⇔ $q |] -> [$form| $p' ⇔ $q' |] 
 >     where p' = nenf' p
 >           q' = nenf' q
 >   _ -> fm
@@ -253,19 +259,19 @@ Positive and negative occurrances of atoms
 
 > occurrences :: Rel -> Formula -> (Bool, Bool)
 > occurrences x fm = case fm of
->   [$fol| ^y |] -> (x == y, False)
->   [$fol| ~ $p |] -> (neg, pos)
+>   [$form| ^y |] -> (x == y, False)
+>   [$form| ~ $p |] -> (neg, pos)
 >     where (pos, neg) = occurrences x p 
->   [$fol| $p /\ $q |] -> (pos1 || pos2, neg1 || neg2)
+>   [$form| $p ∧ $q |] -> (pos1 || pos2, neg1 || neg2)
 >     where (pos1, neg1) = occurrences x p
 >           (pos2, neg2) = occurrences x q 
->   [$fol| $p \/ $q |] -> (pos1 || pos2, neg1 || neg2)
+>   [$form| $p ∨ $q |] -> (pos1 || pos2, neg1 || neg2)
 >     where (pos1, neg1) = occurrences x p
 >           (pos2, neg2) = occurrences x q 
->   [$fol| $p ==> $q |] -> (neg1 || pos2, pos1 || neg2)
+>   [$form| $p ⊃ $q |] -> (neg1 || pos2, pos1 || neg2)
 >     where (pos1, neg1) = occurrences x p
 >           (pos2, neg2) = occurrences x q 
->   [$fol| $p <=> $q |] -> if pos1 || pos2 || neg1 || neg2 
+>   [$form| $p ⇔ $q |] -> if pos1 || pos2 || neg1 || neg2 
 >                           then (True, True) else (False, False)
 >     where (pos1, neg1) = occurrences x p
 >           (pos2, neg2) = occurrences x q 
@@ -274,13 +280,13 @@ Positive and negative occurrances of atoms
 Distribute clauses 
 
 > distrib :: [[Formula]] -> [[Formula]] -> [[Formula]]
-> distrib = Lib.allPairs ListSet.union 
+> distrib = Lib.allPairs Set.union 
 
 Subsumption
 
 > subsume :: [[Formula]] -> [[Formula]]
 > subsume cls =
->   filter (\cl -> not(any (\cl' -> ListSet.psubset cl' cl) cls)) cls
+>   filter (\cl -> not(any (\cl' -> Set.psubset cl' cl) cls)) cls
 
 Disjunctive normal form
 
@@ -295,13 +301,13 @@ Disjunctive normal form
 > purednf :: Formula -> [[Formula]]
 > purednf fm = case fm of
 >   And p q -> distrib (purednf p) (purednf q)
->   Or p q -> ListSet.union (purednf p) (purednf q)
+>   Or p q -> Set.union (purednf p) (purednf q)
 >   _ -> [[fm]]
 
 > trivial :: [Formula] -> Bool
 > trivial lits =
 >     let (pos, neg) = List.partition F.positive lits in
->     ListSet.intersect pos (map F.opp neg) /= []
+>     Set.intersect pos (map F.opp neg) /= []
 
 Conjunctive normal form
 
@@ -313,13 +319,13 @@ Conjunctive normal form
 > simpcnf Top = []
 > simpcnf fm = 
 >   let cjs = filter (not . trivial) (purecnf $ nnf fm) in
->   filter (\c -> not $ any (\c' -> ListSet.psubset c' c) cjs) cjs             
+>   filter (\c -> not $ any (\c' -> Set.psubset c' c) cjs) cjs             
 
 > purecnf :: Formula -> [[Formula]]
 > purecnf = map (map F.opp) . (purednf . nnf . Not)
 
-nnf [$prop| p <=> (q <=> r) |]
-cnf [$prop| p <=> (q <=> r) |]
-dnf [$prop| p <=> (q <=> r) |]
+nnf [$form| p ⇔ (q ⇔ r) |]
+cnf [$form| p ⇔ (q ⇔ r) |]
+dnf [$form| p ⇔ (q ⇔ r) |]
 
 

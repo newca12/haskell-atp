@@ -35,38 +35,48 @@ Intro
 
 Formulas 
 
--- > import qualified FormulaSyn
--- > import qualified Formula
+> import qualified ATP.FormulaSyn
+> import qualified ATP.Formula
 
 Propositional logic
 
--- > import qualified Prop 
--- > import qualified PropExamples
--- > import qualified DefCnf
--- > import qualified Fol
--- > import qualified TestFormulas
--- > import qualified Dp
--- > import qualified Herbrand
--- > import qualified Unif
--- > import qualified Skolem
--- > import qualified Tableaux
--- > import qualified Resolution
+> import qualified ATP.Prop 
+> import qualified ATP.PropExamples
+> import qualified ATP.DefCNF
+> import qualified ATP.FOL
+> import qualified ATP.DP
 
--- > import qualified Prolog
--- > import qualified Meson
--- > import qualified Equal
--- > import qualified Cong
--- > import qualified Rewrite
--- > import qualified EqElim
--- > import qualified Order()
--- > import qualified Completion()
--- > import qualified Paramodulation
--- > import qualified Decidable
--- > import qualified Qelim
--- > import qualified Cooper
--- > import qualified Complex()
--- > import qualified Interpolation()
--- > import qualified Combining
+First order logic
+
+> import qualified ATP.Skolem
+> import qualified ATP.Herbrand
+> import qualified ATP.Unif
+> import qualified ATP.Tableaux
+> import qualified ATP.Resolution
+> import qualified ATP.Prolog
+> import qualified ATP.Meson
+> import qualified ATP.Equal
+> import qualified ATP.Cong
+> import qualified ATP.Rewrite
+> import qualified ATP.Order
+> import qualified ATP.Completion
+> import qualified ATP.EqElim
+> import qualified ATP.Paramodulation
+> import qualified ATP.Decidable
+> import qualified ATP.Qelim
+> import qualified ATP.Cooper
+
+-- > import qualified ATP.Complex
+-- > import qualified ATP.Real
+-- > import qualified ATP.Grobner
+-- > import qualified ATP.Geom
+
+> import qualified ATP.Interpolation
+> import qualified ATP.Combining
+
+Tests
+
+> import qualified ATP.TestFormulas
 
 * Main
 

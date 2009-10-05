@@ -17,28 +17,37 @@ Atoms A ::= ( T ) | - A | Var () | Var ( TS ) | Var
 Relations R ::= Var() | Var ( TS ) | Var | T = T | T < T 
               | T <= T | T > T | T >= T
 
-> module Fol ( onformula
->            , isVar
->            , Env
->            , Fv(fv)
->            , Subst(apply)
->            , generalize
->            , functions
->            , predicates
->            , variant
->            , holds
->            ) where
+* Signature
+
+> module ATP.FOL 
+>   ( onformula
+>   , isVar
+>   , Env
+>   , Fv(fv)
+>   , Subst(apply)
+>   , generalize
+>   , functions
+>   , predicates
+>   , variant
+>   , holds
+>   ) 
+> where
+
+* Imports
 
 > import Prelude 
 > import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
-> import qualified Lib
-> import Lib((|->))
-> import qualified ListSet
-> import ListSet((\\))
-> import FormulaSyn
-> import qualified Formula as F
+
+> import qualified ATP.Util.Lib as LIb
+> import ATP.Util.Lib((↦))
+> import qualified ATP.Util.ListSet as Set
+> import ATP.Util.ListSet((\\))
+> import ATP.FormulaSyn
+> import qualified ATP.Formula as F
+
+* Util
 
 Terms 
 
@@ -51,34 +60,34 @@ Relations
 > onformula :: (Term -> Term) -> Formula -> Formula
 > onformula f = F.onatoms(\(R p a) -> Atom(R p (map f a)))
 
-Free variables 
+* Free variables 
 
 > class Fv a where
 >   fv :: a -> Vars
 
 > instance Fv Term where
 >   fv (Var x) = [x]
->   fv (Fn _ args) = ListSet.unions (map fv args)
+>   fv (Fn _ args) = Set.unions (map fv args)
 
 > instance Fv Rel where
->   fv (R _ args) = ListSet.unions (map fv args)
+>   fv (R _ args) = Set.unions (map fv args)
 
 > instance Fv Formula where
 >   fv fm = case fm of
->           [$fol| true |] -> []
->           [$fol| false |] -> []
->           [$fol| ~ $p |] -> fv p
->           [$fol| forall $x. $p |] -> fv p \\ [x]
->           [$fol| exists $x. $p |] -> fv p \\ [x]
->           [$fol| $p /\ $q  |] -> combine p q
->           [$fol| $p \/ $q |] -> combine p q
->           [$fol| $p ==> $q  |] -> combine p q
->           [$fol| $p <=> $q |] -> combine p q
->           [$fol| ^a |] -> fv a
->     where combine p q = ListSet.union (fv p) (fv q)
+>           [$form| ⊤ |] -> []
+>           [$form| ⊥ |] -> []
+>           [$form| ¬ $p |] -> fv p
+>           [$form| ∀ $x. $p |] -> fv p \\ [x]
+>           [$form| exists $x. $p |] -> fv p \\ [x]
+>           [$form| $p ∧ $q  |] -> combine p q
+>           [$form| $p ∨ $q |] -> combine p q
+>           [$form| $p ⊃ $q  |] -> combine p q
+>           [$form| $p ⇔ $q |] -> combine p q
+>           [$form| ^a |] -> fv a
+>     where combine p q = Set.union (fv p) (fv q)
 
 > instance Fv a => Fv [a] where
->   fv xs = ListSet.unions (map fv xs)
+>   fv xs = Set.unions (map fv xs)
 
 > generalize :: Formula -> Formula
 > generalize fm = foldr All fm (fv fm) 
@@ -86,11 +95,11 @@ Free variables
 Function symbols with arity
 
 > functions :: Formula -> [(Func, Int)]
-> functions = F.atomUnion (\(R _ args) -> foldr (ListSet.union . funcs) [] args) 
+> functions = F.atomUnion (\(R _ args) -> foldr (Set.union . funcs) [] args) 
 
 > funcs :: Term -> [(Func, Int)]
 > funcs (Var _) = []
-> funcs (Fn f args) = foldr (ListSet.union . funcs) [(f, length args)] args 
+> funcs (Fn f args) = foldr (Set.union . funcs) [(f, length args)] args 
 
 > predicates :: Formula -> [(Func, Int)]
 > predicates = F.atomUnion (\(R p args) -> [(p, length args)])
@@ -99,8 +108,6 @@ Environments
 
 This is generally the correct type for substitutions.  There is one exception
 in EqElim where Map Term Term is needed
-
-> type Env = Map Var Term
 
 Substitutions
 
@@ -119,26 +126,26 @@ Substitutions
 
 > instance Subst Formula where
 >   apply env fm = case fm of 
->     [$fol| ^a |] -> [$fol| ^a' |] 
+>     [$form| ^a |] -> [$form| ^a' |] 
 >       where a' = apply env a
->     [$fol| ~ $p |] -> [$fol| ~ $p' |]
+>     [$form| ¬ $p |] -> [$form| ¬ $p' |]
 >       where p' = apply env p
->     [$fol| $p /\ $q |] -> [$fol| $p' /\ $q' |]
+>     [$form| $p ∧ $q |] -> [$form| $p' ∧ $q' |]
 >       where p' = apply env p 
 >             q' = apply env q
->     [$fol| $p \/ $q |] -> [$fol| $p' \/ $q' |]
+>     [$form| $p ∨ $q |] -> [$form| $p' ∨ $q' |]
 >       where p' = apply env p 
 >             q' = apply env q
->     [$fol| $p ==> $q |] -> [$fol| $p' ==> $q' |]
+>     [$form| $p ⊃ $q |] -> [$form| $p' ⊃ $q' |]
 >       where p' = apply env p 
 >             q' = apply env q
->     [$fol| $p <=> $q |] -> [$fol| $p' <=> $q' |]
+>     [$form| $p ⇔ $q |] -> [$form| $p' ⇔ $q' |]
 >       where p' = apply env p 
 >             q' = apply env q
->     [$fol| forall $x. $p |] -> applyq env All x p
->     [$fol| exists $x. $p |] -> applyq env Ex x p
->     [$fol| true |] -> [$fol| true |]
->     [$fol| false |] -> [$fol| false |]
+>     [$form| forall $x. $p |] -> applyq env All x p
+>     [$form| exists $x. $p |] -> applyq env Ex x p
+>     [$form| true |] -> [$form| true |]
+>     [$form| false |] -> [$form| false |]
 
 Substitute under a binder
 The following functions need the type variable, as they are used at multiple types
@@ -148,7 +155,7 @@ The following functions need the type variable, as they are used at multiple typ
 
 > applyq :: Env -> (Var -> Formula -> Formula) 
 >        -> Var -> Formula -> Formula
-> applyq env quant x p = quant x' (apply ((x |-> Var x') env) p)
+> applyq env quant x p = quant x' (apply ((x ↦ Var x') env) p)
 >     where x' = if List.any (\k -> case Map.lookup k env of
 >                                   Just v -> List.elem x (fv v)
 >                                   Nothing -> False) (fv p \\ [x]) 
@@ -163,16 +170,16 @@ The following functions need the type variable, as they are used at multiple typ
 >     Fn f args -> func f (map (termval m v) args)
 
 > holds :: ([a], Var -> [a] -> a, Var -> [a] -> Bool) -> Map Var a -> Formula -> Bool
-> holds m@(domain, _, pred) v fm =
+> holds m@(domain, _, f) v fm =
 >   case fm of 
->     [$fol| false |] -> False
->     [$fol| true |] -> True
->     Atom (R r args) -> pred r (map (termval m v) args)
->     [$fol| ~ $p |] -> not(holds m v p)
->     [$fol| $p /\ $q |] -> holds m v p && holds m v q
->     [$fol| $p \/ $q |] -> holds m v p || holds m v q
->     [$fol| $p ==> $q |] -> not(holds m v p) || holds m v q
->     [$fol| $p <=> $q |] -> holds m v p == holds m v q
->     [$fol| forall $x. $p |] -> List.all (\a -> holds m (Map.insert x a v) p) domain
->     [$fol| exists $x. $p |] -> List.any (\a -> holds m (Map.insert x a v) p) domain
+>     [$form| ⊥ |] -> False
+>     [$form| ⊤ |] -> True
+>     Atom (R r args) -> f r (map (termval m v) args)
+>     [$form| ¬ $p |] -> not(holds m v p)
+>     [$form| $p ∧ $q |] -> holds m v p && holds m v q
+>     [$form| $p ∨ $q |] -> holds m v p || holds m v q
+>     [$form| $p ⊃ $q |] -> not (holds m v p) || holds m v q
+>     [$form| $p ⇔ $q |] -> holds m v p == holds m v q
+>     [$form| ∀ $x. $p |] -> List.all (\a -> holds m (Map.insert x a v) p) domain
+>     [$form| exists $x. $p |] -> List.any (\a -> holds m (Map.insert x a v) p) domain
 

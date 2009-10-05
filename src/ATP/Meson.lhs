@@ -1,38 +1,45 @@
 
 MESON: Model Elimination Subgoal OrieNted
 
-> module Meson ( mexpand
->              , contrapositives
->              , basicMeson
->              , meson
->              ) where
-                        
-> import Prelude 
-> import qualified List
-> import qualified Maybe
-> import qualified Data.Map as M
+* Signature
 
-> import qualified Lib
-> import qualified ListSet
-> import ListSet((\\))
-> import qualified Formulas as F
-> import Formulas(Formula(..), Clause)
-> import qualified Prop
-> import qualified Fol
-> import Fol(Fol, Env)
-> import qualified Skolem
-> import Tableaux
-> import qualified Prolog
-> import Prolog(Rule(Rule))
+> module ATP.Meson
+>   ( mexpand
+>   , contrapositives
+>   , basicMeson
+>   , meson
+>   )
+> where
+  
+* Imports
+                      
+> import Prelude 
+> import qualified Data.List as List
+> import qualified Data.Maybe as Maybe
+> import qualified Data.Map as Map
+
+> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.ListSet as Set
+> import ATP.Util.ListSet((\\))
+> import ATP.FormulaSyn
+> import qualified ATP.Formula as F
+> import qualified ATP.Prop as Prop
+> import qualified ATP.FOL as FOL
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Tableaux as Tableaux
+> import qualified ATP.Prolog as Prolog
+> import ATP.Prolog(Rule(Rule))
+
+* MESON
 
 We start with a function to map a clause into all its contrapositives. In line
 with the discussion above, we only create an additional rule with Bot as the
 conclusion if the original clause is all-negative:
 
-> contrapositives :: Clause Fol -> [Rule]
+> contrapositives :: Clause -> [Rule]
 > contrapositives cls = 
->   let base = map (\c -> Rule (map F.opp (cls \\ [c]), c)) cls in
->   if all F.negative cls then Rule (map F.opp cls, Bot) : base else base
+>   let base = map (\c -> Rule (map F.opp (cls \\ [c])) c) cls in
+>   if all F.negative cls then Rule (map F.opp cls) Bot : base else base
 
 The main implementation is not far from Prolog, but to make later
 extensions easier we use the current goal g and a continuation
@@ -55,7 +62,7 @@ results of unification, decreasing the permissible number of new nodes
 by the number of new subgoals created, and appropriately increasing
 the variable renaming counter.
 
-> basicMexpand :: [Rule] -> [Formula Fol] -> Formula Fol 
+> basicMexpand :: [Rule] -> [Formula] -> Formula 
 >         -> ((Env, Int, Int) -> Maybe a) -> (Env, Int, Int) -> Maybe a
 > basicMexpand rules ancestors g cont (env, n, k) =
 >   if n < 0 then fail "Too deep"  else
@@ -65,7 +72,7 @@ the variable renaming counter.
 >     Just env' -> Just env'
 >     Nothing -> 
 >       let findFn2 rule = 
->             let (Rule(asm, c), k') = Prolog.renamer k rule in
+>             let (Rule asm c, k') = Prolog.renamer k rule in
 >             do env' <- Tableaux.unifyLiterals env (g,c)
 >                foldr (basicMexpand rules (g:ancestors)) 
 >                  cont asm (env', n - length asm, k') in
@@ -77,19 +84,19 @@ subproblems as much as possible. This is particularly worthwhile here
 when we reduce the problem to clausal form, since otherwise the
 translated form often becomes significantly more complicated.
 
-> pureBasicMeson :: Formula Fol -> IO Int
+> pureBasicMeson :: Formula -> IO Int
 > pureBasicMeson fm = 
 >   let cls = Prop.simpcnf $ Skolem.specialize $ Skolem.pnf fm 
 >       rules = concat (map contrapositives cls) in
->   Tableaux.deepen (\n -> do basicMexpand rules [] Bot Just (M.empty, n, 0) 
+>   Tableaux.deepen (\n -> do basicMexpand rules [] Bot Just (Map.empty, n, 0) 
 >                             return n) 0
 
 The overall function starts with the usual generalization, negation and
 Skolemization, then attempts to refute the clauses using MESON:
 
-> basicMeson :: Formula Fol -> IO [Int]
+> basicMeson :: Formula -> IO [Int]
 > basicMeson fm = 
->   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
+>   let fm1 = Skolem.askolemize $ Not $ FOL.generalize fm in
 >   mapM (pureBasicMeson . F.listConj) (Prop.simpdnf fm1)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -105,7 +112,7 @@ are identical under an existing set of assignments. Rather than code
 it explicitly, we can simply call the unification function and see
 that no additional assignments are returned.
 
-> equal :: Env -> Formula Fol -> Formula Fol -> Bool
+> equal :: Env -> Formula -> Formula -> Bool
 > equal env fm1 fm2 = 
 >   case Tableaux.unifyLiterals env (fm1, fm2) of
 >     Nothing -> False
@@ -139,8 +146,8 @@ goals2 with whatever is left over from goals1 plus an additional n2,
 yet force the continuation to fail unless the second takes more than
 n3.
 
-> expand2 :: ([Formula Fol] -> ((Env, Int, Int) -> Maybe a) -> (Env, Int, Int) -> Maybe a) 
->         -> [Formula Fol] -> Int -> [Formula Fol] -> Int -> Int 
+> expand2 :: ([Formula] -> ((Env, Int, Int) -> Maybe a) -> (Env, Int, Int) -> Maybe a) 
+>         -> [Formula] -> Int -> [Formula] -> Int -> Int 
 >         -> ((Env, Int, Int) -> Maybe a) -> Env -> Int -> Maybe a
 > expand2 expfn goals1 n1 goals2 n2 n3 cont env k =
 >   expfn goals1 (\(e1,r1,k1) ->
@@ -162,7 +169,7 @@ and an attempt at ancestor unification, though it also makes a
 repetition check using equal. However, when expanding using a rule,
 control is then passed to mexpands to deal with the multiple subgoals.
 
-> mexpand ::  [Rule] -> [Formula Fol] -> Formula Fol
+> mexpand ::  [Rule] -> [Formula] -> Formula
 >         -> ((Env, Int, Int) -> Maybe a) -> (Env, Int, Int) -> Maybe a
 > mexpand rules ancestors g cont (env,n,k) =
 >   if n < 0 then fail "Too deep"
@@ -171,7 +178,7 @@ control is then passed to mexpands to deal with the multiple subgoals.
 >                                cont (env' ,n, k)) ancestors of
 >     Just e -> Just e
 >     Nothing -> Lib.findApply findFn rules
->         where findFn r = let (Rule (asm,c),k') = Prolog.renamer k r in
+>         where findFn r = let (Rule asm c, k') = Prolog.renamer k r in
 >                          do env' <- Tableaux.unifyLiterals env (g,c)
 >                             mexpands rules (g:ancestors) asm cont 
 >                                      (env',n-length asm,k')
@@ -186,7 +193,7 @@ the remainder plus n2, with no lower limit (hence the -1), and if that fails,
 try it the other way round, this time imposing a lower limit n1 to avoid
 running the continuation twice.
 
-> mexpands :: [Rule] -> [Formula Fol] -> [Formula Fol] 
+> mexpands :: [Rule] -> [Formula] -> [Formula] 
 >          -> ((Env, Int, Int) -> Maybe a) -> (Env, Int, Int) -> Maybe a
 > mexpands rules ancestors gs cont (env,n,k) =
 >   if n < 0 then fail "Too deep" else
@@ -200,14 +207,14 @@ running the continuation twice.
 >     Just e -> Just e
 >     Nothing -> expfn goals2 n1 goals1 n2 n1 cont env k
 
-> pureMeson :: Formula Fol -> IO Int
+> pureMeson :: Formula -> IO Int
 > pureMeson fm = 
 >   let cls = Prop.simpcnf $ Skolem.specialize $ Skolem.pnf fm 
 >       rules = concat (map contrapositives cls) in
->   Tableaux.deepen (\n -> do mexpand rules [] Bot Just (M.empty, n, 0) 
+>   Tableaux.deepen (\n -> do mexpand rules [] Bot Just (Map.empty, n, 0) 
 >                             return n) 0
 
-> meson :: Formula Fol -> IO [Int]
+> meson :: Formula -> IO [Int]
 > meson fm = 
->   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
+>   let fm1 = Skolem.askolemize $ Not $ FOL.generalize fm in
 >   mapM (pureMeson . F.listConj) (Prop.simpdnf fm1)

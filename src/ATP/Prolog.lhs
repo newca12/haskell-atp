@@ -1,63 +1,41 @@
 
-> module Prolog ( Rule(..)
->               , renamer
->               , hornprove
->               , simpleprolog
->               , prolog
->               ) where
-                        
+* Signature
+
+> module ATP.Prolog
+>   ( Rule(..)
+>   , renamer
+>   , hornprove
+>   , simpleprolog
+>   , prolog
+>   )
+> where
+  
+* Imports
+                      
 > import Prelude 
 > import qualified Data.List as List
 > import qualified Data.Maybe as Maybe
 > import qualified Data.Map as Map
 
-Parsing 
+> import qualified ATP.Util.Lex as Lex
+> import qualified ATP.Util.Parse as P
+> import ATP.Util.Parse (Parse, Parser, parser)
+> import qualified ATP.Util.Print as PP
+> import ATP.Util.Print(Pretty, pPrint, (<+>), (<>)) 
 
-> import qualified Lex
-> import qualified Text.ParserCombinators.Parsec as P
-> import Text.ParserCombinators.Parsec (Parser, (<|>), (<?>))
-> import qualified Text.ParserCombinators.Parsec.Expr as E
+> import qualified ATP.Util.Lib as Lib
+> import ATP.FormulaSyn
+> import qualified ATP.Formula as F
+> import qualified ATP.Prop as Prop
+> import qualified ATP.FOL as FOL
+> import ATP.FOL(Env)
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Unif as Unif
+> import qualified ATP.Tableaux as Tableaux
 
-Printing 
+* Prolog
 
-> import qualified Text.PrettyPrint.HughesPJ as PP
-> import Text.PrettyPrint.HughesPJClass( (<+>), (<>) ) 
-
-> import qualified Lib
-> import FormulaSyn
-> import qualified Formula as F
-> import qualified Prop
-> import qualified Fol
-> import Fol(Env)
-> import qualified Skolem
-> import qualified Unif
-> import qualified Tableaux
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Rules
-
-> newtype Rule = Rule ([Formula], Formula) 
-
-Parsing
-
-> parseRule :: Parser Rule
-> parseRule s = 
->   do (c, rest) <- Parse.readt s 
->      (asm, rest1) <- if rest /= [] && head rest == ":-" 
->                      then Parse.list "," Parse.readt (tail rest)
->                      else Just ([], rest) 
->      return (Rule (asm, c), rest1)
-
-Printing
-
-> instance Pretty Rule where
->   pPrint = ppRule
-
-> ppRule :: Rule -> PP.Doc
-> ppRule (Rule([],f)) = Print.pp f <> PP.text "."
-> ppRule (Rule(fs,f)) =
->   Print.pp f <+> PP.text ":-" 
->   <+> PP.cat (PP.punctuate PP.comma (map Print.pp fs)) <> PP.text "."
+> data Rule = Rule [Formula] Formula
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Backchaining
@@ -75,13 +53,13 @@ _k, returning both the modified formula and a new index that can be
 used next time.
 
 > renamer :: Int -> Rule -> (Rule, Int)
-> renamer k (Rule (asm, c)) = 
->   let fvs = Fol.fv $ F.listConj $ c:asm
+> renamer k (Rule asm c) = 
+>   let fvs = FOL.fv $ F.listConj $ c:asm
 >       n = length fvs
->       vvs = map (\n -> Var ("_" ++ show n)) [k .. k+n-1]
+>       vvs = map (\m -> Var ("_" ++ show m)) [k .. k+n-1]
 >       inst :: Formula -> Formula 
->       inst = Fol.apply $ Map.fromList (zip fvs vvs) in
->   (Rule (map inst asm, inst c), k+n)
+>       inst = FOL.apply $ Map.fromList (zip fvs vvs) in
+>   (Rule (map inst asm) (inst c), k+n)
 >       
 
 The core function backchain organizes the backward chaining with
@@ -100,7 +78,7 @@ instantiation.
 >   g:gs -> 
 >     if n == 0 then Nothing else Lib.findApply findFn rules
 >       where findFn rule = 
->               let (Rule (a,c),k') = renamer k rule in
+>               let (Rule a c, k') = renamer k rule in
 >               do env' <- Tableaux.unifyLiterals env (c,g) 
 >                  backchain rules (n-1) k' env' (a ++ gs)
 
@@ -112,7 +90,7 @@ to turn a Horn clause into a definite clause, but just use Bot directly:
 > hornify cls = 
 >   let (pos, neg) = List.partition F.positive cls in
 >   if length pos > 1 then Nothing
->   else Just $ Rule (map F.opp neg, if pos == [] then Bot else head pos)
+>   else Just $ Rule (map F.opp neg) (if pos == [] then Bot else head pos)
 
 As with the tableau provers, we now simply need to iteratively increase
 the proof size bound n until a proof is found. As well as the instantiations,
@@ -121,13 +99,15 @@ the necessary size bound is returned.
 > hornprove :: Formula -> IO (Env, Int)
 > hornprove fm = 
 >   let rules = map hornify (Prop.simpcnf $ Skolem.skolemize 
->                            $ Not $ Fol.generalize fm) 
+>                            $ Not $ FOL.generalize fm) 
 >       rules' = if any (not . Maybe.isJust) rules 
 >                then error "clause not horn" else map Maybe.fromJust rules 
 >       tabFn n = case backchain rules' n 0 Map.empty [Bot] of
 >                   Nothing -> Nothing
 >                   Just env -> Just (env, n) in
 >   Tableaux.deepen tabFn 0
+
+* Prolog
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Prolog
@@ -140,7 +120,7 @@ zero, and this will never happen (at least, not until integer wraparound
 occurs).
 
 > simpleprolog :: [String] -> String -> Maybe Env
-> simpleprolog rules gl = simpleprolog' (map Parse.parse rules) (Parse.parse gl)
+> simpleprolog rules gl = simpleprolog' (map P.parse rules) (P.parse gl)
 
 > simpleprolog' :: [Rule] -> Formula -> Maybe Env
 > simpleprolog' rules gl = backchain rules (-1) 0 Map.empty [gl]
@@ -159,7 +139,7 @@ which are equally general) will be derivable by reading the equations
 left-to-right. Thus we can modify the interpreter:
 
 > prolog :: [String] -> String -> Maybe [Formula]
-> prolog rules gl = prolog' (map Parse.parse rules) (Parse.parse gl)
+> prolog rules gl = prolog' (map P.parse rules) (P.parse gl)
 
 > prolog' :: [Rule] -> Formula -> Maybe [Formula]
 > prolog' rules gl = 
@@ -167,5 +147,29 @@ left-to-right. Thus we can modify the interpreter:
 >                        return $ Atom(R "=" [Var x, t]) in
 >   do env1 <- simpleprolog' rules gl
 >      env2 <- Unif.solve env1
->      mapM (mapFn env2) (Fol.fv gl)
+>      mapM (mapFn env2) (FOL.fv gl)
 
+* Parsing
+
+> instance Parse Rule where
+>   parser = parseRule
+
+> parseRule :: Parser Rule
+> parseRule = 
+>   do f <- parser
+>      fs <- P.option [] $ do
+>             Lex.reservedOp ":-"
+>             P.commas parser
+>      Lex.symbol "."
+>      return $ Rule fs f
+
+* Printing
+
+> instance Pretty Rule where
+>   pPrint = pp
+
+> pp :: Rule -> PP.Doc
+> pp (Rule [] f) = pPrint f <> PP.text "."
+> pp (Rule fs f) =
+>   pPrint f <+> PP.text ":-" 
+>   <+> PP.cat (PP.punctuate PP.comma (map pPrint fs)) <> PP.text "."

@@ -1,29 +1,38 @@
 
-> module Interpolation
->   where
+* Signature
+
+> module ATP.Interpolation
+>   ( interpolate
+>   , einterpolate
+>   ) 
+> where
+
+* Imports
 
 > import Prelude 
-> import qualified List
+> import qualified Data.List as List
 > import qualified Data.Map as Map
-> import qualified ListSet
-> import ListSet((\\))
-> import qualified Lib
-> import Lib((|=>))
-> import qualified Formulas as F
-> import Formulas(Formula(..), (/\), (\/), Sym)
-> import qualified Fol
-> import Fol(Fol(R), Term(..))
-> import qualified Skolem
-> import qualified Order
-> import qualified Prop
-> import qualified Herbrand
-> import qualified EqElim
-> import qualified DefCnf
-> import qualified Equal
 
-> pinterpolate :: Ord a => Formula a -> Formula a -> Formula a
+> import qualified ATP.Util.ListSet as Set
+> import ATP.Util.ListSet((\\))
+> import qualified ATP.Util.Lib as Lib
+> import ATP.Util.Lib((⟾))
+> import ATP.FormulaSyn
+> import qualified ATP.Formula as F
+> import qualified ATP.FOL as FOL
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Order as Order
+> import qualified ATP.Prop as Prop
+> import qualified ATP.Herbrand as Herbrand
+> import qualified ATP.EqElim as EqElim
+> import qualified ATP.DefCNF as CNF
+> import qualified ATP.Equal as Equal
+
+* Interpolation
+
+> pinterpolate :: Formula -> Formula -> Formula
 > pinterpolate p q = 
->   let orify a r = Prop.apply (a |=> Bot) r \/ Prop.apply (a |=> Top) r in
+>   let orify a r = Prop.apply (a ⟾ (⊥)) r ∨ Prop.apply (a ⟾ (⊤)) r in
 >   Prop.simplify $ foldr orify p (Prop.atoms p \\ Prop.atoms q)
 
 Again we can express the proof as an algorithm, for simplicity using the 
@@ -31,52 +40,52 @@ Davis-Putnam procedure from section 3.8 to ﬁnd the set of ground instances.
 (This will usually loop indeﬁnitely unless the user does indeed supply for- 
 mulas p and q such that |= p ∧ q ⇒ ⊥.) 
 
-> urinterpolate :: Formula Fol -> Formula Fol -> IO (Formula Fol)
+> urinterpolate :: Formula -> Formula -> IO (Formula)
 > urinterpolate p q = 
->   let fm = Skolem.specialize $ Skolem.prenex $ p /\ q
->       fvs = Fol.fv fm
+>   let fm = Skolem.specialize $ Skolem.prenex $ p ∧ q
+>       fvs = FOL.fv fm
 >       (consts, funcs) = Herbrand.herbfuns fm
 >       cntms = map (\(c, _) -> Fn c []) consts in
 >   do tups <- Herbrand.dpRefineLoop (Prop.simpcnf fm) cntms funcs fvs 0 [] [] []
->      let fmis = map (\tup -> Fol.apply (Map.fromList (zip fvs tup)) fm) tups
+>      let fmis = map (\tup -> FOL.apply (Map.fromList (zip fvs tup)) fm) tups
 >          (ps, qs) = List.unzip (map (\(And p q) -> (p,q)) fmis) 
->      return $ pinterpolate (F.listConj(ListSet.setify ps)) (F.listConj(ListSet.setify qs))
+>      return $ pinterpolate (F.listConj(Set.setify ps)) (F.listConj(Set.setify qs))
 
  To turn this into an algorithm we 
 ﬁrst deﬁne a function to obtain all the topmost terms whose head function 
 is in the list fns, ﬁrst for terms:
 
-> toptermt :: [(Sym, Int)] -> Term -> [Term]
+> toptermt :: [(Pred, Int)] -> Term -> [Term]
 > toptermt _ (Var _) = []
 > toptermt fns (tm @ (Fn f args)) = if elem (f, length args) fns then [tm]
->                            else ListSet.unions (map (toptermt fns) args)
+>                            else Set.unions (map (toptermt fns) args)
 
 and then for formulas: 
 
-> topterms :: [(Sym, Int)] -> Formula Fol -> [Term]
-> topterms fns = F.atomUnion (\(R _ args) -> ListSet.unions (map (toptermt fns) args))
+> topterms :: [(Pred, Int)] -> Formula -> [Term]
+> topterms fns = F.atomUnion (\(R _ args) -> Set.unions (map (toptermt fns) args))
 
 For the main algorithm, we ﬁnd the pre-interpolant using urinterpolate, 
 ﬁnd the top terms in it starting with non-shared function symbols, sort them 
 in decreasing order of size (so no earlier one is a subterm of a later one), 
 then iteratively replace them by quantiﬁed variables. 
 
-> uinterpolate :: Formula Fol -> Formula Fol -> IO (Formula Fol)
+> uinterpolate :: Formula -> Formula -> IO (Formula)
 > uinterpolate p q = 
->   let fp = Fol.functions p
->       fq = Fol.functions q
+>   let fp = FOL.functions p
+>       fq = FOL.functions q
 >       simpinter tms n c = 
 >         case tms of
 >           [] -> c
 >           (tm @ (Fn f args) : otms) -> 
 >             let v = "v_" ++ show n
->                 c' = EqElim.replace (tm |=> Var v) c
+>                 c' = EqElim.replace (tm ⟾ Var v) c
 >                 c'' = if elem (f, length args) fp 
->                       then Exists v c' else Forall v c' in
+>                       then (∃) v c' else (¥) v c' in
 >             simpinter otms (n+1::Int) c'' 
 >           _ -> error "Impossible" in
 >   do c <- urinterpolate p q 
->      let tts = topterms (ListSet.union (fp \\ fq) (fq \\ fp)) c
+>      let tts = topterms (Set.union (fp \\ fq) (fq \\ fp)) c
 >          tms = List.sortBy (Lib.decreasing Order.termSize) tts 
 >      return $ simpinter tms 1 c
 
@@ -110,11 +119,11 @@ assures us that
 |= p ⇒ c and |= q ⇒ ¬c, and it is also an interpolant for the 
 original formulas. This is realized in the following algorithm:      
 
-> cinterpolate :: Formula Fol -> Formula Fol -> IO (Formula Fol)
+> cinterpolate :: Formula -> Formula -> IO (Formula)
 > cinterpolate p q = 
->   let fm = Skolem.nnf (p /\ q)
->       efm = F.listExists (Fol.fv fm) fm
->       fns = map fst (Fol.functions fm)
+>   let fm = Skolem.nnf (p ∧ q)
+>       efm = F.listExists (FOL.fv fm) fm
+>       fns = map fst (FOL.functions fm)
 >       (And p' q', _) = Skolem.skolem efm fns in
 >   uinterpolate p' q'
 
@@ -124,11 +133,11 @@ that we need to replace them by variables again in the ﬁnal result to respect
 the conditions for an interpolant. We elect to ‘manually’ replace the common 
 variables by new constants c i and then restore them afterwards.
 
-> interpolate :: Formula Fol -> Formula Fol -> IO (Formula Fol)
+> interpolate :: Formula -> Formula -> IO (Formula)
 > interpolate p q =
->   let vs = map Var (ListSet.intersect (Fol.fv p) (Fol.fv q))
->       fns = Fol.functions (p /\ q)
->       n = foldr (DefCnf.maxVarIndex "c_" . fst) 0 fns + 1
+>   let vs = map Var (Set.intersect (FOL.fv p) (FOL.fv q))
+>       fns = FOL.functions (p ∧ q)
+>       n = foldr (CNF.maxVarIndex "c_" . fst) 0 fns + 1
 >       cs = map (\i -> Fn ("c_" ++ show i) []) [n .. n + length vs - 1]
 >       fn_vc = Map.fromList (zip vs cs)
 >       fn_cv = Map.fromList (zip cs vs)
@@ -150,10 +159,10 @@ formulas and possibly the equality sign. To implement this, we can extract
 the equality axioms from equalitize (which is designed for validity-proving 
 and hence adjoins them as hypotheses): 
 
-> einterpolate :: Formula Fol -> Formula Fol -> IO (Formula Fol)
+> einterpolate :: Formula -> Formula -> IO (Formula)
 > einterpolate p q =
 >   let p' = Equal.equalitize p
 >       q' = Equal.equalitize q
->       p'' = if p == p' then p else fst(F.destImp p') /\ p
->       q'' = if q == q' then q else fst(F.destImp q') /\ q in
+>       p'' = if p == p' then p else fst(F.destImp p') ∧ p
+>       q'' = if q == q' then q else fst(F.destImp q') ∧ q in
 >   interpolate p'' q''

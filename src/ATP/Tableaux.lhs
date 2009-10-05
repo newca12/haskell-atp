@@ -1,26 +1,34 @@
 
-> module Tableaux ( unifyLiterals
->                 , deepen
->                 , prawitz
->                 , tab
->                 , splittab
->                 ) where
+* Signature
+
+> module ATP.Tableaux
+>   ( unifyLiterals
+>   , deepen
+>   , prawitz
+>   , tab
+>   , splittab
+>   )
+> where
+
+* Imports
 
 > import Prelude 
 > import qualified List 
 > import qualified Data.Map as Map
 > import Text.Printf(printf)
 
-> import qualified Lib 
-> import Lib((|=>))
-> import qualified ListSet
-> import FormulaSyn
-> import qualified Formula as F
-> import qualified Prop 
-> import qualified Fol
-> import Fol(Env)
-> import qualified Skolem
-> import qualified Unif
+> import qualified ATP.Util.Lib as Lib
+> import ATP.Util.Lib((⟾))
+> import qualified ATP.Util.ListSet as Set
+> import ATP.FormulaSyn
+> import qualified ATP.Formula as F
+> import qualified ATP.Prop as Prop
+> import qualified ATP.FOL as FOL
+> import ATP.FOL(Env)
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Unif as Unif
+
+* Tableaux
 
 We will maintain the environment of variable assignments globally,
 represented as a cycle-free finite partial function just as in unify
@@ -78,15 +86,15 @@ procedure accordingly.
 >   let l = length fvs
 >       newvars = map (\k -> Var ("_" ++ show (n * l + k))) [1 .. l]
 >       inst = Map.fromList (zip fvs newvars)
->       djs1 = Prop.distrib (ListSet.image (ListSet.image (Fol.apply inst)) djs0) djs in
+>       djs1 = Prop.distrib (Set.image (Set.image (FOL.apply inst)) djs0) djs in
 >   case unifyRefute djs1 Map.empty of
 >     Just env -> Just (env, n+1)
 >     Nothing -> prawitzLoop djs0 fvs djs1 (n+1)
 
 > prawitz :: Formula -> Maybe Int
 > prawitz fm = 
->   let fm0 = Skolem.skolemize $ Not $ Fol.generalize fm in
->   case prawitzLoop (Prop.simpdnf fm0) (Fol.fv fm0) [[]] 0 of
+>   let fm0 = Skolem.skolemize $ Not $ FOL.generalize fm in
+>   case prawitzLoop (Prop.simpdnf fm0) (FOL.fv fm0) [[]] 0 of
 >     Nothing -> Nothing
 >     Just (_, n) -> Just n
 
@@ -138,7 +146,7 @@ refutations.
 >     Or p q : unexp -> tableau (p:unexp, lits, n) (tableau (q:unexp, lits, n) cont) (env, k)
 >     fm @ (All x p) : unexp -> 
 >            let y = Var("_" ++ show k) 
->                p' = Fol.apply (x |=> y)  p in
+>                p' = FOL.apply (x ⟾ y)  p in
 >                     tableau (p':unexp ++ [fm], lits, n-1) cont (env, k+1)
 >     fm:unexp -> 
 >       let findFn l = do env' <- unifyComplements env (fm,l) 
@@ -161,9 +169,9 @@ refutations.
 
 > tab :: Formula -> IO Int
 > tab fm = 
->   let sfm = Skolem.askolemize $ Not $ Fol.generalize fm in
+>   let sfm = Skolem.askolemize $ Not $ FOL.generalize fm in
 >   if sfm == Bot then return 0 else tabrefute [sfm]
 
 > splittab :: Formula -> IO [Int]
 > splittab = mapM tabrefute . Prop.simpdnf . Skolem.askolemize 
->            . Not . Fol.generalize
+>            . Not . FOL.generalize

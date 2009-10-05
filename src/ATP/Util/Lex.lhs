@@ -47,6 +47,7 @@ Use the Haskell lexer for identifier conventions.
 >                         , "~", "¬"
 >                         , "::", "+", "-", "*", "/", "^"
 >                         , "=", "<", "<=", "≤", ">", ">=", "≥" 
+>                         , ":-"
 >                         ] 
 >   , L.reservedNames = [ "true", "⊤"
 >                       , "false", "⊥"

@@ -1,14 +1,22 @@
 
-> module Order ( earlier
->              , termSize
->              , lpoGt
->              , lpoGe
->              , weight
->              ) where
-                        
+* Signature
+
+> module ATP.Order 
+>   ( earlier
+>   , termSize
+>   , lpoGt
+>   , lpoGe
+>   , weight
+>   )
+> where
+
+* Imports
+
 > import Prelude 
-> import FormulaSyn
-> import qualified Fol
+> import ATP.FormulaSyn
+> import qualified ATP.FOL as FOL
+
+* Order
 
 > termSize :: Term -> Int
 > termSize (Var _) = 1
@@ -23,7 +31,7 @@
 > lpoGt :: ((String, Int) -> (String, Int) -> Bool) -> Term -> Term -> Bool
 > lpoGt w s t = 
 >   case (s, t) of 
->     (_, Var x) -> not(s == t) && elem x (Fol.fv s)
+>     (_, Var x) -> not(s == t) && elem x (FOL.fv s)
 >     (Fn f fargs, Fn g gargs) -> 
 >       any (\si -> lpoGe w si t) fargs ||
 >       all (lpoGt w s) gargs &&

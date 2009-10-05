@@ -1,26 +1,33 @@
 
 Rewriting
 
-> module Rewrite ( rewrite,
->                ) where
+* Signature
+
+> module ATP.Rewrite
+>   ( rewrite )
+> where
+
+* Imports
 
 > import Prelude 
 > import qualified Data.Map as Map
-> import Formulas(Formula(..))
-> import qualified Fol
-> import Fol(Fol(..), Term(..))
-> import qualified Resolution
+
+> import ATP.FormulaSyn
+> import qualified ATP.FOL as FOL
+> import qualified ATP.Resolution as Resolution
+
+* Rewriting
 
 To rewrite a term t at the top level with an equation l = r we just attempt
 to match l to t and apply the corresponding instantiation to r; the following
 does this with the first in a list of equations to succeed:
 
-> rewrite1 :: [Formula Fol] -> Term -> Maybe Term
+> rewrite1 :: [Formula] -> Term -> Maybe Term
 > rewrite1 eqs t = case eqs of
 >   Atom(R "=" [l,r]):oeqs -> 
 >     case Resolution.termMatch Map.empty [(l,t)] of
 >       Nothing -> rewrite1 oeqs t
->       Just env -> Just $ Fol.apply env r
+>       Just env -> Just $ FOL.apply env r
 >   _ -> Nothing
 
 Our interest is in rewriting at all subterms, and repeatedly, to normalize a
@@ -36,7 +43,7 @@ rewritten is always preferred, and thereafter the first applicable equation in
 the list of rewrites. Alternative strategies such as choosing the innermost
 rewritable subterm would work equally well in our applications.
 
-> rewrite :: [Formula Fol] -> Term -> Term
+> rewrite :: [Formula] -> Term -> Term
 > rewrite eqs tm = 
 >   case rewrite1 eqs tm of
 >     Just tm' -> rewrite eqs tm'
