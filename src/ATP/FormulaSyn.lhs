@@ -405,8 +405,8 @@ Formulas
 > ppPrefixFm pr sym p = PP.text sym <> ppForm pr p
 
 > ppInfixFm :: Int -> String -> Formula -> Formula -> PP.Doc
-> ppInfixFm pr sym p q = PP.sep[PP.hsep[ppForm (pr+1) p, PP.text sym], 
->                               ppForm pr q] 
+> ppInfixFm pr sym p q = PP.sep [ PP.hsep[ppForm (pr+1) p, PP.text sym]
+>                               , ppForm pr q ]
 
 > ppQuant :: String -> (Vars, Formula) -> PP.Doc
 > ppQuant name (bvs, bod) = 

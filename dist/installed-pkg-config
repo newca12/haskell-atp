@@ -1,0 +1,39 @@
+name: ATP
+version: 1.0.0
+license: AllRightsReserved
+copyright:
+maintainer: Sean McLaughlin <seanmcl@gmail.com>
+stability:
+homepage:
+package-url:
+description: Haskell theorem proving algorithms.
+category: Theorem provers
+author: Sean McLaughlin <seanmcl@gmail.com>
+exposed: True
+exposed-modules: ATP.Util.Lib ATP.Util.ListSet ATP.Util.Lex
+                 ATP.Util.Parse ATP.Util.Print ATP.IntroSyn ATP.Intro ATP.FormulaSyn
+                 ATP.Formula ATP.Prop ATP.PropExamples ATP.DefCNF ATP.FOL ATP.DP
+                 ATP.Skolem ATP.Herbrand ATP.Unif ATP.Tableaux ATP.Resolution
+                 ATP.Prolog ATP.Meson ATP.Equal ATP.Cong ATP.Rewrite ATP.Order
+                 ATP.Completion ATP.EqElim ATP.Paramodulation ATP.Decidable
+                 ATP.Qelim ATP.Cooper ATP.Complex ATP.Real ATP.Grobner ATP.Geom
+                 ATP.Interpolation ATP.Combining ATP.TestFormulas
+hidden-modules:
+import-dirs: /Users/sean/.cabal/lib/ATP-1.0.0/ghc-6.10.4
+library-dirs: /Users/sean/.cabal/lib/ATP-1.0.0/ghc-6.10.4
+hs-libraries: HSATP-1.0.0
+extra-libraries:
+extra-ghci-libraries:
+include-dirs:
+includes:
+depends: HUnit-1.2.2.0 QuickCheck-2.1.0.2 base-4.1.0.0
+         containers-0.2.0.1 haskell98-1.0.1.0 hslogger-1.0.7 mtl-1.1.0.2
+         parsec-2.1.0.1 pretty-1.0.1.0 syb-0.1.0.1 template-haskell-2.3.0.1
+         utf8-string-0.3.5
+hugs-options:
+cc-options:
+ld-options:
+framework-dirs:
+frameworks:
+haddock-interfaces: /Users/sean/.cabal/share/doc/ATP-1.0.0/html/ATP.haddock
+haddock-html: /Users/sean/.cabal/share/doc/ATP-1.0.0/html

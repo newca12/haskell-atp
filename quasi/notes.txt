@@ -1,4 +1,0 @@
-
-John never uses vs
-
-parse_formula (ifn,afn) vs inp

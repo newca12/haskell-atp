@@ -44,11 +44,11 @@
 >           case f of
 >             Atom _ -> afn vars f
 >             Not p -> Not $ qelift vars p
->             And p q -> And (qelift vars p) (qelift vars q)
->             Or p q -> Or (qelift vars p) (qelift vars q)
->             Imp p q -> Imp (qelift vars p) (qelift vars q)
->             Iff p q -> Iff (qelift vars p) (qelift vars q)
->             All x p -> Not (qelift vars (Ex x (Not p)))
+>             And p q -> qelift vars p ∧ qelift vars q
+>             Or p q -> qelift vars p ∨ qelift vars q
+>             Imp p q -> qelift vars p ⊃ qelift vars q
+>             Iff p q -> qelift vars p ⇔ qelift vars q
+>             All x p -> (¬) $ qelift vars $ (∃) x $ (¬) p
 >             Ex x p -> let djs = F.disjuncts $ nfn $ qelift (x:vars) p in
 >                           F.listDisj (map (qelim (qfn vars) x) djs)
 >             _ -> f 

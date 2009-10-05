@@ -36,6 +36,9 @@
 > one :: Term
 > one = fromInteger 1
 
+> termInteger :: Integer -> Term
+> termInteger n = Fn (show n) []
+
 > rati :: Rational -> Integer
 > rati x = if Ratio.denominator x == 1 
 >          then toInteger (Ratio.numerator x)
@@ -54,10 +57,10 @@
 > isNumeral _ = False
 
 > numeral1 :: (Rational -> Rational) -> Term -> Term
-> numeral1 fn = fromRational . fn . destNumeral
+> numeral1 fn = flip Fn [] . show . fn . destNumeral
 
 > numeral2 :: (Rational -> Rational -> Rational) -> Term -> Term -> Term
-> numeral2 fn m n = fromRational $ fn (destNumeral m) (destNumeral n)
+> numeral2 fn m n = Fn (show $ fn (destNumeral m) (destNumeral n)) []
 
 > linearCmul :: Rational -> Term -> Term
 > linearCmul n tm = if n == 0 then zero else 
@@ -212,9 +215,9 @@
 >       bs = bset x p
 >       js = [1 .. divlcm x p]
 >       p_element j b =
->         linrep vars x (linearAdd vars b (fromInteger j)) p 
+>         linrep vars x (linearAdd vars b (termInteger j)) p 
 >       stage j = F.listDisj
->         (linrep vars x (fromInteger j) p_inf :
+>         (linrep vars x (termInteger j) p_inf :
 >          map (p_element j) bs) in
 >   F.listDisj (map stage js)
 > cooper _ _ = error "cooper: not an existential formula"

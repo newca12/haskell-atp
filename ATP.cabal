@@ -17,6 +17,58 @@ tested-with:    GHC == 6.10.4
 
 extra-source-files: README LICENSE
 
+library
+
+  hs-source-dirs: src
+
+  exposed-modules: ATP.Util.Lib
+                   ATP.Util.ListSet
+                   ATP.Util.Lex
+                   ATP.Util.Parse
+                   ATP.Util.Print
+                   ATP.IntroSyn
+                   ATP.Intro
+                   ATP.FormulaSyn
+                   ATP.Formula
+                   ATP.Prop
+                   ATP.PropExamples
+                   ATP.DefCNF
+                   ATP.FOL
+                   ATP.DP
+                   ATP.Skolem
+                   ATP.Herbrand
+                   ATP.Unif
+                   ATP.Tableaux
+                   ATP.Resolution
+                   ATP.Prolog
+                   ATP.Meson
+                   ATP.Equal
+                   ATP.Cong
+                   ATP.Rewrite
+                   ATP.Order
+                   ATP.Completion
+                   ATP.EqElim
+                   ATP.Paramodulation
+                   ATP.Decidable
+                   ATP.Qelim
+                   ATP.Cooper
+                   ATP.Complex
+                   ATP.Real
+                   ATP.Grobner
+                   ATP.Geom
+                   ATP.Interpolation
+                   ATP.Combining
+                   ATP.TestFormulas
+
+  extensions:    MultiParamTypeClasses
+                 ScopedTypeVariables
+                 TypeSynonymInstances
+                 OverlappingInstances
+                 FlexibleInstances
+                 DeriveDataTypeable
+                 TemplateHaskell
+                 QuasiQuotes
+
 executable atp
 
   main-is:       Main.lhs
@@ -42,7 +94,8 @@ executable atp
                   pretty,
                   QuickCheck >= 2.1.0.0,
                   template-haskell,
-                  syb
+                  syb,
+                  hslogger >= 1.0.7
 
   ghc-options: -Wall 
                -- These warnings are not turned on by -Wall

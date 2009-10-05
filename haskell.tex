@@ -1,0 +1,289 @@
+
+\documentclass{article} 
+\usepackage{fullpage}
+
+\begin{document} 
+
+\title{Haskell port of ``Handbook of Practical Logic and Automated Reasoning''} 
+\author{Sean McLaughlin} 
+\maketitle \pagestyle{plain} % page numbers
+
+\section{Introduction}
+
+This document describes a port of the Objective Caml code supporting
+John Harrison's logic textbook ``Handbook of Practical Logic and
+Automated Reasoning'' to Haskell. 
+
+The code is written in literate Haskell style. We kept the file names
+of the original mostly intact, though use Haskell naming conventions.
+As an experiment, in some places we inlined the book text. We think
+this is a nice way to present the code, but didn't have the patience
+to do it systematically. Perhaps we will do this when the text is
+finalized.
+
+One minor difference is in the moderate use of type classes which
+makes some of the functionality much cleaner, esp. the manipulation
+of polynomials, which can be achieved through Haskell binary operators
+instead of explicit term manipulation. 
+
+To interact with the port, we wrote our own interpreter for reasons
+given in the next section.
+
+\subsection{Interpreter}
+While Haskell and OCaml are quite
+similar, the port is complicated by the mode of interaction used in
+Harrison's code. Harrison uses the OCaml top level interpreter
+as a basis for experimentation. Additionally, his syntax for
+formulas includes
+
+\begin{verbatim}
+A \/ B /\ C 
+\end{verbatim}  
+
+\noindent for ``$A$ or $B$ and $C$''. The backslash characters pose a
+difficulty. For example:
+
+\begin{verbatim} 
+$ ocaml
+        Objective Caml version 3.09.3
+
+# let s = "A \/ B";;
+Warning X: illegal backslash escape in string.
+val s : string = "A \\/ B"
+\end{verbatim} 
+
+\noindent As you see, in Ocaml strings can only contain backslashes when they
+are ``escaped'' with yet another backslash. Indeed, as in most other
+languages (including Haskell), backslash is used to type unprintable
+or extended characters which are translated by the OCaml parser to the
+relevant ASCII or Unicode symbols.  
+Note that OCaml only issues a warning when you type such
+a backslash, but this is still a problem:
+
+\begin{verbatim} 
+$ ocaml
+        Objective Caml version 3.09.3
+
+# "A /\ B";;
+- : string = "A / B"
+\end{verbatim} 
+
+\noindent An escaped space is certainly not what you meant here!  
+When we try this experiment using GHCi (the interpreter of GHC, a 
+Haskell compiler) we get an error.
+
+\begin{verbatim} 
+$ ghci
+GHCi, version 6.8.2: http://www.haskell.org/ghc/  :? for help
+Loading package base ... linking ... done.
+Prelude> "A \/ B";
+<interactive>:1:5: lexical error in string/character literal at character ' '
+\end{verbatim} 
+
+\noindent Harrison avoids the difficulty by using the Camlp4 preprocessing tool.
+Using Camlp4, new types of quotations can be invented, and parsed
+however you like. In particular, he can treat backslash as a simple
+backslash and not as an escape character. The default Camlp4 syntax
+for quotations is \texttt{<<string>>}, which Harrison uses in his examples:
+
+\begin{verbatim}  
+# <<A /\ B>>;;
+- : fol formula = <<A /\ B>>
+# <<A \/ B>>;;
+- : fol formula = <<A \/ B>>
+\end{verbatim} 
+
+\noindent Having no such tool for GHC, how do we proceed?  There are a number
+of options.
+
+\begin{enumerate} 
+\item Change the syntax of the examples to something the top level 
+  can parse, for instance  
+\begin{verbatim} 
+"A & B | C"
+\end{verbatim} 
+\item Escape every backslash
+\begin{verbatim} 
+A /\\ B \\/ C
+\end{verbatim} 
+\item Write your own top level.  Then you can parse a string
+any way you like, as Camlp4 does.  
+\end{enumerate} 
+
+\noindent We decided upon the third option so as to keep the syntax close
+to the original.  This means, however, that we can not do 
+experiments in the same way Harrison does.  He simply types 
+commands at the OCaml top level
+
+\begin{verbatim} 
+# resolution <<(exists y. forall x. P(x, y)) ==> forall x. exists y. P(x, y)>>;; 
+1 used; 1 unused.
+- : bool list = [true]
+\end{verbatim} 
+
+\noindent We write
+
+\begin{verbatim} 
+$ atp
+> resolution -f <<(exists y. forall x. P(x, y)) ==> forall x. exists y. P(x, y)>>
+<<(exists y. forall x. P(x, y)) ==>
+  (forall x. exists y. P(x, y))>>
+0 used; 2 unused.
+1 used; 1 unused.
+Solution found!
+Computation time: 0.000 sec
+\end{verbatim} 
+
+\noindent The \texttt{-f} means "parse what follows as a formula".  We also have
+a large file of stored formulas that can be referenced by name.  For 
+example, Pelletier's problems can be used as
+
+\begin{verbatim} 
+> resolution p1
+<<p ==> q <=> ~q ==> ~p>>
+Solution found!
+Computation time: 0.000 sec
+\end{verbatim} 
+
+\noindent As a result, we can't experiment quite as freely in Haskell as in
+OCaml.  For instance, trying a different normalization function
+in a decision procedure involves killing the top level, recompiling,
+and starting the top level again.  However, we do think writing your
+own top level has advantages of its own.  
+
+\section{The ATP Interpreter}
+
+Experimenting with the code is done through the \emph{ATP interpreter}.
+After building the interpreter:
+
+\begin{verbatim} 
+$ make
+ghc  -fwarn-deprecations -fwarn-dodgy-imports -fwarn-hi-shadowing -fwarn-implicit-prelude -fwarn-incomplete-patterns -fwarn-missing-fields -fwarn-missing-methods -fwarn-missing-signatures -fwarn-orphans -fwarn-overlapping-patterns -fwarn-monomorphism-restriction -fwarn-tabs -fwarn-type-defaults -fwarn-unused-binds -fwarn-unused-imports -fwarn-unused-matches -fno-warn-incomplete-record-updates -fno-warn-simple-patterns   -o atp --make Main.lhs 
+[ 1 of 33] Compiling UnionFind        ( UnionFind.lhs, UnionFind.o )
+[ 2 of 33] Compiling Lib              ( Lib.lhs, Lib.o )
+...
+Linking atp ...
+\end{verbatim} 
+
+you can start it by typing
+
+\begin{verbatim} 
+$ atp
+> 
+\end{verbatim} 
+
+Now you are ready to issue commands.  If you just type \texttt{<return>}
+or \texttt{help} you will get a list of all available interpreter commands.
+
+\begin{verbatim} 
+> help
+Possible commands:
+   === Util ===
+    
+      help                : this message
+      echo                : echo the inputs
+      bug                 : bug of the moment
+    
+   === Parsing ===
+    
+      parseE              : parse an arithmetic expression and print it
+      parseP              : parse a propositional formula and print it
+      parseT              : parse a first order term and print it
+      parseF              : parse a first order formula and print it
+    
+   === Propositional formulas ===
+    
+      nnf                 : negation normal form
+      cnf                 : conjunctive normal form
+      dnf                 : disjunctive normal form
+      defcnf              : definitional cnf
+      truthtable          : show propositional truth table
+    
+   === Propositional decision procedures ===
+    
+      tautology           : Tautology checker via truth tables
+      dp                  : Davis-Putnam procedure (propositional)
+      dpll                : Davis-Putnam-Loveland-Logemann procedure (propositional)
+    
+   === First order formulas ===
+    
+      showFol             : show first order test formula
+      pnf                 : prenex normal form
+      skolemize           : skolem normal form
+    
+   === Basic Herbrand methods ===
+    
+      gilmore             : Gilmore procedure
+      davisputnam         : Davis-Putname procedure
+    
+   === Unification ===
+    
+      unify               : unify two terms
+    
+   === Tableaux ===
+    
+      prawitz             : Prawitz procedure
+      tab                 : Analytic tableaux procedure
+      splittab            : Analytic tableaux procedure
+    
+   === Resolution ===
+    
+      basicResolution     : Basic resolution procedure
+      resolution          : Resolution with subsumption
+      positiveResolution  : Postive resolution
+      sosResolution       : Set-of-support resolution
+    
+   === Prolog ===
+    
+      hornprove           : Basic horn clause prover using backchaining
+      prolog              : Prolog interpreter
+    
+   === MESON ===
+    
+      basicMeson          : Basic Meson procedure
+      meson               : Optimized Meson procedure
+    
+   === Equality ===
+    
+      ccvalid             : Congruence closure validity
+      rewrite             : Rewriting
+      bmeson              : Meson with equality elimination
+      paramodulation      : Paramodulation
+    
+   === Decidable problems ===
+    
+      aedecide            : Decide AE problems
+      dloQelim            : Dense Linear Orders
+      integerQelim        : Presburger arithmetic
+      nelopInt            : Nelson Oppen
+ 
+> 
+\end{verbatim} 
+
+When a new algorithm is implemented, the top level is extended by adding
+a clause to \texttt{Main.lhs}.  For example, when resolution was finished,
+we added
+
+\begin{verbatim} 
+> import qualified Resolution
+\end{verbatim} 
+
+to the preamble and
+
+\begin{verbatim} 
+> resolution :: Command
+> resolution = ("resolution",
+>                "Resolution with subsumption",
+>                runfol Resolution.resolution)
+\end{verbatim} 
+
+to the list of first order logic algorithms.  If one wishes to extend the 
+Haskell atp code with their own algorithms, it is fairly easy to see how
+to add it to the interpreter.
+
+\end{document} 
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

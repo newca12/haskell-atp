@@ -91,7 +91,7 @@ Truthtables.
 >         let pvs = atoms fm' 
 >             width = foldr (max . length . show) 5 pvs + 1 
 >             fixw s = s ++ replicate (width - length s) ' ' 
->             truthstring p = fixw (if p then "true" else "false") 
+>             truthstring p = fixw (if p then "⊤" else "⊥") 
 >             separator = replicate (width * length pvs + 9) '-' 
 >             row v =
 >                 let lis = map (truthstring . v) pvs 

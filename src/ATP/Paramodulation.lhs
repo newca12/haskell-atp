@@ -29,7 +29,7 @@
 >   case fm of
 >     Atom (R f args) -> Completion.listcases (Completion.overlaps lr)
 >                        (\i a -> rfn i (Atom (R f a))) args []
->     Not p -> overlap1 lr p (\i p -> rfn i (Not p))
+>     Not p -> overlap1 lr p (\i p' -> rfn i (Not p'))
 >     _ -> error "Impossible" 
 
 > overlapc :: (Term, Term) -> Clause -> (Env -> Clause -> a) 
@@ -53,7 +53,7 @@
 > paraloop :: ([Clause], [Clause]) -> IO Bool
 > paraloop (_, []) = error "No proof found"
 > paraloop (used, unused@(cls:ros)) = 
->   do S.putStrLn (show (length used) ++ " used; " ++ show (length unused) ++ " unused.\n")
+>   do S.putStrLn (show (length used) ++ " used; " ++ show (length unused) ++ " unused.")
 >      let used' = Set.insert cls used
 >          news = List.concat (map (Resolution.resolveClauses cls) used')
 >                 ++ List.concat (map (paraClauses cls) used') in

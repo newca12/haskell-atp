@@ -73,7 +73,8 @@
 FIXME: Trying to make the lines longer doesn't seem to be working at all.
 
 > render :: PP.Doc -> String
-> render = PP.renderStyle (PP.Style PP.LeftMode 1000 1.5)
+> --render = PP.renderStyle (PP.Style PP.LeftMode 1000 1.5)
+> render = PP.render
 
 * Type class
 
@@ -102,7 +103,7 @@ FIXME: Trying to make the lines longer doesn't seem to be working at all.
 > appPrec :: Rational
 > appPrec = 10
 
-> putStrLn :: Doc -> IO ()
+> putStrLn :: PP.Doc -> IO ()
 > putStrLn = S.putStrLn . render
 
 ** Instances

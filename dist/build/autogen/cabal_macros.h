@@ -30,6 +30,12 @@
   (major1) == 1 && (major2) <  0 || \
   (major1) == 1 && (major2) == 0 && (minor) <= 1
 
+/* package hslogger-1.0.7 */
+#define MIN_VERSION_hslogger(major1,major2,minor) \
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  0 || \
+  (major1) == 1 && (major2) == 0 && (minor) <= 7
+
 /* package mtl-1.1.0.2 */
 #define MIN_VERSION_mtl(major1,major2,minor) \
   (major1) <  1 || \

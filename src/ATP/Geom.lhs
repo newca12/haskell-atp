@@ -1,5 +1,5 @@
 
-> module ATP.Complex 
+> module ATP.Geom
 >   ()
 > where
 
