@@ -26,7 +26,6 @@ standard library.  Most mirror functions in Harrison's lib.ml
 * Imports
 
 > import Prelude
-> import qualified System.IO.UTF8 as S
 > import qualified System.CPUTime as Time
 > import qualified Text.Printf as Printf
 > import qualified Data.Char as Char

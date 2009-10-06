@@ -43,6 +43,21 @@ library
                  TemplateHaskell
                  QuasiQuotes
 
+  ghc-options: -Wall 
+               -- These warnings are not turned on by -Wall
+               -fwarn-implicit-prelude 
+               -fwarn-monomorphism-restriction 
+               -fwarn-incomplete-record-updates 
+               -fwarn-tabs 
+               -fwarn-simple-patterns 
+               -- -Werror
+               -- Profiling 
+               -- -prof
+               -- -auto-all
+               -- Internal compiler checking
+               -- Remove literate comments with BirdPP
+               -- -pgmL BirdPP
+
   exposed-modules: ATP.Util.Lex
                    ATP.Util.Lib
                    ATP.Util.List

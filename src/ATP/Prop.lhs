@@ -33,13 +33,12 @@ propositional variables.
 
 * Imports
 
-> import Prelude 
+> import Prelude hiding (print)
 > import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
 
 > import qualified ATP.Util.Print as PP
-> import ATP.Util.Print ( ($+$) )
 > import qualified ATP.Util.Lib as Lib
 > import qualified ATP.Util.ListSet as Set
 > import ATP.FormulaSyn 

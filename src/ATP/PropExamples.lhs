@@ -214,11 +214,10 @@ methods.
 > mkAdderTest n k =
 >   let [x, y, c, s, c0, s0, c1, s1, c2, s2] = 
 >         map mkIndex ["x", "y", "c", "s", "c0", 
->                      "s0", "c1", "s1", "c2", "s2"] in
->   (carryselect x y c0 c1 s0 s1 c s n k ∧ (¬) (c 0) ∧
->   (ripplecarry0 x y c2 s2 n) ⊃ 
->      (c n ⇔ c2 n) 
->      ∧ conjoin (\i -> s i ⇔ s2 i) [0 .. n-1])
+>                      "s0", "c1", "s1", "c2", "s2"]
+>   in (carryselect x y c0 c1 s0 s1 c s n k ∧ (¬) (c 0) ∧
+>      (ripplecarry0 x y c2 s2 n) ⊃ 
+>        (c n ⇔ c2 n) ∧ conjoin (\i -> s i ⇔ s2 i) [0 .. n-1])
 
 Now that we can add n-bit numbers, we can multiply them using repeated
 addition. Once again, the traditional algorithm can be applied. Consider

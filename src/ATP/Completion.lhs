@@ -18,6 +18,7 @@
 > import qualified Data.List as List
 > import qualified Data.Map as Map
 
+> import qualified ATP.Util.Print as PP
 > import qualified ATP.Util.Lib as Lib
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
@@ -34,8 +35,10 @@
 > renamePair (fm1, fm2) = 
 >   let fvs1 = FOL.fv fm1
 >       fvs2 = FOL.fv fm2
->       (nms1, nms2) = splitAt (length fvs1) (map (Var . ("x" ++) . show) [0 .. length fvs1 + length fvs2 - 1]) in
->   (FOL.apply (Map.fromList (zip fvs1 nms1)) fm1, FOL.apply (Map.fromList (zip fvs2 nms2)) fm2)
+>       (nms1, nms2) = splitAt (length fvs1) 
+>          (map (Var . ("x" ++) . show) [0 .. length fvs1 + length fvs2 - 1]) 
+>   in ( FOL.apply (Map.fromList (zip fvs1 nms1)) fm1, 
+>        FOL.apply (Map.fromList (zip fvs2 nms2)) fm2 )
 
 > listcases :: (a -> (Env -> a -> b) -> [c]) 
 >           -> (Env -> [a] -> b) -> [a] -> [c] -> [c]
@@ -76,9 +79,9 @@
 > status :: ([Formula], [Formula], [Formula]) -> [Formula] -> IO ()
 > status (eqs, def, crs) eqs0 = 
 >   if eqs == eqs0 && not (length crs `mod` 1000 == 0) then return () else
->   do print (show (length eqs) ++ " equations and " ++
->             show (length crs) ++ " pending critical pairs + " ++
->             show (length def) ++ " deferred")
+>   do PP.putStrLn $ PP.hsep [ PP.int (length eqs), PP.text "equations and"
+>                            , PP.int (length crs), PP.text "pending critical pairs +"
+>                            , PP.int (length def), PP.text "deferred" ]
 
 > complete :: (Term -> Term -> Bool) -> ([Formula], [Formula], [Formula]) -> IO (Maybe [Formula])
 > complete ord (eqs, def, crits) =

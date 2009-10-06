@@ -39,7 +39,7 @@
 
 :set +t
 -- :set prompt "> "
--- :set prompt "Prelude> "
+:set prompt "Prelude> "
 
 -- -----------------------------------------------------------------------------
 --  Functions                                                                   

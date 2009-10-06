@@ -12,12 +12,14 @@
 >     -- * Quotations
 >   , term
 >   , form
+>     -- * Util
+>   , print
 >   )
 > where
 
 * Imports
 
-> import Prelude 
+> import Prelude hiding (print, pred)
 > import qualified Data.Maybe as Maybe
 > import qualified Data.List as List
 > import qualified Data.Map as Map
@@ -47,7 +49,7 @@
 
 > data Term = Var String
 >           | Fn Func [Term]
->   deriving (Eq, Ord, Data, Typeable)
+>   deriving (Eq, Ord, Show, Data, Typeable)
 
 > instance Num Term where
 >   t1 + t2 = Fn "+" [t1, t2]
@@ -66,7 +68,7 @@
 > type Pred = String
 
 > data Rel = R Pred [Term]
->   deriving (Eq, Ord, Data, Typeable)
+>   deriving (Eq, Ord, Show, Data, Typeable)
 
 ○ Formulas
 
@@ -80,7 +82,7 @@
 >              | Iff Formula Formula
 >              | All Var Formula
 >              | Ex Var Formula
->   deriving(Eq, Ord, Data, Typeable)
+>   deriving(Eq, Ord, Show, Data, Typeable)
 
 ○ Useful abbreviations
 
@@ -156,6 +158,7 @@ clause for antiquotes.
 > isQuote :: String -> Bool
 > isQuote ('$':_) = True
 > isQuote ('^':_) = True
+> isQuote "_" = True
 > isQuote _ = False
 
 > encodeRel :: String -> Rel
@@ -284,12 +287,6 @@ clause for antiquotes.
 > quotePatT :: String -> TH.PatQ 
 > quotePatT = quoteTP . parse
 
--- > quoteT :: Term -> TH.ExpQ
--- > quoteT = Q.dataToExpQ (const Nothing)
-
--- > quoteT' :: Term -> TH.PatQ
--- > quoteT' = Q.dataToPatQ (const Nothing)
-
 *** Expressions
 
 > quoteTE :: Term -> TH.ExpQ
@@ -317,7 +314,8 @@ clause for antiquotes.
 
 > antiTP :: String -> TH.PatQ
 > antiTP v = case v of
->   "$_"  -> TH.wildP
+>   "_"  -> TH.wildP
+>   "$_" -> TH.wildP
 >   '$':x -> TH'.varP x
 >   _ -> error ("Impossible: " ++ v)
 
@@ -373,6 +371,7 @@ clause for antiquotes.
 
 > antiFP :: String -> TH.PatQ
 > antiFP v = case v of
+>   "_"  -> TH.wildP
 >   "$_"  -> TH.wildP
 >   '$':x -> TH'.varP x
 >   "^_"  -> TH'.conP "Atom" [TH.wildP]
@@ -385,10 +384,10 @@ clause for antiquotes.
 
 * Printing
 
-Terms
+> print :: Pretty a => a -> IO ()
+> print = PP.putStrLn . pPrint
 
-> instance Show Term where
->   show = PP.prettyShow
+Terms
 
 > instance Pretty Term where
 >   pPrint = ppTerm' 0
@@ -420,9 +419,6 @@ Terms
 
 Relations
 
-> instance Show Rel where
->     show = PP.prettyShow
-
 > isInfixRel :: Rel -> Bool
 > isInfixRel (R p ts) = 
 >   List.elem p ["=", "<", "≺", "<=", "≤", ">", "≻", ">=", "≥"] && length ts == 2 
@@ -441,9 +437,6 @@ Relations
 >                  _ -> p
 
 Formulas
-
-> instance Show Formula where
->   show = PP.prettyShow
 
 > instance Pretty Formula where
 >   pPrint = ppForm 0

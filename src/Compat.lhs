@@ -25,14 +25,22 @@ don't care about performance, so forget about the restriction.
 
 * Imports
 
-> import Prelude 
+> import Prelude hiding (print)
 > import ATP.FormulaSyn
 > import qualified ATP.Formula as F
 > import qualified ATP.Prop as Prop
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Decidable as Decidable
 > import qualified ATP.Qelim as Qelim
 > import qualified ATP.DLO as DLO
 
 * Compatibility functions
+
+lib.ml
+
+intro.ml
+
+formulas.ml
 
 prop.ml
 
@@ -49,7 +57,7 @@ prop.ml
 > negative = F.negative
 > positive = F.positive
 > negate = F.opp
-> nnf = Prop.nnf
+> --nnf = Prop.nnf
 > nenf = Prop.nenf
 > purednf = Prop.purednf
 > trivial = Prop.trivial
@@ -58,6 +66,59 @@ prop.ml
 > purecnf = Prop.purecnf
 > simpcnf = Prop.simpcnf
 > cnf = Prop.cnf
+
+propexamples.ml
+
+defcnf.ml
+
+dp.ml
+
+stal.ml
+
+bdd.ml
+
+fol.ml
+
+skolem.ml
+
+> simplify = Skolem.simplify
+> nnf = Skolem.nnf
+> pnf = Skolem.pnf
+> skolemize = Skolem.skolemize
+
+herbrand.ml
+
+unif.ml
+
+tableaux.ml
+
+resolution.ml
+
+prolog.ml
+
+meson.ml
+
+skolems.ml
+
+equal.ml
+
+cong.ml
+
+rewrite.ml
+
+order.ml
+
+completion.ml
+
+eqelim.ml
+
+paramodulation.ml
+
+decidable.ml
+
+> aedecide = Decidable.aedecide
+> miniscope = Decidable.miniscope
+> wang = Decidable.wang
 
 qelim.ml
 
@@ -68,4 +129,30 @@ qelim.ml
 > dlobasic = DLO.dloBasic
 > afn_dlo = DLO.afn
 > qelim_dlo = DLO.qelim
+
+cooper.ml
+
+complex.ml
+
+real.ml
+
+grobner.ml
+
+geom.ml
+
+interpolation.ml
+
+combining.ml
+
+lcf.ml
+
+lcfprop.ml
+
+folderived.ml
+
+lcffol.ml
+
+tactics.ml
+
+limitations.ml
 

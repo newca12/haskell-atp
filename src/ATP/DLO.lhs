@@ -15,7 +15,7 @@
 
 * Imports
 
-> import Prelude 
+> import Prelude hiding (print)
 > import qualified Data.Char as Char
 > import qualified Data.List as List
 
@@ -51,7 +51,7 @@
 >                    ls = map (\(Atom (R "<" [l, _])) -> l) lefts
 >                    rs = map (\(Atom (R "<" [_, r])) -> r) rights in
 >                F.listConj (Lib.allPairs (≺) ls rs)
-> dloBasic _ = error "dloBasic"               
+> dloBasic _ = error "dloBasic" 
 
 > afn :: Vars -> Formula -> Formula 
 > afn _ [$form| $s ≤ $t |] = [$form| ¬ ($t < $s) |]

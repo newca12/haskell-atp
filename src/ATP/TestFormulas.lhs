@@ -455,7 +455,7 @@ paramodulation.ml
 >    (∀ x. i(x) * x = e)
 >    ⊃ ∀ x. x * i(x) = e |])
 
-DLO
+** DLO
 
 >   , ("dlo1", [$form| ∀ x y. ∃ z. z < x ∧ z < y |])
 >   , ("dlo2", [$form| ∃ z. z < x ∧ z < y |])
