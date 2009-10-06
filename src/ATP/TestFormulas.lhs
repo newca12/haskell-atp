@@ -5,6 +5,7 @@ Example formulas for testing the algorithms.
 
 > module ATP.TestFormulas
 >   ( lookup )
+
 > where
 
 > import Prelude hiding (lookup)
@@ -367,11 +368,11 @@ Propositional
 >    (∀ u v w x y z.
 >         P(x,y,u) ∧ P(y,z,w) ⊃ (P(x,w,v) ⇔ P(u,z,v)))
 >    ⊃ ∀ a b c. P(a,b,c) ⊃ P(b,a,c) |])
->   , ("ewd1062", [$form| (∀ x. x <= x) ∧ 
->                       (∀ x y z. x <= y ∧ y <= z ⊃ x <= z) ∧ 
->                        (∀ x y. f(x) <= y ⇔ x <= g(y)) 
->                       ⊃ (∀ x y. x <= y ⊃ f(x) <= f(y)) ∧ 
->                       (∀ x y. x <= y ⊃ g(x) <= g(y)) |])
+>   , ("ewd1062", [$form| (∀ x. x ≤ x) ∧ 
+>                       (∀ x y z. x ≤ y ∧ y ≤ z ⊃ x ≤ z) ∧ 
+>                        (∀ x y. f(x) ≤ y ⇔ x ≤ g(y)) 
+>                       ⊃ (∀ x y. x ≤ y ⊃ f(x) ≤ f(y)) ∧ 
+>                       (∀ x y. x ≤ y ⊃ g(x) ≤ g(y)) |])
 >     -- paramodulation.ml 
 >   , ("para1", [$form| (∀ x. f(f(x)) = f(x)) ∧ (∀ x. ∃ y. f(y) = x)
 >    ⊃ ∀ x. f(x) = x |])
@@ -389,7 +390,7 @@ Propositional
 >   , ("dlo2", [$form| ∃ z. z < x ∧ z < y |])
 >   , ("dlo3", [$form| ∃ z. x < z ∧ z < y |])
 >   , ("dlo4", [$form| (∀ x. x < a ⊃ x < b) |])
->   , ("dlo5", [$form| ∀ a b. (∀ x. x < a ⊃ x < b) ⇔ a <= b |])
+>   , ("dlo5", [$form| ∀ a b. (∀ x. x < a ⊃ x < b) ⇔ a ≤ b |])
 >   , ("dlo6", [$form| ∀ a b. (∀ x. x < a ⇔ x < b) ⇔ a = b |])
 >   , ("dlo7", [$form| ∃ x y z. ∀ u.
 >                  x < x ∨ ¬ x < u ∨ (x < y ∧ y < z ∧ ¬ x < z) |])
@@ -405,36 +406,36 @@ Propositional
 >   , ("dlo17", [$form| ∃ x. x = x |])
 >   , ("dlo18", [$form| ∃ x. x = x ∧ x = y |])
 >   , ("dlo19", [$form| ∃ z. x < z ∧ z < y |])
->   , ("dlo20", [$form| ∃ z. x <= z ∧ z <= y |])
->   , ("dlo21", [$form| ∃ z. x < z ∧ z <= y |])
+>   , ("dlo20", [$form| ∃ z. x ≤ z ∧ z ≤ y |])
+>   , ("dlo21", [$form| ∃ z. x < z ∧ z ≤ y |])
 >   , ("dlo22", [$form| ∀ x y z. ∃ u. u < x ∧ u < y ∧ u < z |])
 >   , ("dlo23", [$form| ∀ y. x < y ∧ y < z ⊃ w < z |])
 >   , ("dlo24", [$form| ∀ x y. x < y |])
 >   , ("dlo25", [$form| ∃ z. z < x ∧ x < y |])
->   , ("dlo26", [$form| ∀ a b. (∀ x. x < a ⊃ x < b) ⇔ a <= b |])
+>   , ("dlo26", [$form| ∀ a b. (∀ x. x < a ⊃ x < b) ⇔ a ≤ b |])
 >   , ("dlo27", [$form| ∀ x. x < a ⊃ x < b |])
->   , ("dlo28", [$form| ∀ x. x < a ⊃ x <= b |])
+>   , ("dlo28", [$form| ∀ x. x < a ⊃ x ≤ b |])
 >   , ("dlo29", [$form| ∀ a b. ∃ x. ¬ (x = a) ∨ ¬ (x = b) ∨ (a = b) |])
->   , ("dlo30", [$form| ∀ x y. x <= y ∨ x > y |])
+>   , ("dlo30", [$form| ∀ x y. x ≤ y ∨ x > y |])
 
 Presburger
 
 >   , ("pres0", [$form| ∀ x y. ¬ (2 * x + 1 = 2 * y) |])
->   , ("pres1", [$form| ∀ x. ∃ y. 2 * y <= x ∧ x < 2 * (y + 1) |])
+>   , ("pres1", [$form| ∀ x. ∃ y. 2 * y ≤ x ∧ x < 2 * (y + 1) |])
 >   , ("pres2", [$form| ∃ x y. 4 * x - 6 * y = 1 |])
 >   , ("pres3", [$form| ∀ x. ¬ divides(2,x) ∧ divides(3,x-1) ⇔
 >                           divides(12,x-1) ∨ divides(12,x-7) |])
->   , ("pres4", [$form| ∀ x. b < x ⊃ a <= x |])
->   , ("pres5", [$form| ∃ x y. x > 0 ∧ y >= 0 ∧ 3 * x - 5 * y = 1 |])
+>   , ("pres4", [$form| ∀ x. b < x ⊃ a ≤ x |])
+>   , ("pres5", [$form| ∃ x y. x > 0 ∧ y ≥ 0 ∧ 3 * x - 5 * y = 1 |])
 >   , ("pres6", [$form| ∃ x y z. 4 * x - 6 * y = 1 |])
 >   , ("pres7", [$form| ∀ x. a < 3 * x ⊃ b < 3 * x |])
->   , ("pres8", [$form| ∀ x y. x <= y ⊃ 2 * x + 1 < 2 * y |])
+>   , ("pres8", [$form| ∀ x y. x ≤ y ⊃ 2 * x + 1 < 2 * y |])
 >   , ("pres9", [$form| (∃ d. y = 65 * d) ⊃ (∃ d. y = 5 * d) |])
 >   , ("pres10", [$form| ∀ y. (∃ d. y = 65 * d) ⊃ (∃ d. y = 5 * d) |])
 >   , ("pres11", [$form| ∀ x y. ¬ (2 * x + 1 = 2 * y) |])
 >   , ("pres12", [$form| ∀ x y z. (2 * x + 1 = 2 * y) ⊃ x + y + z > 129 |])
 >   , ("pres13", [$form| ∀ x. a < x ⊃ b < x |])
->   , ("pres14", [$form| ∀ x. a <= x ⊃ b < x |])
+>   , ("pres14", [$form| ∀ x. a ≤ x ⊃ b < x |])
 
 Formula examples from Cooper's paper. 
 
@@ -446,15 +447,15 @@ Formula examples from Cooper's paper.
 
 More of my own.                                                           
 
->   , ("pres20", [$form| ∀ x y. x >= 0 ∧ y >= 0
+>   , ("pres20", [$form| ∀ x y. x ≥ 0 ∧ y ≥ 0
 >                   ⊃ 12 * x - 8 * y < 0 ∨ 12 * x - 8 * y > 2 |])
 >   , ("pres21", [$form| ∃ x y. 5 * x + 3 * y = 1 |])
 >   , ("pres22", [$form| ∃ x y. 5 * x + 10 * y = 1 |])
->   , ("pres23", [$form| ∃ x y. x >= 0 ∧ y >= 0 ∧ 5 * x - 6 * y = 1 |])
+>   , ("pres23", [$form| ∃ x y. x ≥ 0 ∧ y ≥ 0 ∧ 5 * x - 6 * y = 1 |])
 >   , ("pres24", [$form| ∃ w x y z. 2 * w + 3 * x + 4 * y + 5 * z = 1 |])
->   , ("pres25", [$form| ∃ x y. x >= 0 ∧ y >= 0 ∧ 5 * x - 3 * y = 1 |])
->   , ("pres26", [$form| ∃ x y. x >= 0 ∧ y >= 0 ∧ 3 * x - 5 * y = 1 |])
->   , ("pres27", [$form| ∃ x y. x >= 0 ∧ y >= 0 ∧ 6 * x - 3 * y = 1 |])
+>   , ("pres25", [$form| ∃ x y. x ≥ 0 ∧ y ≥ 0 ∧ 5 * x - 3 * y = 1 |])
+>   , ("pres26", [$form| ∃ x y. x ≥ 0 ∧ y ≥ 0 ∧ 3 * x - 5 * y = 1 |])
+>   , ("pres27", [$form| ∃ x y. x ≥ 0 ∧ y ≥ 0 ∧ 6 * x - 3 * y = 1 |])
 >   , ("pres28", [$form| ∀ x y. ¬ (x = 0) ⊃ 5 * y < 6 * x ∨ 5 * y > 6 * x |])
 >   , ("pres29", [$form| ∀ x y. ¬ divides(5,x) ∧ ¬ divides(6,y) ⊃ ¬ (6 * x = 5 * y) |])
 >   , ("pres30", [$form| ∀ x y. ¬ divides(5,x) ⊃ ¬ (6 * x = 5 * y) |])
@@ -464,12 +465,12 @@ More of my own.
 
 Positive variant of the Bezout theorem (see the exercise).                
 
->   , ("pres34", [$form| ∀ z. z > 7 ⊃ ∃ x y. x >= 0 ∧ y >= 0 ∧ 3 * x + 5 * y = z |])
->   , ("pres35", [$form| ∀ z. z > 2 ⊃ ∃ x y. x >= 0 ∧ y >= 0 ∧ 3 * x + 5 * y = z |])
+>   , ("pres34", [$form| ∀ z. z > 7 ⊃ ∃ x y. x ≥ 0 ∧ y ≥ 0 ∧ 3 * x + 5 * y = z |])
+>   , ("pres35", [$form| ∀ z. z > 2 ⊃ ∃ x y. x ≥ 0 ∧ y ≥ 0 ∧ 3 * x + 5 * y = z |])
 >   , ("pres36", [$form| ∀ z.
->         z <= 7
->         ⊃ ((∃ x y. x >= 0 ∧ y >= 0 ∧ 3 * x + 5 * y = z) ⇔
->              ¬ (∃ x y. x >= 0 ∧ y >= 0 ∧ 3 * x + 5 * y = 7 - z)) |])
+>         z ≤ 7
+>         ⊃ ((∃ x y. x ≥ 0 ∧ y ≥ 0 ∧ 3 * x + 5 * y = z) ⇔
+>              ¬ (∃ x y. x ≥ 0 ∧ y ≥ 0 ∧ 3 * x + 5 * y = 7 - z)) |])
 
 Basic result about congruences.                                           
 
@@ -508,26 +509,26 @@ Inspired by the Collatz conjecture.
 
 Bob Constable's "stamp problem".
 
->   , ("pres45", [$form| ∀ x. x >= 8 ⊃ ∃ u v. u >= 0 ∧ v >= 0 ∧ x = 3 * u + 5 * v |])
+>   , ("pres45", [$form| ∀ x. x ≥ 8 ⊃ ∃ u v. u ≥ 0 ∧ v ≥ 0 ∧ x = 3 * u + 5 * v |])
 >   , ("pres46", [$form| ∃ l.
->         ∀ x. x >= l
->                   ⊃ ∃ u v. u >= 0 ∧ v >= 0 ∧ x = 3 * u + 5 * v |])
+>         ∀ x. x ≥ l
+>                   ⊃ ∃ u v. u ≥ 0 ∧ v ≥ 0 ∧ x = 3 * u + 5 * v |])
 >   , ("pres47", [$form| ∃ l.
->         ∀ x. x >= l
->                   ⊃ ∃ u v. u >= 0 ∧ v >= 0 ∧ x = 3 * u + 7 * v |])
+>         ∀ x. x ≥ l
+>                   ⊃ ∃ u v. u ≥ 0 ∧ v ≥ 0 ∧ x = 3 * u + 7 * v |])
 >   , ("pres48", [$form| ∃ l.
->         ∀ x. x >= l
->                   ⊃ ∃ u v. u >= 0 ∧ v >= 0 ∧ x = 3 * u + 8 * v |])
+>         ∀ x. x ≥ l
+>                   ⊃ ∃ u v. u ≥ 0 ∧ v ≥ 0 ∧ x = 3 * u + 8 * v |])
 >   , ("pres49", [$form| ∃ l.
->         ∀ x. x >= l
->                   ⊃ ∃ u v. u >= 0 ∧ v >= 0 ∧ x = 7 * u + 8 * v |])
+>         ∀ x. x ≥ l
+>                   ⊃ ∃ u v. u ≥ 0 ∧ v ≥ 0 ∧ x = 7 * u + 8 * v |])
 
 Example from reciprocal mult: (2622 * x)>>16 = x/100 within a range.      
 
 >   , ("pres50", [$form| ∀ x q1 q2 r1 r2.
 >         x < 4699 ∧
->         2622 * x = 65536 * q1 + r1 ∧ 0 <= q1 ∧ 0 <= r1 ∧ r1 < 65536 ∧
->         x = 100 * q2 + r2 ∧ 0 <= q2 ∧ 0 <= r2 ∧ r2 < 100
+>         2622 * x = 65536 * q1 + r1 ∧ 0 ≤ q1 ∧ 0 ≤ r1 ∧ r1 < 65536 ∧
+>         x = 100 * q2 + r2 ∧ 0 ≤ q2 ∧ 0 ≤ r2 ∧ r2 < 100
 >         ⊃ q1 = q2 |])
 >   , ("pres51", [$form| ∀ x y.
 >         (∃ d. x + y = 2 * d) ⇔
@@ -537,31 +538,31 @@ Landau trick! Is it too slow?
 
 >   , ("pres52", [$form| ∀ n.
 >      0 < n ∧ n < 2400
->        ⊃ n <= 2 ∧ 2 <= 2 * n ∨
->            n <= 3 ∧ 3 <= 2 * n ∨
->            n <= 5 ∧ 5 <= 2 * n ∨
->            n <= 7 ∧ 7 <= 2 * n ∨
->            n <= 13 ∧ 13 <= 2 * n ∨
->            n <= 23 ∧ 23 <= 2 * n ∨
->            n <= 43 ∧ 43 <= 2 * n ∨
->            n <= 83 ∧ 83 <= 2 * n ∨
->            n <= 163 ∧ 163 <= 2 * n ∨
->            n <= 317 ∧ 317 <= 2 * n ∨
->            n <= 631 ∧ 631 <= 2 * n ∨
->            n <= 1259 ∧ 1259 <= 2 * n ∨
->            n <= 2503 ∧ 2503 <= 2 * n |])
+>        ⊃ n ≤ 2 ∧ 2 ≤ 2 * n ∨
+>            n ≤ 3 ∧ 3 ≤ 2 * n ∨
+>            n ≤ 5 ∧ 5 ≤ 2 * n ∨
+>            n ≤ 7 ∧ 7 ≤ 2 * n ∨
+>            n ≤ 13 ∧ 13 ≤ 2 * n ∨
+>            n ≤ 23 ∧ 23 ≤ 2 * n ∨
+>            n ≤ 43 ∧ 43 ≤ 2 * n ∨
+>            n ≤ 83 ∧ 83 ≤ 2 * n ∨
+>            n ≤ 163 ∧ 163 ≤ 2 * n ∨
+>            n ≤ 317 ∧ 317 ≤ 2 * n ∨
+>            n ≤ 631 ∧ 631 ≤ 2 * n ∨
+>            n ≤ 1259 ∧ 1259 ≤ 2 * n ∨
+>            n ≤ 2503 ∧ 2503 ≤ 2 * n |])
 >   , ("pres53", [$form| ∀ d. ∃ x y. 3 * x + 5 * y = d |])
 >   , ("pres54", [$form| ∀ d. ∃ x y. 3 * x + 5 * y = d |])
->   , ("pres55", [$form| ∀ d. d >= 8 ⊃ ∃ x y. 3 * x + 5 * y = d |])
+>   , ("pres55", [$form| ∀ d. d ≥ 8 ⊃ ∃ x y. 3 * x + 5 * y = d |])
 >   , ("pres56", [$form| ∀ d. ∃ x y. 3 * x - 5 * y = d |])
 
 Nelson Oppen
 
 >   , ("nelop0", [$form| f(v - 1) - 1 = v + 1 ∧ f(u) + 1 = u - 1 ∧ u + 1 = v ⊃ ⊥ |])
->   , ("nelop1", [$form| y <= x ∧ y >= x + z ∧ z >= 0 ⊃ f(f(x) - f(y)) = f(z) |])
->   , ("nelop2", [$form| x = y ∧ y >= z ∧ z >= x ⊃ f(z) = f(x) |])
->   , ("nelop3", [$form| a <= b ∧ b <= f(a) ∧ f(a) <= 1
->   ⊃ a + b <= 1 ∨ b + f(b) <= 1 ∨ f(f(b)) <= f(a) |])
+>   , ("nelop1", [$form| y ≤ x ∧ y ≥ x + z ∧ z ≥ 0 ⊃ f(f(x) - f(y)) = f(z) |])
+>   , ("nelop2", [$form| x = y ∧ y ≥ z ∧ z ≥ x ⊃ f(z) = f(x) |])
+>   , ("nelop3", [$form| a ≤ b ∧ b ≤ f(a) ∧ f(a) ≤ 1
+>   ⊃ a + b ≤ 1 ∨ b + f(b) ≤ 1 ∨ f(f(b)) ≤ f(a) |])
 
 Failures of original Shostak procedure.                                   
 
@@ -590,22 +591,22 @@ RJB example; lists plus uninterpreted functions
 
 Another one from the ICS paper 
 
->   , ("nelop10", [$form| ¬ (f(f(x) - f(y)) = f(z)) ∧ y <= x ∧ y >= x + z ∧ z >= 0 ⊃ ⊥ |])
+>   , ("nelop10", [$form| ¬ (f(f(x) - f(y)) = f(z)) ∧ y ≤ x ∧ y ≥ x + z ∧ z ≥ 0 ⊃ ⊥ |])
 
 Shostak's "A Practical Decision Procedure..."
 
 No longer works since I didn't do predicates in congruence closure
 
->   , ("nelop11", [$form| x < f(y) + 1 ∧ f(y) <= x ⊃ (P(x,y) ⇔ P(f(y),y)) |])
+>   , ("nelop11", [$form| x < f(y) + 1 ∧ f(y) ≤ x ⊃ (P(x,y) ⇔ P(f(y),y)) |])
 
 Shostak's "Practical..." paper again, using extra clauses for MAX 
 
->   , ("nelop12", [$form| (x >= y ⊃ MAX(x,y) = x) ∧ (y >= x ⊃ MAX(x,y) = y)
+>   , ("nelop12", [$form| (x ≥ y ⊃ MAX(x,y) = x) ∧ (y ≥ x ⊃ MAX(x,y) = y)
 >                           ⊃ x = y + 2 ⊃ MAX(x,y) = x |])
 
 Shostak's "Practical..." paper again 
 
->   , ("nelop13", [$form| x <= g(x) ∧ x >= g(x) ⊃ x = g(g(g(g(x)))) |])
+>   , ("nelop13", [$form| x ≤ g(x) ∧ x ≥ g(x) ⊃ x = g(g(g(g(x)))) |])
 
 Easy example I invented 
 

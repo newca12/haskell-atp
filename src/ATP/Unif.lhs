@@ -18,7 +18,6 @@ Unification
 > import ATP.Util.Lib((↦))
 > import ATP.FormulaSyn
 > import qualified ATP.FOL as FOL
-> import ATP.FOL(Env)
 
 * Unification
 

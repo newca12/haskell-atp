@@ -29,7 +29,6 @@
 > import qualified ATP.Formula as F
 > import qualified ATP.Prop as Prop
 > import qualified ATP.FOL as FOL
-> import ATP.FOL(Env)
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Unif as Unif
 > import qualified ATP.Tableaux as Tableaux

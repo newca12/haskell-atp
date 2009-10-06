@@ -114,7 +114,7 @@ the result back to a formula:
 > defcnf1 fm = F.listConj $ map F.listDisj $ mkDefcnf maincnf fm
 
 :module + DefCnf Prop
-defcnf1 $ read "(p | (q & ~r)) & s"
+defcnf1 $ parse "(p ∨ (q ∧ ¬ r)) ∧ s"
 
   We can optimize the procedure by avoiding some obviously redundant
 definitions.  First, when dealing with an iterated conjunction in the

@@ -7,7 +7,11 @@ The front end for the automated theorem proving Haskell port.
 
 * Signature
 
-> module Main ( main ) where 
+> module Main 
+>   ( doit
+>   , main 
+>   ) 
+> where 
 
 * Imports
 
@@ -18,12 +22,12 @@ The front end for the automated theorem proving Haskell port.
 > import System.Console.GetOpt (OptDescr(..), ArgDescr(..))
 > import qualified Codec.Binary.UTF8.String as UString
 > import qualified Control.Exception as Exn
+> import Control.Exception (Exception)
 > import qualified Data.Maybe as Maybe
 > import qualified Data.List as List
+> import Data.Generics (Data, Typeable)
 > import qualified Test.HUnit as Test
 > import Test.HUnit(Test(..), (~:))
-
-Basics
 
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.Lib as Lib
@@ -31,32 +35,21 @@ Basics
 > import qualified ATP.Util.Parse as P
 > import ATP.Util.Parse (parse)
 > import qualified ATP.Util.Print as PP
-> import ATP.Util.Print (Pretty, pPrint, (<+>), ($+$))
+> import ATP.Util.Print (Pretty, pPrint, (<>), (<+>), ($+$))
 > import qualified ATP.Util.Log as Log
 > import ATP.Util.Log (Priority)
 > import qualified ATP.Util.Misc as Misc
 > import qualified ATP.Util.Monad as M
 
-Intro
-
 > import ATP.IntroSyn
 > import qualified ATP.Intro as Intro
-
-Formulas 
-
 > import ATP.FormulaSyn
 > import qualified ATP.Formula as F
-
-Propositional logic
-
 > import qualified ATP.Prop  as Prop 
 > import qualified ATP.PropExamples as PropExamples
 > import qualified ATP.DefCNF as CNF
 > import qualified ATP.FOL as FOL
 > import qualified ATP.DP as DP
-
-First order logic
-
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Herbrand as Herbrand
 > import qualified ATP.Unif as Unif
@@ -81,61 +74,104 @@ First order logic
 > import qualified ATP.Geom as Geom
 > import qualified ATP.Interpolation as Interpolation
 > import qualified ATP.Combining as Combining
-
-Tests
-
 > import qualified ATP.TestFormulas as Forms
 
-* Top
+* Options
 
 > type Args = [String]
 
-> main :: IO ()
-> main = do 
->   S.putStrLn "Welcome to Haskell ATP!"
->   S.putStrLn ""
->   -- Get command line arguments
->   args <- System.getArgs
->   -- Parse arguments.  Opts is the unknown options that will be parsed by
->   -- the individual prover.  
->   (flags, args', opts) <- parseOptions args
->   -- It's important to decode the command line arguments, since they may
->   -- be in Unicode syntax.  UString seems to work.
->   let uargs = map UString.decodeString args'
->       uopts = map UString.decodeString opts
->       prio = maybe Log.defaultPrio id (List.findFirst getPrio flags)
->   -- Initialize the log file
->   let logToFile = elem LogToFile flags
->   Log.initialize prio logToFile (elem LogToTerm flags)
->   -- Now we can start logging.  Start with a notification that
->   -- logging is taking place!
->   if logToFile
->     then Log.stdout ("Logging output to file: " ++ Log.logFileName) 
->     else return ()
->   Log.infoM' "ATP" $ PP.vcat [ PP.text "flags        :" <+> pPrint flags
->                              , PP.text "args         :" <+> pPrint uargs  
->                              , PP.text "unknown opts :" <+> pPrint uopts ]
->   -- Run the requested command
->   forward uargs
+> data Flag = Verbose Priority
+>           | LogToTerm
+>           | LogToFile
+>           | FormulaFlag String
+>   deriving (Eq, Show)
 
-Determine logging priority.
+> type Flags = [Flag]
 
-> getPrio :: Flag -> Maybe Priority
-> getPrio (Verbose p) = Just p
-> getPrio _ = Nothing
+> instance Pretty Flag where
+>   pPrint = PP.text . show
 
-Forward a command from the top level to the requested command.
+> decodeFlag :: Flag -> Flag
+> decodeFlag (FormulaFlag s) = FormulaFlag $ UString.decodeString s
+> decodeFlag f = f
 
-> forward :: Args -> IO ()
-> forward [] = S.putStrLn usage
-> forward (com : args) = 
->   case lookup com (map (\c@(n,_,_) -> (n,c)) commands) of
->     Nothing -> S.putStrLn $ "No such command: " ++ com
->     Just (_, _, f) -> f args
+> options :: [OptDescr Flag]
+> options =
+>  [ Option ['v'] ["Verbose"] (OptArg verbose (show Log.defaultPrio)) 
+>      "Verbosity level.  (debug | info | warn | error)"
+>  , Option ['T'] ["LogToTerm"] (NoArg LogToTerm)
+>      "Log to terminal on stdout."
+>  , Option ['F'] ["LogToFile"] (NoArg LogToFile)
+>      "Log to the log file."
+>  , Option ['f'] ["formula"] (ReqArg FormulaFlag "<formula>")
+>      "Formula to process.  Used in a number of commands."
+>  ]
+
+'parseOptions' returns flags, arguments, and unknown flags.
+
+> parseOptions :: Args -> IO (Flags, Args, [String])
+> parseOptions argv = case Opt.getOpt' Opt.Permute options argv of
+>   (o, n, u, []) -> return (o, n, u)
+>   (_, _, _, errs) -> ioError $ userError $ concat errs ++ usageMsg
+
+> verbose :: Maybe String -> Flag
+> verbose Nothing = Verbose Log.defaultPrio
+> verbose (Just s) = case Log.readPrio s of 
+>   Nothing -> error $ "No such setting for 'verbose': " ++ s
+>   Just p -> Verbose p
+
+> usageMsg :: String
+> usageMsg = Opt.usageInfo usage options 
+>   where usage = PP.render block
+>         block = PP.vcat [ PP.text "Possible commands:"
+>                         , PP.nest 3 (PP.vcat (map group groups))
+>                         , PP.text "For help on an individual command, type 'help <cmd>'."
+>                         , PP.space
+>                         , PP.text "Flags:"
+>                         , PP.space 
+>                         ]
+>         group (s, coms) = PP.text ("=== " ++ s ++ " ===") $+$ PP.space $+$
+>                           PP.nest 3 (PP.vcat (map com coms)) $+$ PP.space
+>         com (Com s summ _ _) = PP.text (s ++ spaces s ++ ": " ++ summ)
+>         spaces s = concat (replicate (20 - length s) " ")
+
+Get a formula from commandline options.
+
+> getFormula :: Flags -> Args -> Formula
+> getFormula flags args = case (List.findFirst isFormulaFlag flags, args) of
+>     (Just f, _) -> parse f
+>     (Nothing, [n]) -> case Forms.lookup n of 
+>                          Nothing -> Exn.throw $ ComExn "Can't determine formula"
+>                          Just f -> f
+>     (Nothing, ["prime", n]) -> PropExamples.prime $ read n
+>     (Nothing, ["ramsey", s, t, n]) -> PropExamples.ramsey (read s) (read t) (read n)
+>     _ -> Exn.throw $ ComExn "Can't determine formula"
+>   where isFormulaFlag (FormulaFlag f) = Just f
+>         isFormulaFlag _ = Nothing
+
+Get a Prolog program from commandline options.
+
+> getProgram :: Flags -> Args -> ([String], String)
+> getProgram _ _ = error "Unimplemented" 
+
+Get rewriting rules.
+
+> getRewrites :: Flags -> Args -> ([Formula], Term)
+> getRewrites _ _ = error "Unimplemented" 
 
 * Commands
 
-> type Command = (String, String, Args -> IO ())
+> data Command = Com { name :: String
+>                    , summary :: String
+>                    , desc :: PP.Doc
+>                    , _command :: Flags -> Args -> IO ()
+>                    } 
+
+> newtype ComExn = ComExn String
+>   deriving (Show, Data, Typeable)
+
+> instance Exn.Exception ComExn where
+
 > type Group = (String, [Command])
 
 > groups :: [Group]
@@ -151,24 +187,24 @@ Forward a command from the top level to the requested command.
 >             [ parseExpr
 >             , parseTerm
 >             , parseForm ])
->          , ("Propositional formulas", 
->             [ nnf
+>          , ("Formula kung fu", 
+>             [ nnf 
 >             , cnf
 >             , dnf
 >             , defcnf
->             , truthtable ])
+>             , pnf
+>             , skolem
+>             ])
 >          , ("Propositional decision procedures",
->             [ tautology
+>             [ truthtable
+>             , tautology
 >             , dp
->             , dpll ])
->          , ("First order formulas",
->             [ pnf
->             , skolemize ])
+>             , dpll 
+>             ])
 >          , ("Basic Herbrand methods",
 >             [ gilmore
->             , davisputnam ])
->          , ("Unification",
->             [ unify ])
+>             , davisputnam 
+>             ])
 >          , ("Tableaux",
 >             [ prawitz
 >             , tab
@@ -185,15 +221,16 @@ Forward a command from the top level to the requested command.
 >             [ basicMeson
 >             , meson ])
 >          , ("Equality",
->             [ ccvalid
+>             [ bmeson 
+>             , paramod
+>             , ccvalid
 >             , rewrite
->             , bmeson 
->             , paramodulation])
+>             ])
 >          , ("Decidable problems",
 >             [ aedecide
 >             , dlo
->             , pres
->             , nelopInt
+>             , presburgher
+>             , nelop
 >             ])
 >          ]
 
@@ -203,23 +240,39 @@ Forward a command from the top level to the requested command.
 ** Misc
 
 > help :: Command
-> help = ("help", "Show a help message.", f)
->   where f [] = S.putStrLn usage
->         f _ = do S.putStrLn "'help' takes no arguments"
->                  S.putStrLn usage
+> help = Com "help" summ usage f
+>   where summ = "Show a help message."
+>         usage = PP.vcat [ PP.text "help"
+>                         , PP.text "help <command>" ]
+>         f [] [] = S.putStrLn usageMsg
+>         f [] [com] = case List.find (\c -> name c == com) commands of
+>                     Nothing -> S.putStrLn $ "Can't find command: " ++ com
+>                     Just c -> PP.putStrLn $ 
+>                       PP.vcat [ PP.text $ "Command : " ++ name c
+>                               , PP.text $ "Summary : " ++ summary c
+>                               , PP.text   "Usage   : " <> desc c
+>                               ] 
+>         f _ _ = Exn.throw $ ComExn "Bad arguments"
 
 > version :: Command
-> version = ("version", "Show the version..", f)
->   where f [] = S.putStrLn $ "Version " ++ Misc.version
->         f _ = S.putStrLn "'version' takes no arguments"
+> version = Com "version" summ usage f
+>   where summ = "Show the current version."
+>         usage = PP.text "version"
+>         f [] [] = S.putStrLn $ "Version " ++ Misc.version
+>         f _ _ = Exn.throw $ ComExn "'version' takes no arguments"
 
 > echo :: Command
-> echo = ("echo", "Echo the input arguments", f)
->   where f args = S.putStrLn $ show args
+> echo = Com "echo" summ usage f
+>   where summ = "Echo the input arguments"
+>         usage = PP.text "echo -flag1 -flag2 arg1 arg2"
+>         f :: Flags -> Args -> IO ()
+>         f fs args = S.putStrLn (show fs ++ show args)
 
 > bug :: Command
-> bug = ("bug", "Run the bug of the moment.", f)
->   where f _ = error "Bug"
+> bug = Com "bug" summ usage f
+>   where summ = "Run the bug of the moment."
+>         usage = PP.text "bug ..."
+>         f _ _ = error "Bug"
 
 ** Tests
 
@@ -227,296 +280,350 @@ Forward a command from the top level to the requested command.
 > tests = "All" ~: TestList []
 
 > test :: Command
-> test = ("test", "Run unit tests.", f)
->   where f [] = do 
->          S.putStrLn "Running all tests.  This may take awhile."
->          M.ignore $ Test.runTestTT tests
->         f _ = S.putStrLn "'test' takes no arguments."
+> test = Com "test" summ usage f
+>   where summ = "Run unit tests."
+>         usage = PP.text "test"
+>         f [] [] = do 
+>           S.putStrLn "Running all tests.  This may take awhile."
+>           M.ignore $ Test.runTestTT tests
+>         f _ _ = Exn.throw $ ComExn "'test' takes no arguments."
 
 Show a test formula
 
 > showTest :: Command
-> showTest = ("show", "Show a test formula.", f)
->   where f [s] = case Forms.lookup s of
->           Nothing -> S.putStrLn $ "Can't find test: " ++ s
->           Just ψ -> PP.putStrLn $ pPrint ψ
->         f _ = S.putStrLn "usage: show <formula id>"
+> showTest = Com "show" summ usage f
+>   where summ = "Show a formula."
+>         usage = PP.vcat [ PP.text "show -f <formula>"
+>                         , PP.text "show <id>"
+>                         , PP.text "show prime 5"
+>                         , PP.text "show ramsey 2 3 5"
+>                         ]
+>         f flags args = PP.putStrLn $ pPrint $ getFormula flags args
 
 ** Parsing
 
 > parseExpr :: Command
-> parseExpr = ("expr", "Parse an expression.", f)
->   where f [s] = do
->           let s' = UString.decodeString s
->           S.putStrLn $ "Parsing <<" ++ s' ++ ">>"
->           let x :: Expr = parse s'
+> parseExpr = Com "expr" summ usage f
+>   where summ = "Parse an expression."
+>         usage = PP.vcat [ PP.text "expr <expr>"
+>                         , PP.text "expr 'x + y * 7'" ]
+>         f [] [s] = do
+>           S.putStrLn $ "Parsing <<" ++ s ++ ">>"
+>           let x :: Expr = parse s
 >           PP.putStrLn $ pPrint x
->         f _ = S.putStrLn "usage: expr <expr>"
+>         f _ _ = Exn.throw $ ComExn "Bad arguments"
 
 > parseTerm :: Command
-> parseTerm = ("term", "Parse a term.", f)
->   where f [s] = do
->           let s' = UString.decodeString s
->           S.putStrLn $ "Parsing <<" ++ s' ++ ">>"
->           let x :: Term = parse s'
+> parseTerm = Com "term" summ usage f
+>   where summ = "Parse a term." 
+>         usage = PP.vcat [ PP.text "term <term>"
+>                         , PP.text "term 'p(x, y) + 8'" ]
+>         f [] [s] = do
+>           S.putStrLn $ "Parsing <<" ++ s ++ ">>"
+>           let x :: Term = parse s
 >           PP.putStrLn $ pPrint x
->         f _ = S.putStrLn "usage: term <term>"
+>         f _ _ = Exn.throw $ ComExn "Bad arguments"
 
 > parseForm :: Command
-> parseForm = ("form", "Parse a formula.", f)
->   where f [s] = do
->           let s' = UString.decodeString s
->           S.putStrLn $ "Parsing <<" ++ s' ++ ">>"
->           let x :: Formula = parse s'
+> parseForm = Com "form" summ usage f
+>   where summ = "Parse a formula." 
+>         usage = PP.vcat [ PP.text "form <formula>"
+>                         , PP.text "form '⊤ ∧ f(c) ⊃ ∀ x. P(x)'" ]
+>         f [] [s] = do
+>           S.putStrLn $ "Parsing <<" ++ s ++ ">>"
+>           let x :: Formula = parse s
 >           PP.putStrLn $ pPrint x
->         f _ = S.putStrLn "usage: form <formula>"
+>         f _ _ = Exn.throw $ ComExn "Bad arguments"
 
 ** Formula manipulation
 
+
 > nnf :: Command
-> nnf = ("nnf", 
->        "negation normal form",
->        PP.putStrLn . pPrint . Prop.nnf . parse . head)
+> nnf = Com "nnf" "Negation normal form." usage f
+>   where usage = PP.vcat [ PP.text "nnf -f <formula>"
+>                         , PP.text "nnf <id>" ]
+>         f flags args = PP.putStrLn $ pPrint $ Prop.nnf fm
+>           where fm = getFormula flags args
 
 > cnf :: Command
-> cnf = ("cnf", 
->        "conjunctive normal form",
->        PP.putStrLn . pPrint . Prop.cnf . parse . head)
+> cnf = Com "cnf" "Conjunctive normal form." usage f
+>   where usage = PP.vcat [ PP.text "cnf -f <formula>"
+>                         , PP.text "cnf <id>" ]
+>         f flags args = PP.putStrLn $ pPrint $ Prop.cnf fm
+>           where fm = getFormula flags args
 
 > dnf :: Command
-> dnf = ("dnf", 
->        "disjunctive normal form",
->        PP.putStrLn . pPrint . Prop.dnf . parse . head)
+> dnf = Com "dnf" "Disjunctive normal form." usage f
+>   where usage = PP.vcat [ PP.text "dnf -f <formula>"
+>                         , PP.text "dnf <id>" ]
+>         f flags args = PP.putStrLn $ pPrint $ Prop.dnf fm
+>           where fm = getFormula flags args
 
 > defcnf :: Command
-> defcnf = ("defcnf", 
->           "definitional cnf",
->           PP.putStrLn . pPrint . CNF.defcnf . parse . head)
+> defcnf = Com "defcnf" "Conjunctive normal form." usage f
+>   where usage = PP.vcat [ PP.text "defcnf -f <formula>"
+>                         , PP.text "defcnf <id>" ]
+>         f flags args = PP.putStrLn $ pPrint $ CNF.defcnf fm
+>           where fm = getFormula flags args
+> pnf :: Command
+> pnf = Com "pnf" "Prenex normal form" usage f
+>   where usage = PP.vcat [ PP.text "pnf -f <formula>"
+>                         , PP.text "pnf <id>" ] 
+>         f flags args = PP.putStrLn $ pPrint $ Skolem.pnf fm
+>           where fm = getFormula flags args
 
-> truthtable :: Command
-> truthtable = ("truthtable", 
->               "show propositional truth table",
->               S.putStrLn . (\f -> Prop.truthtable f ++ "\n") . parse . head)
+> skolem :: Command
+> skolem = Com "skolem" "Skolem normal form" usage f
+>   where usage =  PP.vcat [ PP.text "skolem -f <formula>"
+>                          , PP.text "skolem <id>" ] 
+>         f flags args = PP.putStrLn $ pPrint $ Skolem.skolemize fm
+>           where fm = getFormula flags args
 
 ** Propositional solvers
 
+> run :: Pretty a => (Formula -> IO a) -> Flags -> Args -> IO ()
+> run f flags args = 
+>   let fm = getFormula flags args in
+>   do res <- f fm 
+>      --PP.putStrLn $ pPrint (flags, args)
+>      PP.putStrLn $ pPrint fm
+>      PP.putStrLn $ pPrint res
+
+> truthtable :: Command
+> truthtable = Com "truthtable" "Show propositional truth table" usage f
+>   where usage = PP.vcat [ PP.text "truthtable -f <formula>"
+>                         , PP.text "truthtable <id>" ]
+>         f flags args = S.putStrLn $ Prop.truthtable fm
+>           where fm = getFormula flags args
+
 > tautology :: Command
-> tautology = ("tautology", 
->              "Tautology checker via truth tables",
->              runprop Prop.tautology)
+> tautology = Com "tautology" "Tautology checker via truth tables" usage f
+>   where usage = PP.vcat [ PP.text "tautology -f <formula>"
+>                         , PP.text "tautology <id>"
+>                         , PP.text "tautology prime 17"
+>                         , PP.text "tautology ramsey 2 3 5"]
+>         f = run (return . Prop.tautology)
 
 > dp :: Command
-> dp = ("dp",
->       "Davis-Putnam procedure (propositional)",
->       runprop DP.dptaut)
+> dp = Com "dp" "Davis-Putnam procedure (propositional)" usage f
+>   where usage = PP.vcat [ PP.text "dp -f <formula>"
+>                         , PP.text "dp <id>"
+>                         , PP.text "dp prime 17"
+>                         , PP.text "dp ramsey 2 3 5"]
+>         f = run (return . DP.dptaut)
 
 > dpll :: Command
-> dpll = ("dpll",
->         "Davis-Putnam-Loveland-Logemann procedure (propositional)",
->         runprop DP.dplltaut)
-
-> runprop :: Pretty a => (Formula -> a) -> Args -> IO ()
-> runprop f args = 
->   let fm = case args of
->            [] -> error ("Can't read arguments: " ++ show args)
->            [n] -> case Forms.lookup n of
->                     Nothing -> error ("Can't find formula: " ++ n)
->                     Just f' -> f'
->            ("-":"f":fm':_) -> parse fm'
->            ("-":"prime":n:_) -> PropExamples.prime $ read n
->            ("-":"prime0":n:_) -> F.unIff $ PropExamples.prime $ read n
->            ("-":"ramsey":s:t:n:_) -> PropExamples.ramsey (read s) (read t) (read n) 
->            _ -> error "Impossible" 
->   in do PP.putStrLn $ pPrint fm
->         Lib.time $ let res = f fm in PP.putStrLn $ pPrint res
-
-** Unification
-
-> unify :: Command
-> unify = ("unify", 
->          "unify two terms",
->          \(s1:s2:_) -> let tm1 :: Term = parse s1
->                            tm2 :: Term = parse s2 in
->                        unifyFun [(tm1,tm2)])
-
-> unifyFun :: [(Term, Term)] -> IO ()
-> unifyFun eqs = 
->   case Unif.unifyAndApply eqs of
->     Nothing -> S.putStrLn "Can't unify\n"
->     Just eqs' -> PP.putStrLn $ pPrint $ show eqs'
-
-** First order formulas
-
-> pnf :: Command
-> pnf = ("pnf", 
->        "prenex normal form",
->        PP.putStrLn . pPrint . Skolem.pnf . parse . head)
-
-> skolemize :: Command
-> skolemize = ("skolemize", 
->        "skolem normal form",
->        PP.putStrLn . pPrint . Skolem.skolemize . parse . head)
+> dpll = Com "dpll" summ usage f
+>   where summ = "Davis-Putnam-Loveland-Logemann procedure (propositional)" 
+>         usage = PP.vcat [ PP.text "dpll -f <formula>"
+>                         , PP.text "dpll <id>"
+>                         , PP.text "dpll prime 17"
+>                         , PP.text "dpll ramsey 2 3 5"]
+>         f = run (return . DP.dplltaut)
 
 ** First order solvers
 
-> runfol :: (Formula -> IO a) -> Args -> IO ()
-> runfol f args = 
->   do fm <- case args of 
->              [] -> error "Can't read argument"
->              "-":"f":fm':_ -> return (parse fm')
->              n:_ -> case Forms.lookup n of
->                      Nothing -> error $ "Can't find formula: " ++ n
->                      Just ψ -> return ψ
->      fm' <- return (if elem "eq" args then Equal.equalitize fm else fm)
->      PP.putStrLn $ pPrint fm'
->      M.ignore $ Lib.time $ f fm'
-
 > gilmore :: Command
-> gilmore = ("gilmore",
->            "Gilmore procedure",
->            runfol Herbrand.gilmore)
+> gilmore = Com "gilmore" "Gilmore procedure." usage f
+>   where usage = PP.vcat [ PP.text "gilmore -f <formula>"
+>                         , PP.text "gilmore <id>"
+>                         ] 
+>         f = run Herbrand.gilmore
 
 > davisputnam :: Command
-> davisputnam = ("davisputnam", 
->                "Davis-Putname procedure",
->                runfol Herbrand.davisputnam)
+> davisputnam = Com "davisputnam" "Davis-Putnam procedure." usage f
+>   where usage = PP.vcat [ PP.text "davisputnam -f <formula>"
+>                         , PP.text "davisputnam <id>"
+>                         ] 
+>         f = run Herbrand.davisputnam
 
 > prawitz :: Command
-> prawitz = ("prawitz",
->            "Prawitz procedure",
->            runfol (PP.putStrLn . pPrint . Tableaux.prawitz))
+> prawitz = Com "prawitz" "Prawitz procedure." usage f
+>   where usage = PP.vcat [ PP.text "prawitz -f <formula>"
+>                         , PP.text "prawitz <id>"
+>                         ] 
+>         f = run (return . Tableaux.prawitz)
 
 > tab :: Command
-> tab = ("tab",
->        "Analytic tableaux procedure",
->        runfol Tableaux.tab)
+> tab = Com "tab" "Analytic tableaux procedure." usage f
+>   where usage = PP.vcat [ PP.text "tab -f <formula>"
+>                         , PP.text "tab <id>"
+>                         ] 
+>         f = run Tableaux.tab
 
 > splittab :: Command
-> splittab = ("splittab",
->             "Analytic tableaux procedure",
->             runfol Tableaux.splittab)
+> splittab = Com "splittab" "Analytic tableaux procedure." usage f
+>   where usage = PP.vcat [ PP.text "splittab -f <formula>"
+>                         , PP.text "splittab <id>"
+>                         ] 
+>         f = run Tableaux.splittab
 
 > basicResolution :: Command
-> basicResolution = ("basicResolution",
->                    "Basic resolution procedure",
->                    runfol Resolution.basicResolution)
+> basicResolution = Com "basicResolution" "Resolution procedure." usage f
+>   where usage = PP.vcat [ PP.text "basicResolution -f <formula>"
+>                         , PP.text "basicResolution <id>"
+>                         ] 
+>         f = run Resolution.basicResolution
 
 > resolution :: Command
-> resolution = ("resolution",
->                "Resolution with subsumption",
->                runfol Resolution.resolution)
+> resolution = Com "resolution" "Resolution procedure." usage f
+>   where usage = PP.vcat [ PP.text "resolution -f <formula>"
+>                         , PP.text "resolution <id>"
+>                         ] 
+>         f = run Resolution.resolution
 
 > positiveResolution :: Command
-> positiveResolution = ("positiveResolution",
->                "Postive resolution",
->                runfol Resolution.positiveResolution)
+> positiveResolution = Com "positiveResolution" "Resolution procedure." usage f
+>   where usage = PP.vcat [ PP.text "positiveResolution -f <formula>"
+>                         , PP.text "positiveResolution <id>"
+>                         ] 
+>         f = run Resolution.positiveResolution
 
 > sosResolution :: Command
-> sosResolution = ("sosResolution",
->                  "Set-of-support resolution",
->                  runfol Resolution.sosResolution)
-
-> paramodulation :: Command
-> paramodulation = ("paramodulation",
->                  "Paramodulation",
->                  runfol Paramodulation.paramodulation)
+> sosResolution = Com "sosResolution" "Resolution procedure." usage f
+>   where usage = PP.vcat [ PP.text "sosResolution -f <formula>"
+>                         , PP.text "sosResolution <id>"
+>                         ] 
+>         f = run Resolution.sosResolution
 
 > hornprove :: Command
-> hornprove = ("hornprove",
->              "Basic horn clause prover using backchaining",
->              runfol Prolog.hornprove)
+> hornprove = Com "hornprove" summ usage f
+>   where summ = "Basic horn clause prover using backchaining"
+>         usage = PP.vcat [ PP.text "hornprove -f <formula>"
+>                         , PP.text "hornprove <id>"
+>                         ] 
+>         f = run Prolog.hornprove
 
 > prolog :: Command
-> prolog = ("prolog",
->           "Prolog interpreter",
->          \(c:prog) -> case Prolog.prolog prog c of
->                         Nothing -> S.putStrLn "Unsolvable"
->                         Just eqs -> PP.putStrLn $ pPrint eqs)
+> prolog = Com "prolog" "Prolog interpreter" usage f
+>   where usage = PP.vcat [ PP.text "prolog -f <formula>"
+>                         , PP.text "prolog -file <file>"
+>                         , PP.text "prolog <id>"
+>                         ] 
+>         f flags args = case Prolog.prolog prog c of
+>                          Nothing -> S.putStrLn "Unsolvable"
+>                          Just eqs -> PP.putStrLn $ pPrint eqs
+>           where (prog, c) = getProgram flags args
 
 > basicMeson :: Command
-> basicMeson = ("basicMeson",
->               "Basic Meson procedure",
->               runfol Meson.basicMeson)
+> basicMeson = Com "basicMeson" "Basic MESON procedure." usage f
+>   where usage = PP.vcat [ PP.text "basicMeson -f <formula>"
+>                         , PP.text "basicMeson <id>"
+>                         ] 
+>         f = run Meson.basicMeson
 
 > meson :: Command
-> meson = ("meson",
->          "Optimized Meson procedure",
->          runfol Meson.meson)
+> meson = Com "meson" "MESON procedure." usage f
+>   where usage = PP.vcat [ PP.text "meson -f <formula>"
+>                         , PP.text "meson <id>"
+>                         ] 
+>         f = run Meson.meson
 
 > bmeson :: Command
-> bmeson = ("bmeson",
->           "Meson with equality elimination",
->          runfol EqElim.bmeson)
+> bmeson = Com "bmeson" "MESON procedure with equality elimination." usage f
+>   where usage = PP.vcat [ PP.text "bmeson -f <formula>"
+>                         , PP.text "bmeson <id>"
+>                         ] 
+>         f = run EqElim.bmeson
+
+> paramod :: Command
+> paramod = Com "paramod" "Paramodulation." usage f
+>   where usage = PP.vcat [ PP.text "paramod -f <formula>"
+>                         , PP.text "paramod <id>"
+>                         ] 
+>         f = run Paramodulation.paramodulation
 
 > ccvalid :: Command
-> ccvalid = ("cc",
->            "Congruence closure validity",
->            runfol (PP.putStrLn . pPrint . Cong.ccvalid))
+> ccvalid = Com "ccvalid" "Congruence closure." usage f
+>   where usage = PP.vcat [ PP.text "ccvalid -f <formula>"
+>                         , PP.text "ccvalid <id>"
+>                         ] 
+>         f = run (return . Cong.ccvalid)
 
 > rewrite :: Command
-> rewrite = ("rewrite",
->            "Rewriting",
->           \(eq:eqs) -> let tm = Rewrite.rewrite (map parse eqs) (parse eq) in
->                        PP.putStrLn $ pPrint tm)
+> rewrite = Com "rewrite" "Rewriting" usage f
+>   where usage = PP.vcat [ PP.text "rewrite -file <file>"
+>                         , PP.text "rewrite -f <formula>"
+>                         ] 
+>         f flags args = PP.putStrLn $ pPrint $ Rewrite.rewrite fs t 
+>           where (fs, t) = getRewrites flags args 
 
 > aedecide :: Command
-> aedecide = ("aedecide",
->             "Decide AE problems",
->             runfol (PP.putStrLn . pPrint . Decidable.aedecide))
+> aedecide = Com "aedecide" "Decide AE problems." usage f
+>   where usage = PP.vcat [ PP.text "aedecide -f <formula>"
+>                         , PP.text "aedecide <id>"
+>                         ] 
+>         f = run (return . Decidable.aedecide)
 
 > dlo :: Command
-> dlo = ("dlo", "Dense Linear Orders",
->             runfol (PP.putStrLn . pPrint . Qelim.qelimDLO))
+> dlo = Com "dlo" "Dense linear orders." usage f
+>   where usage = PP.vcat [ PP.text "dlo -f <formula>"
+>                         , PP.text "dlo <id>"
+>                         ] 
+>         f = run (return . Qelim.qelimDLO)
 
-> pres :: Command
-> pres = ("pres", "Presburger arithmetic",
->                  runfol (PP.putStrLn . pPrint . Cooper.integerQelim))
+> presburgher :: Command
+> presburgher = Com "presburgher" "Presburgher arithmetic." usage f
+>   where usage = PP.vcat [ PP.text "presburgher -f <formula>"
+>                         , PP.text "presburgher <id>"
+>                         ] 
+>         f = run (return . Cooper.integerQelim)
 
-> nelopInt :: Command
-> nelopInt = ("nelopInt",
->             "Nelson Oppen",
->             runfol (PP.putStrLn . pPrint . Combining.nelop (Combining.addDefault [Combining.intLang])))
+> nelop :: Command
+> nelop = Com "nelop" "Teh Nelson-Oppen method" usage f
+>   where usage = PP.vcat [ PP.text "nelop -f <formula>"
+>                         , PP.text "nelop <id>" ] 
+>         f = run (return . 
+>                  Combining.nelop (Combining.addDefault [Combining.intLang]))
 
-* Options
+* Top
 
-> data Flag = -- Flags
->             Verbose Priority
->           | LogToTerm
->           | LogToFile
->   deriving (Eq, Show)
+> main :: IO ()
+> main = System.getArgs >>= doit
 
-> instance Pretty Flag where
->   pPrint = PP.text . show
+> doit :: Args -> IO ()
+> doit args = do 
+>   S.putStrLn "Welcome to Haskell ATP!"
+>   S.putStrLn ""
+>   -- Parse arguments.  Opts is the unknown options that will be parsed by
+>   -- the individual prover.  
+>   (flags, args', opts) <- parseOptions args
+>   let flags' = map decodeFlag flags
+>   -- It's important to decode the command line arguments, since they may
+>   -- be in Unicode syntax.  UString seems to work.
+>   let uargs = map UString.decodeString args'
+>       uopts = map UString.decodeString opts
+>       prio = maybe Log.defaultPrio id (List.findFirst getPrio flags')
+>   -- Initialize the log file
+>   let logToFile = elem LogToFile flags'
+>   Log.initialize prio logToFile (elem LogToTerm flags')
+>   -- Now we can start logging.  Start with a notification that
+>   -- logging is taking place!
+>   if logToFile
+>     then Log.stdout ("Logging output to file: " ++ Log.logFileName) 
+>     else return ()
+>   Log.infoM' "ATP" $ PP.vcat [ PP.text "flags        :" <+> pPrint flags'
+>                              , PP.text "args         :" <+> pPrint uargs  
+>                              , PP.text "unknown opts :" <+> pPrint uopts ]
+>   -- Run the requested command
+>   Exn.catch (forward flags' $ uopts ++ uargs) handle
 
-> options :: [OptDescr Flag]
-> options =
->  [ Option ['v'] ["Verbose"] (OptArg verbose (show Log.defaultPrio)) 
->      "Verbosity level.  (debug | info | warn | error)"
->  , Option ['T'] ["LogToTerm"] (NoArg LogToTerm)
->      "Log to terminal on stdout."
->  , Option ['F'] ["LogToFile"] (NoArg LogToFile)
->      "Log to the log file."
->  ]
+Handle exceptions
 
-> parseOptions :: Args -> IO ([Flag], [String], [String])
-> parseOptions argv = case Opt.getOpt' Opt.Permute options argv of
->   (o, n, u, []) -> return (o, n, u)
->   (_, _, _, errs) -> ioError $ userError $ concat errs ++ usage
+> handle :: ComExn -> IO ()
+> handle (ComExn s) = S.putStrLn s
 
-> verbose :: Maybe String -> Flag
-> verbose Nothing = Verbose Log.defaultPrio
-> verbose (Just s) = case Log.readPrio s of 
->   Nothing -> error $ "No such setting for 'verbose': " ++ s
->   Just p -> Verbose p
+Determine logging priority.
 
-> usage :: String
-> usage = Opt.usageInfo usageMsg options 
->   where usageMsg = PP.render block
->         block = PP.vcat [ PP.text "Possible commands:"
->                         , PP.nest 3 (PP.vcat (map group groups))
->                         , PP.text "Flags:"
->                         ]
->         group (name, coms) = PP.text ("=== " ++ name ++ " ===") $+$ PP.space $+$
->                              PP.nest 3 (PP.vcat (map com coms)) $+$ PP.space
->         com (name, desc, _) = PP.text (name ++ spaces name ++ ": " ++ desc)
->         spaces name = concat (replicate (20 - length name) " ")
+> getPrio :: Flag -> Maybe Priority
+> getPrio (Verbose p) = Just p
+> getPrio _ = Nothing
+
+Forward a command from the top level to the requested command.
+
+> forward :: Flags -> Args -> IO ()
+> forward _ [] = S.putStrLn usageMsg
+> forward flags (com : args) = 
+>   case List.find (\c -> name c == com) commands of
+>     Nothing -> S.putStrLn $ "No such command: " ++ com
+>     Just (Com _ _ _ f) -> f flags args

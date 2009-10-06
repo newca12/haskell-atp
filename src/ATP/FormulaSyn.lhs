@@ -18,8 +18,9 @@
 * Imports
 
 > import Prelude 
-> import qualified Data.List as List
 > import qualified Data.Maybe as Maybe
+> import qualified Data.List as List
+> import qualified Data.Map as Map
 > import Data.Map (Map)
 > import qualified Language.Haskell.TH as TH
 > import Language.Haskell.TH(ExpQ, PatQ)
@@ -87,6 +88,10 @@
 > type Clause = [Formula]
 > type Clauses = [Clause]
 > type Env = Map Var Term
+
+> instance Pretty Env where
+>   pPrint m = PP.set (map pp $ Map.toList m)
+>     where pp (x, t) = PP.hsep [pPrint x, PP.text "↦", pPrint t]
 
 * Infix ops
 
@@ -348,10 +353,10 @@ Terms
 >   Var x -> PP.text x
 >   Fn "^" [t1, t2] -> ppInfixTm True prec 24 "^" t1 t2
 >   Fn "/" [t1, t2] -> ppInfixTm True prec 22 "/" t1 t2
->   Fn "*" [t1, t2] -> ppInfixTm True prec 20 "*" t1 t2
+>   Fn "*" [t1, t2] -> ppInfixTm False prec 20 "*" t1 t2
 >   Fn "-" [t1, t2] -> ppInfixTm True prec 18 "-" t1 t2
->   Fn "+" [t1, t2] -> ppInfixTm True prec 16 "+" t1 t2
->   Fn "::" [t1, t2] -> ppInfixTm True prec 14 "::" t1 t2
+>   Fn "+" [t1, t2] -> ppInfixTm False prec 16 "+" t1 t2
+>   Fn "::" [t1, t2] -> ppInfixTm False prec 14 "::" t1 t2
 >   Fn f [] -> PP.text f
 >   Fn f xs -> PP.text f <> ppArgs xs
 
@@ -376,9 +381,13 @@ Relations
 > instance Pretty Rel where
 >   pPrint (R p []) = PP.text p
 >   pPrint (R p args) = 
->     if List.elem p ["=", "<", "<=", ">", ">="] && length args == 2 
->     then ppInfixTm False 12 12 p (args !! 0) (args !! 1)
->     else PP.text p <> ppArgs args
+>       if List.elem p ["=", "<", "<=", "≤", ">", ">=", "≥"] && length args == 2 
+>       then ppInfixTm False 12 12 p' (args !! 0) (args !! 1)
+>       else PP.text p <> ppArgs args
+>     where p' = case p of 
+>                  "<=" -> "≤"
+>                  ">=" -> "≥"
+>                  _ -> p
 
 Formulas
 
@@ -387,6 +396,9 @@ Formulas
 
 > instance Pretty Formula where
 >   pPrint = ppForm 0
+
+Since all infix formulas associate to the right, we don't need
+to complicate the printer with associativity.
 
 > ppForm :: Int -> Formula -> PP.Doc
 > ppForm pr f = case f of 
@@ -405,8 +417,10 @@ Formulas
 > ppPrefixFm pr sym p = PP.text sym <> ppForm pr p
 
 > ppInfixFm :: Int -> String -> Formula -> Formula -> PP.Doc
-> ppInfixFm pr sym p q = PP.sep [ PP.hsep[ppForm (pr+1) p, PP.text sym]
->                               , ppForm pr q ]
+> ppInfixFm pr sym p q = 
+>   let lev :: Int = if sym == "∧" || sym == "∨" then 0 else 2 in 
+>   PP.hang (ppForm (pr+1) p <+> PP.text sym)
+>     lev (ppForm pr q)
 
 > ppQuant :: String -> (Vars, Formula) -> PP.Doc
 > ppQuant name (bvs, bod) = 

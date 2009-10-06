@@ -21,11 +21,43 @@ library
 
   hs-source-dirs: src
 
-  exposed-modules: ATP.Util.Lib
+  build-depends:  base,
+                  haskell98,
+                  containers,
+                  mtl,
+                  parsec,
+                  utf8-string >= 0.3.5,
+                  HUnit >= 1.2.2.0,
+                  pretty,
+                  QuickCheck >= 2.1.0.0,
+                  template-haskell,
+                  hslogger >= 1.0.7,
+                  syb
+
+  extensions:    MultiParamTypeClasses
+                 ScopedTypeVariables
+                 TypeSynonymInstances
+                 OverlappingInstances
+                 FlexibleInstances
+                 DeriveDataTypeable
+                 TemplateHaskell
+                 QuasiQuotes
+
+  exposed-modules: ATP.Util.Lex
+                   ATP.Util.Lib
+                   ATP.Util.List
                    ATP.Util.ListSet
-                   ATP.Util.Lex
+                   ATP.Util.Log
+                   ATP.Util.Log.Class
+                   ATP.Util.Misc
+                   ATP.Util.Monad
                    ATP.Util.Parse
+                   ATP.Util.Parse.Parse
                    ATP.Util.Print
+                   ATP.Util.Print.Print
+                   ATP.Util.TH
+                   ATP.Util.UnionFind
+                   
                    ATP.IntroSyn
                    ATP.Intro
                    ATP.FormulaSyn
@@ -60,31 +92,13 @@ library
                    ATP.Combining
                    ATP.TestFormulas
 
-  extensions:    MultiParamTypeClasses
-                 ScopedTypeVariables
-                 TypeSynonymInstances
-                 OverlappingInstances
-                 FlexibleInstances
-                 DeriveDataTypeable
-                 TemplateHaskell
-                 QuasiQuotes
-
 executable atp
 
   main-is:       Main.lhs
 
   hs-source-dirs: src
 
-  extensions:    MultiParamTypeClasses
-                 ScopedTypeVariables
-                 TypeSynonymInstances
-                 OverlappingInstances
-                 FlexibleInstances
-                 DeriveDataTypeable
-                 TemplateHaskell
-                 QuasiQuotes
-
-  build-depends:  base >= 3.0.3.1,
+  build-depends:  base,
                   haskell98,
                   containers,
                   mtl,
@@ -94,8 +108,17 @@ executable atp
                   pretty,
                   QuickCheck >= 2.1.0.0,
                   template-haskell,
-                  syb,
-                  hslogger >= 1.0.7
+                  hslogger >= 1.0.7,
+                  syb
+
+  extensions:    MultiParamTypeClasses
+                 ScopedTypeVariables
+                 TypeSynonymInstances
+                 OverlappingInstances
+                 FlexibleInstances
+                 DeriveDataTypeable
+                 TemplateHaskell
+                 QuasiQuotes
 
   ghc-options: -Wall 
                -- These warnings are not turned on by -Wall

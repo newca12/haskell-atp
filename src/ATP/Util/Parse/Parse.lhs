@@ -9,10 +9,11 @@
 > where
 
 > import Prelude 
+> import Data.Ratio (Ratio, (%))
 > import qualified Data.Set as Set
 > import Data.Set (Set)
-> import Text.ParserCombinators.Parsec as P
-> import Text.ParserCombinators.Parsec (Parser)
+> import qualified Text.ParserCombinators.Parsec as P
+> import Text.ParserCombinators.Parsec (Parser, (<|>))
 > import qualified ATP.Util.Lex as Lex
 
 > class Parse a where
@@ -40,6 +41,21 @@
 > instance Parse Bool where
 >   parser = (Lex.reserved "True" >> return True)
 >        <|> (Lex.reserved "False" >> return False)
+
+> instance Parse Int where
+>   parser = Lex.int
+
+> instance Parse Integer where
+>   parser = Lex.integer
+
+> instance Parse (Ratio Integer) where
+>   parser = parseRatio
+
+> parseRatio :: Parser (Ratio Integer) 
+> parseRatio = do n <- (parser <|> Lex.parens parser)
+>                 d <- P.option 1 $ (Lex.reservedOp "/" <|> Lex.reservedOp "%") >> parser
+>                 return $ n % d
+>          <|> Lex.parens parseRatio
 
 > instance (Ord a, Parse a) => Parse (Set a) where
 >   parser = braces parser >>= return . Set.fromList

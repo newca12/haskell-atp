@@ -26,21 +26,22 @@ standard library.  Most mirror functions in Harrison's lib.ml
 * Imports
 
 > import Prelude
-> import qualified List 
+> import qualified System.IO.UTF8 as S
 > import qualified System.CPUTime as Time
 > import qualified Text.Printf as Printf
-> import qualified Char 
+> import qualified Data.Char as Char
+> import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
 
 * Misc
 
-> time :: IO a -> IO a
+> time :: Show a => IO a -> IO a
 > time a = do start <- Time.getCPUTime
 >             v <- a
 >             end <- Time.getCPUTime
->             let diff = (fromIntegral (end - start)) / (10E12) :: Double
->             Printf.printf "Computation time: %0.3f sec\n" (diff :: Double)
+>             let diff :: Double = (fromIntegral (end - start)) / (10E12) 
+>             Printf.printf "Computation time: %0.3f sec\n" diff
 >             return v
 
 > pow' :: Int -> Int -> Int -> Int

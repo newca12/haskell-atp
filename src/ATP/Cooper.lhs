@@ -21,6 +21,9 @@
 > import qualified Ratio
 > import Ratio ((%))
 
+> import qualified ATP.Util.Debug as Debug
+> import ATP.Util.Parse (parse)
+> import ATP.Util.Print (pPrint)
 > import qualified ATP.Util.ListSet as Set
 > import ATP.FormulaSyn
 > import qualified ATP.Formula as F
@@ -48,7 +51,9 @@
 > irat x = x % 1
 
 > destNumeral :: Term -> Rational
-> destNumeral (Fn ns []) = read ns
+> destNumeral t@(Fn ns []) = 
+>   --Debug.trace' "destNumeral" (pPrint t) $ 
+>   parse ns
 > destNumeral t = error ("destNumeral: " ++ show t)
 
 > isNumeral :: Term -> Bool

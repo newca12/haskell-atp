@@ -62,7 +62,7 @@
 > nnf (Not (Ex x p)) = All x (nnf (Not p))
 > nnf fm = fm
 
-nnf $ read "(∀ x. P(x)) ⊃ ((∃ y. Q(y)) ⇔ ∃ z. P(z) & Q(z))"
+nnf $ parse "(∀ x. P(x)) ⊃ ((∃ y. Q(y)) ⇔ ∃ z. P(z) ∧ Q(z))"
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %%% Prenex Normal Form
@@ -138,6 +138,6 @@ nnf $ read "(∀ x. P(x)) ⊃ ((∃ y. Q(y)) ⇔ ∃ z. P(z) & Q(z))"
 >       (q', fns'') = skolem q fns' in
 >   (cons p' q', fns'')
 
-skolemize $ read "∃ y. x < y ⊃ ∀ u. ∃ v. x * u < y * v"
-skolemize $ read "∀ x. P(x) ⊃ (∃ y z. Q(y) | ~(∃ z. P(z) & Q(z)))"
+skolemize $ parse "∃ y. x < y ⊃ ∀ u. ∃ v. x * u < y * v"
+skolemize $ parse "∀ x. P(x) ⊃ (∃ y z. Q(y) ∨ ~(∃ z. P(z) ∧ Q(z)))"
 

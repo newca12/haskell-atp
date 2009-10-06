@@ -22,7 +22,6 @@ Relations R ::= Var() | Var ( TS ) | Var | T = T | T < T
 > module ATP.FOL 
 >   ( onformula
 >   , isVar
->   , Env
 >   , Fv(fv)
 >   , Subst(apply)
 >   , generalize

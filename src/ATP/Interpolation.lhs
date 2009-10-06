@@ -48,7 +48,7 @@ mulas p and q such that |= p ∧ q ⇒ ⊥.)
 >       cntms = map (\(c, _) -> Fn c []) consts in
 >   do tups <- Herbrand.dpRefineLoop (Prop.simpcnf fm) cntms funcs fvs 0 [] [] []
 >      let fmis = map (\tup -> FOL.apply (Map.fromList (zip fvs tup)) fm) tups
->          (ps, qs) = List.unzip (map (\(And p q) -> (p,q)) fmis) 
+>          (ps, qs) = List.unzip (map (\(And p' q') -> (p',q')) fmis) 
 >      return $ pinterpolate (F.listConj(Set.setify ps)) (F.listConj(Set.setify qs))
 
  To turn this into an algorithm we 

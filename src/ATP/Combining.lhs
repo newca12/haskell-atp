@@ -41,7 +41,7 @@ The Nelson-Oppen method.
 >         pdesc sn = elem sn preds
 >         elim fm = Cooper.integerQelim(FOL.generalize fm) == Top
 >         funcs = [("-", 1::Int), ("+", 2), ("-", 2), ("*", 2)]
->         preds = [("<=", 2::Int), ("<", 2), (">=", 2), (">", 2)]
+>         preds = [("<=", 2::Int), ("≤", 2), ("<", 2), (">=", 2), ("≥", 2), (">", 2)]
 
 > addDefault :: [Lang] -> [Lang]
 > addDefault langs = langs ++ [(\sn -> not (List.any (\(f, _, _) -> f sn) langs),
@@ -196,3 +196,5 @@ The Nelson-Oppen method.
 > nelop :: [Lang] -> Formula -> Bool
 > nelop langs fm = List.all (nelop1 langs) (Prop.simpdnf $ Skolem.simplify $ Not fm)
 
+let langs = addDefault [intLang]
+let fm :: Formula = ATP.Util.Parse.parse "1 = 1"
