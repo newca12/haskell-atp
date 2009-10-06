@@ -21,9 +21,7 @@
 > import qualified Ratio
 > import Ratio ((%))
 
-> import qualified ATP.Util.Debug as Debug
 > import ATP.Util.Parse (parse)
-> import ATP.Util.Print (pPrint)
 > import qualified ATP.Util.ListSet as Set
 > import ATP.FormulaSyn
 > import qualified ATP.Formula as F
@@ -51,9 +49,7 @@
 > irat x = x % 1
 
 > destNumeral :: Term -> Rational
-> destNumeral t@(Fn ns []) = 
->   --Debug.trace' "destNumeral" (pPrint t) $ 
->   parse ns
+> destNumeral (Fn ns []) = parse ns
 > destNumeral t = error ("destNumeral: " ++ show t)
 
 > isNumeral :: Term -> Bool
@@ -246,7 +242,7 @@
 > integerQelim :: Formula -> Formula 
 > integerQelim = 
 >  Skolem.simplify . evalc .
->     Qelim.liftQelim linform (Qelim.cnnf posineq . evalc) cooper
+>     Qelim.lift linform (Qelim.cnnf posineq . evalc) cooper
 
 > relativize :: (Var -> Formula) -> Formula -> Formula 
 > relativize r fm =
@@ -261,4 +257,4 @@
 >    _ -> fm
 
 > naturalQelim :: Formula -> Formula 
-> naturalQelim = integerQelim . relativize (\x -> Atom(R "<=" [zero, Var x]))
+> naturalQelim = integerQelim . relativize (\x -> zero ≤ Var x)

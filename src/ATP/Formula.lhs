@@ -6,7 +6,7 @@
 >   , opp, negative, positive
 >   , conjuncts, disjuncts
 >   , listConj, listDisj
->   , listForall, listExists
+>   , listAll, listEx
 >   , destImp, unIff
 >   ) 
 > where
@@ -82,13 +82,13 @@ listConj [a,b,c] --> a & b & c
 > listDisj l = foldr1 Or l
 
 Make a big forall (exists resp.) from a list
-listForall [x,y,z] <<P(x,y,z)>> --> <<forall x y z. P(x,y,z)>>
+listAll [x,y,z] <<P(x,y,z)>> --> <<forall x y z. P(x,y,z)>>
 
-> listForall :: Vars -> Formula -> Formula
-> listForall xs b = foldr All b xs
+> listAll :: Vars -> Formula -> Formula
+> listAll xs b = foldr All b xs
 
-> listExists :: Vars -> Formula -> Formula
-> listExists xs b = foldr Ex b xs
+> listEx :: Vars -> Formula -> Formula
+> listEx xs b = foldr Ex b xs
 
 > destImp :: Formula -> (Formula, Formula)
 > destImp [$form| $a ⊃ $b |] = (a, b)
@@ -101,7 +101,7 @@ the Prelude.)
 
 > opp :: Formula -> Formula
 > opp [$form| ¬ $p |] = p 
-> opp [$form| $p |] = [$form| ~ $p |]
+> opp [$form| $p |] = (¬) p
 
 Sign of a formula
 

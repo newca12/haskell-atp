@@ -7,6 +7,7 @@ The Nelson-Oppen method.
 >   ( slowNelop
 >   , nelop
 >   , intLang
+>   , dloLang
 >   , addDefault
 >   )
 > where
@@ -30,10 +31,11 @@ The Nelson-Oppen method.
 > import qualified ATP.Equal as Equal
 > import qualified ATP.DefCNF as CNF
 > import qualified ATP.Prop as Prop
+> import qualified ATP.DLO as DLO
 
 * Nelson-Oppen
 
-> type Lang = ( (Pred, Int) -> Bool, (Pred, Int) -> Bool, Formula -> Bool )
+> type Lang = ( (Func, Int) -> Bool, (Pred, Int) -> Bool, Formula -> Bool )
 
 > intLang :: Lang
 > intLang = (fdesc, pdesc, elim)
@@ -41,6 +43,12 @@ The Nelson-Oppen method.
 >         pdesc sn = elem sn preds
 >         elim fm = Cooper.integerQelim(FOL.generalize fm) == Top
 >         funcs = [("-", 1::Int), ("+", 2), ("-", 2), ("*", 2)]
+>         preds = [("<=", 2::Int), ("≤", 2), ("<", 2), (">=", 2), ("≥", 2), (">", 2)]
+
+> dloLang :: Lang
+> dloLang = (fdesc, pdesc, DLO.valid)
+>   where fdesc (s, n) = n == 0 && Cooper.isNumeral (Fn s [])
+>         pdesc sn = elem sn preds
 >         preds = [("<=", 2::Int), ("≤", 2), ("<", 2), (">=", 2), ("≥", 2), (">", 2)]
 
 > addDefault :: [Lang] -> [Lang]

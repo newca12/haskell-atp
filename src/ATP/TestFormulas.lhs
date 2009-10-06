@@ -21,6 +21,8 @@ Example formulas for testing the algorithms.
 > formulas = 
 >   [ 
 
+** Pellatier's problems
+
 Propositional
 
 >     ("p1", [$form| p ⊃ q ⇔ ¬ q ⊃ ¬ p |])
@@ -40,70 +42,92 @@ Propositional
 >   , ("p15", [$form| p ⊃ q ⇔ ¬ p ∨ q |])
 >   , ("p16", [$form| (p ⊃ q) ∨ (q ⊃ p) |])
 >   , ("p17", [$form| p ∧ (q ⊃ r) ⊃ s ⇔ (¬ p ∨ q ∨ s) ∧ (¬ p ∨ ¬ r ∨ s) |])
->     -- First order
+
+First order
+
 >   , ("p18", [$form| ∃ y. ∀ x. P(y) ⊃ P(x) |])
+
 >   , ("p19", [$form| ∃ x. ∀ y z. (P(y) ⊃ Q(z)) ⊃ P(x) ⊃ Q(x) |])
+
 >   , ("p20", [$form| (∀ x y. ∃ z. ∀ w. P(x) ∧ Q(y) ⊃ R(z) ∧ U(w)) 
 >                       ⊃ (∃ x y. P(x) ∧ Q(y)) ⊃ (∃ z. R(z)) |])
+
 >   , ("p21", [$form| (∃ x. P ⊃ Q(x)) ∧ (∃ x. Q(x) ⊃ P) 
 >                       ⊃ (∃ x. P ⇔ Q(x)) |])
+
 >   , ("p22", [$form| (∀ x. P ⇔ Q(x)) ⊃ (P ⇔ (∀ x. Q(x))) |])
+
 >   , ("p23", [$form| (∀ x. P ∨ Q(x)) ⇔ P ∨ (∀ x. Q(x)) |])
+
 >   , ("p24", [$form|  ¬ (∃ x. U(x) ∧ Q(x)) ∧ 
 >                    (∀ x. P(x) ⊃ Q(x) ∨ R(x)) ∧       
 >                  ¬ (∃ x. P(x) ⊃ (∃ x. Q(x))) ∧   
 >                    (∀ x. Q(x) ∧ R(x) ⊃ U(x))         
 >                  ⊃ (∃ x. P(x) ∧ R(x)) |]) 
+
 >   , ("p25", [$form| (∃ x. P(x)) ∧ 
 >                  (∀ x. U(x) ⊃ ¬ G(x) ∧ R(x)) ∧ 
 >                  (∀ x. P(x) ⊃ G(x) ∧ U(x)) ∧ 
 >                  ((∀ x. P(x) ⊃ Q(x)) ∨ (∃ x. Q(x) ∧ P(x))) 
 >                  ⊃ (∃ x. Q(x) ∧ P(x)) |]) 
+
 >   , ("p26", [$form| ((∃ x. P(x)) ⇔ (∃ x. Q(x))) ∧ 
 >                   (∀ x y. P(x) ∧ Q(y) ⊃ (R(x) ⇔ U(y))) 
 >                   ⊃ ((∀ x. P(x) ⊃ R(x)) ⇔ (∀ x. Q(x) ⊃ U(x))) |])
+
 >   , ("p27", [$form| (∃ x. P(x) ∧ ¬ Q(x)) ∧ 
 >                   (∀ x. P(x) ⊃ R(x)) ∧ 
 >                   (∀ x. U(x) ∧ V(x) ⊃ P(x)) ∧ 
 >                   (∃ x. R(x) ∧ ¬ Q(x)) 
 >                   ⊃ (∀ x. U(x) ⊃ ¬ R(x)) 
 >                   ⊃ (∀ x. U(x) ⊃ ¬ V(x)) |])
+
 >   , ("p28", [$form| (∀ x. P(x) ⊃ (∀ x. Q(x))) ∧ 
 >                   ((∀ x. Q(x) ∨ R(x)) ⊃ (∃ x. Q(x) ∧ R(x))) ∧ 
 >                   ((∃ x. R(x)) ⊃ (∀ x. L(x) ⊃ M(x))) ⊃ 
 >                   (∀ x. P(x) ∧ L(x) ⊃ M(x)) |])
+
 >   , ("p29", [$form| (∃ x. P(x)) ∧ (∃ x. G(x)) ⊃ 
 >                   ((∀ x. P(x) ⊃ H(x)) ∧ (∀ x. G(x) ⊃ J(x)) ⇔ 
 >                   (∀ x y. P(x) ∧ G(y) ⊃ H(x) ∧ J(y))) |])
+
 >   , ("p30", [$form| (∀ x. P(x) ∨ G(x) ⊃ ¬ H(x)) ∧ 
 >                   (∀ x. (G(x) ⊃ ¬ U(x)) ⊃ P(x) ∧ H(x)) 
 >                   ⊃ (∀ x. U(x)) |])
+
 >   , ("p31", [$form| ¬ (∃ x. P(x) ∧ (G(x) ∨ H(x))) ∧ 
 >                   (∃ x. Q(x) ∧ P(x)) ∧ 
 >                   (∀ x. ¬ H(x) ⊃ J(x)) 
 >                   ⊃ (∃ x. Q(x) ∧ J(x)) |])
+
 >   , ("p32", [$form| (∀ x. P(x) ∧ (G(x) ∨ H(x)) ⊃ Q(x)) ∧ 
 >                   (∀ x. Q(x) ∧ H(x) ⊃ J(x)) ∧ 
 >                   (∀ x. R(x) ⊃ H(x)) 
 >                   ⊃ (∀ x. P(x) ∧ R(x) ⊃ J(x)) |])
+
 >   , ("p33", [$form| (∀ x. P(a) ∧ (P(x) ⊃ P(b)) ⊃ P(c)) ⇔ 
 >                   (∀ x. P(a) ⊃ P(x) ∨ P(c)) ∧ (P(a) ⊃ P(b) ⊃ P(c)) |])
+
 >   , ("p34", [$form| ((∃ x. ∀ y. P(x) ⇔ P(y)) ⇔ 
 >                      ((∃ x. Q(x)) ⇔ (∀ y. Q(y)))) ⇔ 
 >                   ((∃ x. ∀ y. Q(x) ⇔ Q(y)) ⇔ 
 >                   ((∃ x. P(x)) ⇔ (∀ y. P(y)))) |])
+
 >   , ("p35", [$form| ∃ x y. P(x,y) ⊃ (∀ x y. P(x,y)) |])
+
 >   , ("p36", [$form| (∀ x. ∃ y. P(x,y)) ∧ 
 >                   (∀ x. ∃ y. G(x,y)) ∧ 
 >                   (∀ x y. P(x,y) ∨ G(x,y) 
 >                   ⊃ (∀ z. P(y,z) ∨ G(y,z) ⊃ H(x,z))) 
 >                   ⊃ (∀ x. ∃ y. H(x,y)) |])
+
 >   , ("p37", [$form| (∀ z. 
 >                   ∃ w. ∀ x. ∃ y. (P(x,z) ⊃ P(y,w)) ∧ P(y,z) ∧ 
 >                   (P(y,w) ⊃ (∃ u. Q(u,w)))) ∧ 
 >                   (∀ x z. ¬ P(x,z) ⊃ (∃ y. Q(y,z))) ∧ 
 >                   ((∃ x y. Q(x,y)) ⊃ (∀ x. R(x,x))) ⊃ 
 >                   (∀ x. ∃ y. R(x,y)) |])
+
 >   , ("p38", [$form| (∀ x. 
 >                     P(a) ∧ (P(x) ⊃ (∃ y. P(y) ∧ R(x,y))) ⊃ 
 >                   (∃ z w. P(z) ∧ R(x,w) ∧ R(w,z))) ⇔ 
@@ -111,30 +135,39 @@ Propositional
 >                   (¬ P(a) ∨ P(x) ∨ (∃ z w. P(z) ∧ R(x,w) ∧ R(w,z))) ∧ 
 >                     (¬ P(a) ∨ ¬ (∃ y. P(y) ∧ R(x,y)) ∨ 
 >                   (∃ z w. P(z) ∧ R(x,w) ∧ R(w,z)))) |])
+
 >   , ("p39", [$form| ¬ (∃ x. ∀ y. P(y,x) ⇔ ¬ P(y,y)) |])
+
 >   , ("p40", [$form| (∃ y. ∀ x. P(x,y) ⇔ P(x,x)) 
 >                   ⊃ ¬ (∀ x. ∃ y. ∀ z. P(z,y) ⇔ ¬ P(z,x)) |])
+
 >   , ("p41", [$form| (∀ z. ∃ y. ∀ x. P(x,y) ⇔ P(x,z) ∧ ¬ P(x,x)) 
 >                   ⊃ ¬ (∃ z. ∀ x. P(x,z)) |])
+
 >   , ("p42", [$form| ¬ (∃ y. ∀ x. P(x,y) ⇔ ¬ (∃ z. P(x,z) ∧ P(z,x))) |])
+
 >   , ("p43", [$form| (∀ x y. Q(x,y) ⇔ ∀ z. P(z,x) ⇔ P(z,y)) 
 >                     ⊃ ∀ x y. Q(x,y) ⇔ Q(y,x) |])
+
 >   , ("p44", [$form| (∀ x. P(x) ⊃ (∃ y. G(y) ∧ H(x,y)) ∧ 
 >                   (∃ y. G(y) ∧ ¬ H(x,y))) ∧ 
 >                   (∃ x. J(x) ∧ (∀ y. G(y) ⊃ H(x,y))) 
 >                   ⊃ (∃ x. J(x) ∧ ¬ P(x)) |])
+
 >   , ("p45", [$form|  (∀ x. P(x) ∧ (∀ y. G(y) ∧ H(x,y) ⊃ J(x,y))  
 >                       ⊃ (∀ y. G(y) ∧ H(x,y) ⊃ R(y))) ∧           
 >                    ¬ (∃ y. L(y) ∧ R(y)) ∧                             
 >                       (∃ x. P(x) ∧ (∀ y. H(x,y) ⊃ L(y)) ∧     
 >                     (∀ y. G(y) ∧ H(x,y) ⊃ J(x,y)))                  
 >                     ⊃ (∃ x. P(x) ∧ ¬ (∃ y. G(y) ∧ H(x,y))) |])
+
 >   , ("p46", [$form| (∀ x. P(x) ∧ (∀ y. P(y) ∧ H(y,x) ⊃ G(y)) ⊃ G(x)) ∧ 
 >                   ((∃ x. P(x) ∧ ¬ G(x)) ⊃ 
 >                   (∃ x. P(x) ∧ ¬ G(x) ∧ 
 >                   (∀ y. P(y) ∧ ¬ G(y) ⊃ J(x,y)))) ∧ 
 >                   (∀ x y. P(x) ∧ P(y) ∧ H(x,y) ⊃ ¬ J(y,x)) ⊃ 
 >                   (∀ x. P(x) ⊃ G(x)) |])
+
 >   , ("p55", [$form| lives(agatha) ∧ lives(butler) ∧ lives(charles) ∧ 
 >                   (killed(agatha,agatha) ∨ killed(butler,agatha) ∨ 
 >                   killed(charles,agatha)) ∧ 
@@ -147,6 +180,7 @@ Propositional
 >                   ⊃ killed(agatha,agatha) ∧ 
 >                   ¬ killed(butler,agatha) ∧ 
 >                   ¬ killed(charles,agatha) |])
+
 >   , ("p57", [$form| P(f((a),b),f(b,c)) ∧ 
 >                   P(f(b,c),f(a,c)) ∧ 
 >                   (∀ x y z. P(x,y) ∧ P(y,z) ⊃ P(x,z)) 
@@ -156,38 +190,48 @@ Propositional
 >   , ("p59", [$form| (∀ x. P(x) ⇔ ¬ P(f(x))) ⊃ (∃ x. P(x) ∧ ¬ P(f(x))) |])
 >   , ("p60", [$form| ∀ x. P(x,f(x)) ⇔ 
 >                         ∃ y. (∀ z. P(z,y) ⊃ P(z,f(x))) ∧ P(x,y) |])
->     -- Gilmore
+
+Gilmore
+
 >   , ("gilmore_1", [$form| ∃ x. ∀ y z.
 >                          ((F(y) ⊃ G(y)) ⇔ F(x)) ∧ 
 >                          ((F(y) ⊃ H(y)) ⇔ G(x)) ∧ 
 >                          (((F(y) ⊃ G(y)) ⊃ H(y)) ⇔ H(x)) 
 >                         ⊃ F(z) ∧ G(z) ∧ H(z) |])
+
 >   , ("gilmore_2", [$form| ∃ x y. ∀ z. 
 >                        (F(x,z) ⇔ F(z,y)) ∧ (F(z,y) ⇔ F(z,z)) ∧ (F(x,y) ⇔ F(y,x)) 
 >                        ⊃ (F(x,y) ⇔ F(x,z)) |])
+
 >   , ("gilmore_3", [$form| ∃ x. ∀ y z. 
 >                         ((F(y,z) ⊃ (G(y) ⊃ H(x))) ⊃ F(x,x)) ∧ 
 >                         ((F(z,x) ⊃ G(x)) ⊃ H(z)) ∧ 
 >                         F(x,y) 
 >                         ⊃ F(z,z) |])
+
 >   , ("gilmore_4", [$form| ∃ x y. ∀ z. 
 >                         (F(x,y) ⊃ F(y,z) ∧ F(z,z)) ∧ 
 >                         (F(x,y) ∧ G(x,y) ⊃ G(x,z) ∧ G(z,z)) |])
+
 >   , ("gilmore_5", [$form| (∀ x. ∃ y. F(x,y) ∨ F(y,x)) ∧ 
 >                           (∀ x y. F(y,x) ⊃ F(y,y)) 
 >                         ⊃ ∃ z. F(z,z) |])
+
 >   , ("gilmore_6", [$form| ∀ x. ∃ y. 
 >                         (∃ u. ∀ v. F(u,x) ⊃ G(v,u) ∧ G(u,x)) 
 >                         ⊃ (∃ u. ∀ v. F(u,y) ⊃ G(v,u) ∧ G(u,y)) ∨ 
 >                         (∀ u v. ∃ w. G(v,u) ∨ H(w,y,u) ⊃ G(u,w)) |])
+
 >   , ("gilmore_7", [$form| (∀ x. K(x) ⊃ ∃ y. L(y) ∧ (F(x,y) ⊃ G(x,y))) ∧ 
 >                         (∃ z. K(z) ∧ ∀ u. L(u) ⊃ F(z,u)) 
 >                         ⊃ ∃ v w. K(v) ∧ L(w) ∧ G(v,w) |])
+
 >   , ("gilmore_8", [$form| ∃ x. ∀ y z. 
 >                         ((F(y,z) ⊃ (G(y) ⊃ (∀ u. ∃ v. H(u,v,x)))) ⊃ F(x,x)) ∧ 
 >                         ((F(z,x) ⊃ G(x)) ⊃ (∀ u. ∃ v. H(u,v,z))) ∧ 
 >                         F(x,y) 
 >                         ⊃ F(z,z) |])
+
 >   , ("gilmore_9", [$form| ∀ x. ∃ y. ∀ z. 
 >                         ((∀ u. ∃ v. F(y,u,v) ∧ G(y,u) ∧ ¬ H(y,x)) 
 >                         ⊃ (∀ u. ∃ v. F(x,u,v) ∧ G(z,u) ∧ ¬ H(x,z)) 
@@ -196,15 +240,19 @@ Propositional
 >                         ⊃ ¬ (∀ u. ∃ v. F(x,u,v) ∧ G(z,u) ∧ ¬ H(x,z)) 
 >                         ⊃ (∀ u. ∃ v. F(y,u,v) ∧ G(y,u) ∧ ¬ H(y,x)) ∧ 
 >                         (∀ u. ∃ v. F(z,u,v) ∧ G(y,u) ∧ ¬ H(z,y))) |])
->     -- Misc
+
+Misc
+
 >   , ("davis_putnam_example", [$form| ∃ x. ∃ y. ∀ z. 
 >                                    (F(x,y) ⊃ (F(y,z) ∧ F(z,z))) ∧ 
 >                                    ((F(x,y) ∧ G(x,y)) ⊃ (G(x,z) ∧ G(z,z))) |])
+
 >   , ("los", [$form| (∀ x y z. P(x,y) ∧ P(y,z) ⊃ P(x,z)) ∧ 
 >                   (∀ x y z. Q(x,y) ∧ Q(y,z) ⊃ Q(x,z)) ∧ 
 >                   (∀ x y. Q(x,y) ⊃ Q(y,x)) ∧ 
 >                   (∀ x y. P(x,y) ∨ Q(x,y)) 
 >                   ⊃ (∀ x y. P(x,y)) ∨ (∀ x y. Q(x,y)) |])
+
 >   , ("steamroller", [$form| ((∀ x. P1(x) ⊃ P0(x)) ∧ (∃ x. P1(x))) ∧ 
 >                          ((∀ x. P2(x) ⊃ P0(x)) ∧ (∃ x. P2(x))) ∧ 
 >                          ((∀ x. P3(x) ⊃ P0(x)) ∧ (∃ x. P3(x))) ∧ 
@@ -225,17 +273,21 @@ Propositional
 >                          (∀ x. (P4(x) ∨ P5(x)) ⊃ ∃ y. Q0(y) ∧ R(x,y)) 
 >                          ⊃ ∃ x y. P0(x) ∧ P0(y) ∧ 
 >                                  ∃ z. Q1(z) ∧ R(y,z) ∧ R(x,y) |])
+
 >   , ("wishnu", [$form| (∃ x. x = f(g(x)) ∧ ∀ x'. x' = f(g(x')) ⊃ x = x') ⇔ 
 >            (∃ y. y = g(f(y)) ∧ ∀ y'. y' = g(f(y')) ⊃ y = y') |])
+
 >   , ("eq1", [$form| (∀ x y z. x * (y * z) = (x * y) * z) ∧ 
 >                   (∀ x. 1 * x = x) ∧ 
 >                   (∀ x. i(x) * x = 1) 
 >                   ⊃ ∀ x. x * i(x) = 1 |])
+
 >   , ("eq2", [$form| (∀ x y z. x * (y * z) = (x * y) * z) ∧ 
 >                   (∀ x. 1 * x = x) ∧ 
 >                   (∀ x. x * 1 = x) ∧ 
 >                   (∀ x. x * x = 1) 
 >                   ⊃ ∀ x y. x * y  = y * x |])
+
 
 >   , ("eq3", [$form| (∀ x. x = x) ∧ 
 >                   (∀ x y z. x * (y * z) = (x * y) * z) ∧ 
@@ -249,6 +301,7 @@ Propositional
 >                   (∀ x y z. x = y ⊃ z * x = z * y) ∧ 
 >                   (∀ x y z. x = y ∧ y = z ⊃ x = z)
 >                   ⊃ ∀ x. x * i(x) = 1 |])
+
 
 >   , ("eq4", [$form| (∀ x y z. axiom(x * (y * z),(x * y) * z)) ∧ 
 >                   (∀ x y z. axiom((x * y) * z,x * (y * z)) ∧ 
@@ -267,6 +320,7 @@ Propositional
 >                   (∀ s t. achain(s,t) ⊃ s = t) ∧ 
 >                   (∀ t. t = t) 
 >                   ⊃ ∀ x. x * i(x) = 1 |])
+
 >   , ("eq5", [$form| (∀ x y z. axiom(x * (y * z),(x * y) * z)) ∧ 
 >                   (∀ x y z. axiom((x * y) * z,x * (y * z)) ∧ 
 >                   (∀ x. axiom(1 * x,x)) ∧ 
@@ -283,6 +337,7 @@ Propositional
 >                   (∀ s t. achain(s,t) ⊃ s = t) ∧ 
 >                   (∀ t. t = t) 
 >                   ⊃ ∀ x. x * i(x) = 1 |]) 
+
 >   , ("eq6", [$form| axiom(f(f(f(f(f(c))))),c) ∧ 
 >                   axiom(c,f(f(f(f(f(c)))))) ∧ 
 >                   axiom(f(f(f(c))),c) ∧ 
@@ -296,6 +351,7 @@ Propositional
 >                   (∀ t. t = t) ∧ 
 >                   (∀ x y. x = y ⊃ cong(f(x),f(y))) 
 >                   ⊃ f(c) = c |])
+
 >   , ("eq7", [$form| (∀ x y z. eqA (x * (y * z),(x * y) * z)) ∧ 
 >                   (∀ x y z. eqA ((x * y) * z)) ∧ 
 >                   (∀ x. eqA (1 * x,x)) ∧ 
@@ -321,6 +377,7 @@ Propositional
 >                   (∀ x y z. eqA (x,y) ∧ eqT (y,z) ⊃ eqT (x,z)) ∧ 
 >                   (∀ x y z. eqC (x,y) ∧ eqT (y,z) ⊃ eqT (x,z)) 
 >                   ⊃ ∀ x. eqT (x * i(x),1) |]) 
+
 >   , ("eq8", [$form| (∀ x y z. eqA (x * (y * z),(x * y) * z)) ∧ 
 >                  (∀ x y z. eqA ((x * y) * z)) ∧ 
 >                  (∀ x. eqA (1 * x,x)) ∧ 
@@ -340,6 +397,7 @@ Propositional
 >                  (∀ x y z. eqA (x,y) ∧ eqT (y,z) ⊃ eqT (x,z)) ∧ 
 >                  (∀ x y z. eqC (x,y) ∧ eqT (y,z) ⊃ eqT (x,z)) 
 >                  ⊃ ∀ x. eqT (x * i(x),1) ∨ eqC (x * i(x),1) |]) 
+
 >   , ("eq9", [$form| (∀ x y z. eq1(x * (y * z),(x * y) * z)) ∧ 
 >                   (∀ x y z. eq1((x * y) * z,x * (y * z))) ∧ 
 >                   (∀ x. eq1(1 * x,x)) ∧ 
@@ -351,41 +409,54 @@ Propositional
 >                   (∀ x y z. eq1(x,y) ∧ eq2(y,z) ⊃ eq2(x,z)) ∧ 
 >                   (∀ x y. eq1(x,y) ⊃ eq2(x,y)) 
 >                   ⊃ ∀ x. eq2(x,i(x)) |]) 
+
 >   , ("eq10", [$form| f(f(f(f(f(c))))) = c ∧ f(f(f(c))) = c 
 >                    ⊃ f(c) = c ∨ f(g(c)) = g(f(c)) |])
+
 >   , ("eq11", [$form| ∀ c. f(f(f(f(f(c))))) = c ∧ f(f(f(c))) = c ⊃ f(c) = c |])
->     -- eqelim.ml
+
+eqelim.ml
+
 >   , ("eq12", [$form| (∀ x. R(x,x)) ∧ 
 >                    (∀ x y. R(x,y) ⊃  R(y,x)) ∧ 
 >                    (∀ x y z. R(x,y) ∧ R(y,z) ⊃ R(x,z)) 
 >                    ⇔ (∀ x y. R(x,y) ⇔ (∀ z. R(x,z) ⇔ R(y,z))) |]) 
+
 >   , ("abel", [$form| (∀ x. P(1,x,x)) ∧ 
 >          (∀ x. P(x,x,1)) ∧ 
 >          (∀ u v w x y z. P(x,y,u) ∧ P(y,z,w) 
 >                              ⊃ (P(x,w,v) ⇔ P(u,z,v))) 
 >            ⊃ ∀ a b c. P(a,b,c) ⊃ P(b,a,c) |])
+
 >   , ("abel_false", [$form| (∀ x. P(x,x,1)) ∧
->    (∀ u v w x y z.
->         P(x,y,u) ∧ P(y,z,w) ⊃ (P(x,w,v) ⇔ P(u,z,v)))
->    ⊃ ∀ a b c. P(a,b,c) ⊃ P(b,a,c) |])
+>                              (∀ u v w x y z.
+>                                 P(x,y,u) ∧ P(y,z,w) ⊃ (P(x,w,v) ⇔ P(u,z,v)))
+>                              ⊃ ∀ a b c. P(a,b,c) ⊃ P(b,a,c) |])
+
 >   , ("ewd1062", [$form| (∀ x. x ≤ x) ∧ 
 >                       (∀ x y z. x ≤ y ∧ y ≤ z ⊃ x ≤ z) ∧ 
 >                        (∀ x y. f(x) ≤ y ⇔ x ≤ g(y)) 
 >                       ⊃ (∀ x y. x ≤ y ⊃ f(x) ≤ f(y)) ∧ 
 >                       (∀ x y. x ≤ y ⊃ g(x) ≤ g(y)) |])
->     -- paramodulation.ml 
+
+paramodulation.ml 
+
 >   , ("para1", [$form| (∀ x. f(f(x)) = f(x)) ∧ (∀ x. ∃ y. f(y) = x)
 >    ⊃ ∀ x. f(x) = x |])
 >     -- Groups
+
 >   , ("group1", [$form| (∀ x y z. x * (y * z) = (x * y) * z) ∧
 >    (∀ x. e * x = x) ∧
 >    (∀ x. i(x) * x = e)
 >    ⊃ ∀ x. x * e = x |])
+
 >   , ("group2", [$form| (∀ x y z. x * (y * z) = (x * y) * z) ∧
 >    (∀ x. e * x = x) ∧
 >    (∀ x. i(x) * x = e)
 >    ⊃ ∀ x. x * i(x) = e |])
->     -- DLO
+
+DLO
+
 >   , ("dlo1", [$form| ∀ x y. ∃ z. z < x ∧ z < y |])
 >   , ("dlo2", [$form| ∃ z. z < x ∧ z < y |])
 >   , ("dlo3", [$form| ∃ z. x < z ∧ z < y |])
@@ -418,7 +489,7 @@ Propositional
 >   , ("dlo29", [$form| ∀ a b. ∃ x. ¬ (x = a) ∨ ¬ (x = b) ∨ (a = b) |])
 >   , ("dlo30", [$form| ∀ x y. x ≤ y ∨ x > y |])
 
-Presburger
+** Presburger
 
 >   , ("pres0", [$form| ∀ x y. ¬ (2 * x + 1 = 2 * y) |])
 >   , ("pres1", [$form| ∀ x. ∃ y. 2 * y ≤ x ∧ x < 2 * (y + 1) |])
@@ -556,7 +627,7 @@ Landau trick! Is it too slow?
 >   , ("pres55", [$form| ∀ d. d ≥ 8 ⊃ ∃ x y. 3 * x + 5 * y = d |])
 >   , ("pres56", [$form| ∀ d. ∃ x y. 3 * x - 5 * y = d |])
 
-Nelson Oppen
+** Nelson-Oppen
 
 >   , ("nelop0", [$form| f(v - 1) - 1 = v + 1 ∧ f(u) + 1 = u - 1 ∧ u + 1 = v ⊃ ⊥ |])
 >   , ("nelop1", [$form| y ≤ x ∧ y ≥ x + z ∧ z ≥ 0 ⊃ f(f(x) - f(y)) = f(z) |])

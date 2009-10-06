@@ -122,7 +122,7 @@ original formulas. This is realized in the following algorithm:
 > cinterpolate :: Formula -> Formula -> IO (Formula)
 > cinterpolate p q = 
 >   let fm = Skolem.nnf (p ∧ q)
->       efm = F.listExists (FOL.fv fm) fm
+>       efm = F.listEx (FOL.fv fm) fm
 >       fns = map fst (FOL.functions fm)
 >       (And p' q', _) = Skolem.skolem efm fns in
 >   uinterpolate p' q'

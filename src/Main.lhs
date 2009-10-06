@@ -66,6 +66,7 @@ The front end for the automated theorem proving Haskell port.
 > import qualified ATP.Paramodulation as Paramodulation
 > import qualified ATP.Decidable as Decidable
 > import qualified ATP.Qelim as Qelim
+> import qualified ATP.DLO as DLO
 > import qualified ATP.Cooper as Cooper
 > import qualified ATP.Poly as Poly
 > import qualified ATP.Complex as Complex
@@ -75,6 +76,8 @@ The front end for the automated theorem proving Haskell port.
 > import qualified ATP.Interpolation as Interpolation
 > import qualified ATP.Combining as Combining
 > import qualified ATP.TestFormulas as Forms
+
+> import qualified ATP.Test.DLO 
 
 * Options
 
@@ -229,8 +232,10 @@ Get rewriting rules.
 >          , ("Decidable problems",
 >             [ aedecide
 >             , dlo
+>             , dlovalid
 >             , presburgher
 >             , nelop
+>             , nelopDLO
 >             ])
 >          ]
 
@@ -277,7 +282,9 @@ Get rewriting rules.
 ** Tests
 
 > tests :: Test
-> tests = "All" ~: TestList []
+> tests = "All" ~: TestList 
+>   [ ATP.Test.DLO.tests 
+>   ]
 
 > test :: Command
 > test = Com "test" summ usage f
@@ -560,7 +567,14 @@ Show a test formula
 >   where usage = PP.vcat [ PP.text "dlo -f <formula>"
 >                         , PP.text "dlo <id>"
 >                         ] 
->         f = run (return . Qelim.qelimDLO)
+>         f = run (return . DLO.qelim)
+
+> dlovalid :: Command
+> dlovalid = Com "dlovalid" "Dense linear orders." usage f
+>   where usage = PP.vcat [ PP.text "dlovalid -f <formula>"
+>                         , PP.text "dlovalid <id>"
+>                         ] 
+>         f = run (return . DLO.valid)
 
 > presburgher :: Command
 > presburgher = Com "presburgher" "Presburgher arithmetic." usage f
@@ -570,11 +584,20 @@ Show a test formula
 >         f = run (return . Cooper.integerQelim)
 
 > nelop :: Command
-> nelop = Com "nelop" "Teh Nelson-Oppen method" usage f
->   where usage = PP.vcat [ PP.text "nelop -f <formula>"
+> nelop = Com "nelop" summ usage f
+>   where summ = "The Nelson-Oppen method, linear integer arithmetic"
+>         usage = PP.vcat [ PP.text "nelop -f <formula>"
 >                         , PP.text "nelop <id>" ] 
 >         f = run (return . 
 >                  Combining.nelop (Combining.addDefault [Combining.intLang]))
+
+> nelopDLO :: Command
+> nelopDLO = Com "nelop-dlo" summ usage f
+>   where summ = "The Nelson-Oppen method, dense linear orders"
+>         usage = PP.vcat [ PP.text "nelop -f <formula>"
+>                         , PP.text "nelop <id>" ] 
+>         f = run (return . 
+>                  Combining.nelop (Combining.addDefault [Combining.dloLang]))
 
 * Top
 
