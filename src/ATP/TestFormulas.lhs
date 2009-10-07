@@ -574,13 +574,17 @@ Inspired by the Collatz conjecture.
 >   , ("pres42", [$form| ∃ a b. a > 1 ∧ b > 1 ∧
 >                ((2 * b = a) ∨ (2 * b = 3 * a + 1)) ∧
 >                (a = b) |])
+
+Haskell destroys ML on this example.x
+
 >   , ("pres43", [$form| ∃ a b. a > 1 ∧ b > 1 ∧
 >                ((2 * b = a) ∨ (2 * b = 3 * a + 1)) ∧
 >                ((2 * a = b) ∨ (2 * a = 3 * b + 1)) |])
 
-Bob Constable's "stamp problem".
+Bob Constable's "stamp problem".  Haskell is much faster on these problems.
 
 >   , ("pres45", [$form| ∀ x. x ≥ 8 ⊃ ∃ u v. u ≥ 0 ∧ v ≥ 0 ∧ x = 3 * u + 5 * v |])
+
 >   , ("pres46", [$form| ∃ l.
 >         ∀ x. x ≥ l
 >                   ⊃ ∃ u v. u ≥ 0 ∧ v ≥ 0 ∧ x = 3 * u + 5 * v |])
@@ -697,5 +701,24 @@ An example where the "naive" procedure is slow but feasible
 
 >   , ("nelop17", [$form| 4 * x = 2 * x + 2 * y ∧ x = f(2 * x - y) ∧
 >                            f(2 * y - x) = 3 ∧ f(x) = 4 ⊃ ⊥ |])
+
+DKAL
+
+>   , ("alice1", [$form| 
+>       ∀ X Y.
+>        ((curTime(alice) < licExp(X) ∧
+>        curTime(alice) < licExp(X)) ∧
+>       curTime(alice) < licExp(Y)) ⊃
+>       (((curTime(alice) < licExp(Y)) ∧
+>        curTime(alice) < licExp(Y)) ∧
+>        curTime(alice) < licExp(Y)) |])
+
+>   , ("alice2", [$form| 
+>       ((curTime(alice) < licExp(X) ∧ ⊤ ∧ ⊤ ∧ ⊤) ∧
+>        curTime(alice) < licExp(X) ∧ ⊤ ∧ ⊤ ∧ ⊤) ∧
+>       curTime(alice) < licExp(Y) ∧ ⊤ ∧ ⊤ ∧ ⊤ ⊃
+>       ((curTime(alice) < licExp(Y) ∧ ⊤ ∧ ⊤ ∧ ⊤) ∧
+>        curTime(alice) < licExp(Y) ∧ ⊤ ∧ ⊤ ∧ ⊤) ∧
+>       curTime(alice) < licExp(Y) ∧ ⊤ ∧ ⊤ ∧ ⊤ |])
 
 >   ]

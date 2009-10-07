@@ -5,9 +5,11 @@ The Nelson-Oppen method.
 
 > module ATP.Combining
 >   ( slowNelop
->   , nelop
 >   , intLang
 >   , dloLang
+>   , nelop
+>   , nelopInt
+>   , nelopDLO
 >   , addDefault
 >   )
 > where
@@ -52,9 +54,9 @@ The Nelson-Oppen method.
 >         preds = [("<=", 2::Int), ("≤", 2), ("<", 2), (">=", 2), ("≥", 2), (">", 2)]
 
 > addDefault :: [Lang] -> [Lang]
-> addDefault langs = langs ++ [(\sn -> not (List.any (\(f, _, _) -> f sn) langs),
->                               \sn -> sn == ("=", 2), 
->                               Cong.ccvalid)]
+> addDefault langs = langs ++ [ ( \sn -> not (List.any (\(f, _, _) -> f sn) langs)
+>                               , \sn -> sn == ("=", 2)
+>                               , Cong.ccvalid) ]
 
 > chooseLang :: [Lang] -> Formula -> Maybe Lang
 > chooseLang langs fm =
@@ -77,9 +79,10 @@ The Nelson-Oppen method.
 > homot (fn, pr, dp) tm cont n defs = 
 >   case tm of 
 >     Var _ -> cont tm n defs
->     Fn f args -> if fn(f, length args) 
->                    then listify (homot (fn, pr, dp)) args (\a -> cont (Fn f a)) n defs
->                  else cont (Var ("v_" ++ show n)) (n+1) ( (Equal.mkEq (Var ("v_" ++ show n)) tm) : defs)
+>     Fn f args -> 
+>       if fn(f, length args) 
+>       then listify (homot (fn, pr, dp)) args (\a -> cont (Fn f a)) n defs
+>       else cont (Var ("v_" ++ show n)) (n+1) (Var ("v_" ++ show n) ≡ tm : defs)
 
 > homol :: [Lang] -> Formula -> (Formula -> Int -> [Formula] -> a) -> Int -> [Formula] -> a
 > homol langs fm cont n defs =
@@ -101,9 +104,8 @@ The Nelson-Oppen method.
 
 > homogenize :: [Lang] -> [Formula] -> [Formula]
 > homogenize langs fms = 
->   let fvs = Set.unions (map FOL.fv fms) 
->       n = 1 + foldr (CNF.maxVarIndex "v_") 0 fvs in
->   homo langs fms (\res _ _ -> res) n []
+>   let n = 1 + foldr (CNF.maxVarIndex "v_") 0 (FOL.fv fms) 
+>   in homo langs fms (\res _ _ -> res) n []
 
 > belongs :: Lang -> Formula -> Bool
 > belongs (fn, pr, _) fm = 
@@ -120,13 +122,13 @@ The Nelson-Oppen method.
 > arreq :: Vars -> [Formula]
 > arreq l =
 >   case l of 
->     v1:v2:rest -> Equal.mkEq (Var v1) (Var v2) : arreq (v2 : rest)
+>     v1:v2:rest -> Var v1 ≡ Var v2 : arreq (v2 : rest)
 >     _ -> []
 
 > arrangement :: [Vars] -> [Formula]
 > arrangement part = 
 >   foldr (Set.union . arreq) 
->     (map (\(v,w) -> Not(Equal.mkEq (Var v) (Var w))) (Lib.distinctPairs (map head part))) 
+>     (map (\(v,w) -> Var v ≠ Var w) (Lib.distinctPairs (map head part))) 
 >     part
 
 > destDef :: Formula -> Maybe (Var, Term)
@@ -174,9 +176,10 @@ The Nelson-Oppen method.
 > findasubset :: ([a] -> Maybe b) -> Int -> [a] -> Maybe b
 > findasubset p 0 _ = p []
 > findasubset _ _ [] = Nothing
-> findasubset p m (h:t) = case findasubset (p . (h:)) (m-1) t of
->                           Just x -> Just x
->                           Nothing -> findasubset p m t
+> findasubset p m (h:t) = 
+>   case findasubset (p . (h:)) (m-1) t of
+>     Just x -> Just x
+>     Nothing -> findasubset p m t
 
 > findsubset :: ([a] -> Bool) -> [a] -> Maybe [a]
 > findsubset p l = 
@@ -203,6 +206,12 @@ The Nelson-Oppen method.
 
 > nelop :: [Lang] -> Formula -> Bool
 > nelop langs fm = List.all (nelop1 langs) (Prop.simpdnf $ Skolem.simplify $ Not fm)
+
+> nelopInt :: Formula -> Bool
+> nelopInt = nelop [intLang]
+
+> nelopDLO :: Formula -> Bool
+> nelopDLO = nelop [dloLang]
 
 let langs = addDefault [intLang]
 let fm :: Formula = ATP.Util.Parse.parse "1 = 1"

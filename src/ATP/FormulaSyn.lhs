@@ -8,12 +8,13 @@
 >   , Pred, Rel(R)
 >   , Clause, Clauses
 >   , Env
->   , (¬), (∧), (∨), (⇔), (⊃), (¥), (∃), (⊤), (⊥), (≤), (≥), (≺), (≻), (≡)
+>   , (¬), (∧), (∨), (⇔), (⊃), (¥), (∃), (⊤), (⊥)
+>   , (≤), (≥), (≺), (≻), (≡), (≠)
 >     -- * Quotations
 >   , term
 >   , form
 >     -- * Util
->   , print
+>   , pp
 >   )
 > where
 
@@ -92,8 +93,8 @@
 > type Env = Map Var Term
 
 > instance Pretty Env where
->   pPrint m = PP.set (map pp $ Map.toList m)
->     where pp (x, t) = PP.hsep [pPrint x, PP.text "↦", pPrint t]
+>   pPrint m = PP.set (map pr $ Map.toList m)
+>     where pr (x, t) = PP.hsep [pPrint x, PP.text "↦", pPrint t]
 
 * Infix ops
 
@@ -144,6 +145,9 @@
 > (≡) :: Term -> Term -> Formula
 > s ≡ t = Atom $ R "=" [s, t]
 
+> (≠) :: Term -> Term -> Formula
+> s ≠ t = Not $ s ≡ t
+
 * Parsing
 
 > instance Parse Term where
@@ -171,6 +175,9 @@ clause for antiquotes.
 > var = do Lex.symbol "$"
 >          x <- Lex.identifier
 >          return $ ("$" ++ x)
+>   <|> do Lex.symbol "^"
+>          x <- Lex.identifier
+>          return $ ("^" ++ x)
 >   <|> Lex.identifier
 
 ○ Terms
@@ -300,6 +307,7 @@ clause for antiquotes.
 > antiTE :: String -> TH.ExpQ
 > antiTE v = case v of
 >   '$':back -> TH'.varE back
+>   '^':back -> TH'.conE "Var" [TH'.varE back]
 >   _ -> error ("Impossible: " ++ v) 
 
 *** Patterns 
@@ -317,6 +325,7 @@ clause for antiquotes.
 >   "_"  -> TH.wildP
 >   "$_" -> TH.wildP
 >   '$':x -> TH'.varP x
+>   '^':x -> TH'.conP "Var" [TH'.varP x]
 >   _ -> error ("Impossible: " ++ v)
 
 ** Formulas
@@ -384,8 +393,8 @@ clause for antiquotes.
 
 * Printing
 
-> print :: Pretty a => a -> IO ()
-> print = PP.putStrLn . pPrint
+> pp :: Pretty a => a -> IO ()
+> pp = PP.putStrLn . pPrint
 
 Terms
 

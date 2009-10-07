@@ -78,6 +78,8 @@ The front end for the automated theorem proving Haskell port.
 > import qualified ATP.TestFormulas as Forms
 
 > import qualified ATP.Test.DLO 
+> import qualified ATP.Test.Cooper
+> import qualified ATP.Test.Combining
 
 * Options
 
@@ -233,7 +235,7 @@ Get rewriting rules.
 >             [ aedecide
 >             , dlo
 >             , dlovalid
->             , presburgher
+>             , cooper
 >             , nelop
 >             , nelopDLO
 >             ])
@@ -284,6 +286,8 @@ Get rewriting rules.
 > tests :: Test
 > tests = "All" ~: TestList 
 >   [ ATP.Test.DLO.tests 
+>   , ATP.Test.Cooper.tests 
+>   --, ATP.Test.Combining.tests 
 >   ]
 
 > test :: Command
@@ -576,10 +580,10 @@ Show a test formula
 >                         ] 
 >         f = run (return . DLO.valid)
 
-> presburgher :: Command
-> presburgher = Com "presburgher" "Presburgher arithmetic." usage f
->   where usage = PP.vcat [ PP.text "presburgher -f <formula>"
->                         , PP.text "presburgher <id>"
+> cooper :: Command
+> cooper = Com "cooper" "Cooper's algorithm for Presburger arithmetic." usage f
+>   where usage = PP.vcat [ PP.text "cooper -f <formula>"
+>                         , PP.text "cooper <id>"
 >                         ] 
 >         f = run (return . Cooper.integerQelim)
 

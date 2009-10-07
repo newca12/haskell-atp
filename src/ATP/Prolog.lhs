@@ -165,10 +165,7 @@ left-to-right. Thus we can modify the interpreter:
 * Printing
 
 > instance Pretty Rule where
->   pPrint = pp
-
-> pp :: Rule -> PP.Doc
-> pp (Rule [] f) = pPrint f <> PP.text "."
-> pp (Rule fs f) =
->   pPrint f <+> PP.text ":-" 
->   <+> PP.cat (PP.punctuate PP.comma (map pPrint fs)) <> PP.text "."
+>   pPrint (Rule [] f) = pPrint f <> PP.text "."
+>   pPrint (Rule fs f) =
+>     pPrint f <+> PP.text ":-" 
+>              <+> PP.cat (PP.punctuate PP.comma (map pPrint fs)) <> PP.text "."

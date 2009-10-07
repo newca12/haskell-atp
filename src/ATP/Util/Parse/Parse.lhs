@@ -22,6 +22,8 @@
 >   parse = Lex.makeParser parser
 >   parseFile :: String -> IO a
 >   parseFile = Lex.makeFileParser parser
+>   maybe :: String -> Maybe a
+>   maybe = Lex.makeParser $ P.optionMaybe parser
 
 > commas :: Parser a -> Parser [a]
 > commas p = P.sepBy p Lex.comma
