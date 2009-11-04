@@ -10,23 +10,22 @@
 * Imports
 
 > import Prelude 
-> import qualified Data.List as List
-> import qualified Data.Map as Map
-
+> import qualified ATP.DefCNF as CNF
+> import qualified ATP.EqElim as EqElim
+> import qualified ATP.Equal as Equal
+> import qualified ATP.FOL as FOL
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn
+> import qualified ATP.Herbrand as Herbrand
+> import qualified ATP.Order as Order
+> import qualified ATP.Prop as Prop
+> import qualified ATP.Skolem as Skolem
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
 > import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((⟾))
-> import ATP.FormulaSyn
-> import qualified ATP.Formula as F
-> import qualified ATP.FOL as FOL
-> import qualified ATP.Skolem as Skolem
-> import qualified ATP.Order as Order
-> import qualified ATP.Prop as Prop
-> import qualified ATP.Herbrand as Herbrand
-> import qualified ATP.EqElim as EqElim
-> import qualified ATP.DefCNF as CNF
-> import qualified ATP.Equal as Equal
+> import qualified Data.List as List
+> import qualified Data.Map as Map
 
 * Interpolation
 
@@ -48,7 +47,7 @@ mulas p and q such that |= p ∧ q ⇒ ⊥.)
 >       cntms = map (\(c, _) -> Fn c []) consts in
 >   do tups <- Herbrand.dpRefineLoop (Prop.simpcnf fm) cntms funcs fvs 0 [] [] []
 >      let fmis = map (\tup -> FOL.apply (Map.fromList (zip fvs tup)) fm) tups
->          (ps, qs) = List.unzip (map (\(And p' q') -> (p',q')) fmis) 
+>          (ps, qs) = List.unzip (map F.destAnd fmis) 
 >      return $ pinterpolate (F.listConj(Set.setify ps)) (F.listConj(Set.setify qs))
 
  To turn this into an algorithm we 
@@ -124,8 +123,8 @@ original formulas. This is realized in the following algorithm:
 >   let fm = Skolem.nnf (p ∧ q)
 >       efm = F.listEx (FOL.fv fm) fm
 >       fns = map fst (FOL.functions fm)
->       (And p' q', _) = Skolem.skolem efm fns in
->   uinterpolate p' q'
+>       (p', q') = F.destAnd $ fst $ Skolem.skolem efm fns 
+>   in uinterpolate p' q'
 
 To deal with shared variables we could introduce Skolem constants by 
 existential quantiﬁcation before the core operation. The only diﬀerence is 

@@ -34,17 +34,16 @@ Relations R ::= Var() | Var ( TS ) | Var | T = T | T < T
 
 * Imports
 
-> import Prelude 
-> import qualified Data.List as List
-> import qualified Data.Map as Map
-> import Data.Map(Map)
-
+> import ATP.Util.Prelude 
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn
 > import qualified ATP.Util.Lib as LIb
 > import ATP.Util.Lib((↦))
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
-> import ATP.FormulaSyn
-> import qualified ATP.Formula as F
+> import qualified Data.List as List
+> import qualified Data.Map as Map
+> import Data.Map(Map)
 
 * Util
 

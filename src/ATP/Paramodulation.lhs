@@ -8,19 +8,18 @@
 * Imports
 
 > import Prelude 
-> import qualified System.IO.UTF8 as S
-> import qualified Data.List as List
-
 > import qualified ATP.Completion as Completion
-> import qualified ATP.Prop as Prop
-> import qualified ATP.Skolem as Skolem
-> import ATP.FormulaSyn
-> import qualified ATP.Formula as F
-> import qualified ATP.Util.ListSet as Set
-> import ATP.Util.ListSet((\\))
 > import qualified ATP.Equal as Equal
 > import qualified ATP.FOL as FOL
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn
+> import qualified ATP.Prop as Prop
 > import qualified ATP.Resolution as Resolution
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Util.ListSet as Set
+> import ATP.Util.ListSet((\\))
+> import qualified Data.List as List
+> import qualified System.IO.UTF8 as S
 
 * Paramodulation
 

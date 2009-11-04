@@ -25,13 +25,12 @@
 * Imports
 
 > import Prelude hiding (div)
-> import qualified Ratio
-
-> import ATP.Util.Parse as P
-> import ATP.Util.Parse (parse)
-> import qualified ATP.Util.Lib as Lib
 > import ATP.FormulaSyn
 > import qualified ATP.Order as Order
+> import qualified ATP.Util.Lib as Lib
+> import ATP.Util.Parse as P
+> import ATP.Util.Parse (parse)
+> import qualified Ratio
 
 * Polynomials
 
@@ -40,9 +39,7 @@
 * Arithmetic
 
 > isNumeral :: Term -> Bool
-> isNumeral (Fn ns []) = case P.maybe ns of
->                          Nothing -> False
->                          Just (_ :: Integer) -> True
+> isNumeral (Fn _ns []) = error "Unimplemented" 
 > isNumeral _ = False
 
 Note that in Harrison's code he uses the OCaml Num module.  Num.num is an

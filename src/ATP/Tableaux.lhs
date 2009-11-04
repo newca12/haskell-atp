@@ -13,19 +13,18 @@
 * Imports
 
 > import Prelude 
-> import qualified List 
-> import qualified Data.Map as Map
-> import Text.Printf(printf)
-
+> import qualified ATP.FOL as FOL
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn
+> import qualified ATP.Prop as Prop
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Unif as Unif
 > import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((⟾))
 > import qualified ATP.Util.ListSet as Set
-> import ATP.FormulaSyn
-> import qualified ATP.Formula as F
-> import qualified ATP.Prop as Prop
-> import qualified ATP.FOL as FOL
-> import qualified ATP.Skolem as Skolem
-> import qualified ATP.Unif as Unif
+> import qualified Data.List as List
+> import qualified Data.Map as Map
+> import Text.Printf(printf)
 
 * Tableaux
 

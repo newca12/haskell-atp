@@ -7,7 +7,8 @@
 > where
 
 > import Prelude hiding (print, putStr, putStrLn) 
+> import ATP.Util.Parse.Parse
 > import Text.ParserCombinators.Parsec hiding (parse)
 > import Text.ParserCombinators.Parsec.Expr 
-> import ATP.Util.Parse.Parse
+
 

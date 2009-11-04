@@ -13,12 +13,12 @@
 
 * Imports
 
-> import Prelude 
+> import ATP.Util.Prelude 
+> import qualified ATP.FOL as FOL
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
-> import ATP.FormulaSyn
-> import qualified ATP.Formula as F
-> import qualified ATP.FOL as FOL
 
 * Equality
 

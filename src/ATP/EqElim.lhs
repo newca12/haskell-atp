@@ -13,23 +13,22 @@
 
 * Imports
 
-> import Prelude 
-> import qualified Data.Maybe as Maybe
-> import qualified Data.List as List
-> import qualified Data.Map as Map
-> import Data.Map(Map)
-
-> import qualified ATP.Util.Lib as Lib
-> import qualified ATP.Util.ListSet as Set
-> import ATP.Util.ListSet((\\))
-> import ATP.FormulaSyn
-> import qualified ATP.Formula as F
+> import ATP.Util.Prelude 
 > import qualified ATP.Equal as Equal
 > import qualified ATP.FOL as FOL
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn
+> import qualified ATP.Meson as Meson
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Tableaux as Tableaux
-> import qualified ATP.Meson as Meson
+> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.ListSet as Set
+> import ATP.Util.ListSet((\\))
+> import qualified Data.List as List
+> import qualified Data.Map as Map
+> import Data.Map(Map)
+> import qualified Data.Maybe as Maybe
 
 * Equality elimination
 

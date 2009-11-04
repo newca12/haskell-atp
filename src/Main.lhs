@@ -8,9 +8,7 @@ The front end for the automated theorem proving Haskell port.
 * Signature
 
 > module Main 
->   ( doit
->   , main 
->   ) 
+>   ( main ) 
 > where 
 
 * Imports
@@ -19,6 +17,7 @@ The front end for the automated theorem proving Haskell port.
 > import qualified System
 > import qualified System.IO.UTF8 as S
 > import qualified System.Console.GetOpt as Opt
+> import qualified System.Exit as Exit
 > import System.Console.GetOpt (OptDescr(..), ArgDescr(..))
 > import qualified Codec.Binary.UTF8.String as UString
 > import qualified Control.Exception as Exn
@@ -29,6 +28,7 @@ The front end for the automated theorem proving Haskell port.
 > import qualified Test.HUnit as Test
 > import Test.HUnit(Test(..), (~:))
 
+> import ATP.Util.Impossible
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.Lib as Lib
 > import qualified ATP.Util.Lex as Lex
@@ -177,68 +177,36 @@ Get rewriting rules.
 
 > instance Exn.Exception ComExn where
 
+** Groups
+
 > type Group = (String, [Command])
 
 > groups :: [Group]
 > groups = [ ("Misc",
->             [ version
->             , help
->             , echo
->             , bug ])
+>             [ version, help, echo, bug ])
 >          , ("Test",
->             [ test
->             , showTest ])
+>             [ test, showTest ])
 >          , ("Parsing",
->             [ parseExpr
->             , parseTerm
->             , parseForm ])
+>             [ parseExpr, parseTerm, parseForm ])
 >          , ("Formula kung fu", 
->             [ nnf 
->             , cnf
->             , dnf
->             , defcnf
->             , pnf
->             , skolem
->             ])
+>             [ nnf, cnf, dnf, defcnf, pnf, skolem ])
 >          , ("Propositional decision procedures",
->             [ truthtable
->             , tautology
->             , dp
->             , dpll 
->             ])
+>             [ truthtable, tautology, dp, dpll ])
 >          , ("Basic Herbrand methods",
->             [ gilmore
->             , davisputnam 
->             ])
+>             [ gilmore, davisputnam ])
 >          , ("Tableaux",
->             [ prawitz
->             , tab
->             , splittab ])
+>             [ prawitz, tab, splittab ])
 >          , ("Resolution",
->             [ basicResolution
->             , resolution
->             , positiveResolution
+>             [ basicResolution, resolution, positiveResolution
 >             , sosResolution ])
 >          , ("Prolog",
->             [ hornprove
->             , prolog ])
+>             [ hornprove, prolog ])
 >          , ("MESON",
->             [ basicMeson
->             , meson ])
+>             [ basicMeson, meson ])
 >          , ("Equality",
->             [ bmeson 
->             , paramod
->             , ccvalid
->             , rewrite
->             ])
+>             [ bmeson, paramod, ccvalid, rewrite ])
 >          , ("Decidable problems",
->             [ aedecide
->             , dlo
->             , dlovalid
->             , cooper
->             , nelop
->             , nelopDLO
->             ])
+>             [ aedecide, dlo, dlovalid, cooper, nelop, nelopDLO ])
 >          ]
 
 > commands :: [Command]
@@ -287,7 +255,7 @@ Get rewriting rules.
 > tests = "All" ~: TestList 
 >   [ ATP.Test.DLO.tests 
 >   , ATP.Test.Cooper.tests 
->   --, ATP.Test.Combining.tests 
+>   , ATP.Test.Combining.tests 
 >   ]
 
 > test :: Command
@@ -592,16 +560,14 @@ Show a test formula
 >   where summ = "The Nelson-Oppen method, linear integer arithmetic"
 >         usage = PP.vcat [ PP.text "nelop -f <formula>"
 >                         , PP.text "nelop <id>" ] 
->         f = run (return . 
->                  Combining.nelop (Combining.addDefault [Combining.intLang]))
+>         f = run (return . Combining.nelopInt)
 
 > nelopDLO :: Command
 > nelopDLO = Com "nelop-dlo" summ usage f
 >   where summ = "The Nelson-Oppen method, dense linear orders"
 >         usage = PP.vcat [ PP.text "nelop -f <formula>"
 >                         , PP.text "nelop <id>" ] 
->         f = run (return . 
->                  Combining.nelop (Combining.addDefault [Combining.dloLang]))
+>         f = run (return . Combining.nelopDLO)
 
 * Top
 
@@ -634,6 +600,10 @@ Show a test formula
 >                              , PP.text "unknown opts :" <+> pPrint uopts ]
 >   -- Run the requested command
 >   Exn.catch (forward flags' $ uopts ++ uargs) handle
+>   `catchImpossible` \e -> do
+>    S.putStr $ show e
+>    Exit.exitFailure
+
 
 Handle exceptions
 

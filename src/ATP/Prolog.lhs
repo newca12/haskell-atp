@@ -13,24 +13,22 @@
 * Imports
                       
 > import Prelude 
-> import qualified Data.List as List
-> import qualified Data.Maybe as Maybe
-> import qualified Data.Map as Map
-
+> import qualified ATP.FOL as FOL
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn
+> import qualified ATP.Prop as Prop
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Tableaux as Tableaux
+> import qualified ATP.Unif as Unif
 > import qualified ATP.Util.Lex as Lex
+> import qualified ATP.Util.Lib as Lib
 > import qualified ATP.Util.Parse as P
 > import ATP.Util.Parse (Parse, Parser, parser)
 > import qualified ATP.Util.Print as PP
 > import ATP.Util.Print(Pretty, pPrint, (<+>), (<>)) 
-
-> import qualified ATP.Util.Lib as Lib
-> import ATP.FormulaSyn
-> import qualified ATP.Formula as F
-> import qualified ATP.Prop as Prop
-> import qualified ATP.FOL as FOL
-> import qualified ATP.Skolem as Skolem
-> import qualified ATP.Unif as Unif
-> import qualified ATP.Tableaux as Tableaux
+> import qualified Data.List as List
+> import qualified Data.Map as Map
+> import qualified Data.Maybe as Maybe
 
 * Prolog
 

@@ -26,12 +26,12 @@ standard library.  Most mirror functions in Harrison's lib.ml
 * Imports
 
 > import Prelude
-> import qualified System.CPUTime as Time
-> import qualified Text.Printf as Printf
 > import qualified Data.Char as Char
 > import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
+> import qualified System.CPUTime as Time
+> import qualified Text.Printf as Printf
 
 * Misc
 

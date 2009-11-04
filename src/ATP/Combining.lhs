@@ -16,24 +16,27 @@ The Nelson-Oppen method.
 
 * Imports
 
-> import Prelude 
-> import qualified Data.List as List
-> import qualified Data.Maybe as Maybe
+#include "undefined.h"
 
-> import qualified ATP.Util.ListSet as Set
-> import ATP.Util.ListSet((\\))
+> import ATP.Util.Prelude 
+> import qualified ATP.Cong as Cong
+> import qualified ATP.Cooper as Cooper
+> import qualified ATP.DefCNF as CNF
+> import qualified ATP.DLO as DLO
+> import qualified ATP.Equal as Equal
+> import qualified ATP.FOL as FOL
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn
+> import qualified ATP.Prop as Prop
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Util.Debug as Debug
 > import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((⟾))
-> import ATP.FormulaSyn
-> import qualified ATP.Formula as F
-> import qualified ATP.FOL as FOL
-> import qualified ATP.Skolem as Skolem
-> import qualified ATP.Cooper as Cooper
-> import qualified ATP.Cong as Cong
-> import qualified ATP.Equal as Equal
-> import qualified ATP.DefCNF as CNF
-> import qualified ATP.Prop as Prop
-> import qualified ATP.DLO as DLO
+> import qualified ATP.Util.ListSet as Set
+> import ATP.Util.ListSet((\\))
+--> import qualified Control.Exception as Exn
+> import qualified Data.List as List
+> import qualified Data.Maybe as Maybe
 
 * Nelson-Oppen
 
@@ -67,7 +70,7 @@ The Nelson-Oppen method.
 >       List.find (\(fn,_,_) -> fn(f,length args)) langs
 >     Atom(R p args) ->
 >       List.find (\(_,pr,_) -> pr(p,length args)) langs
->     _ -> error "Impossible" 
+>     _ -> Debug.impossible
 
 > listify :: (a -> (b -> c) -> c) -> [a] -> ([b] -> c) -> c 
 > listify f l cont = 
@@ -207,11 +210,23 @@ The Nelson-Oppen method.
 > nelop :: [Lang] -> Formula -> Bool
 > nelop langs fm = List.all (nelop1 langs) (Prop.simpdnf $ Skolem.simplify $ Not fm)
 
+-- > nelop :: [Lang] -> Formula -> Bool
+-- > nelop langs fm = Debug.impossible
+
+-- > nelop :: [Lang] -> Formula -> Bool
+-- > nelop langs fm = Exn.assert False undefined
+
+-- > nelop :: [Lang] -> Formula -> Bool
+-- > nelop langs fm = Exn.assert False True
+
+-- > nelop :: [Lang] -> Formula -> Bool
+-- > nelop langs fm = __IMPOSSIBLE__
+
 > nelopInt :: Formula -> Bool
-> nelopInt = nelop [intLang]
+> nelopInt = nelop (addDefault [intLang])
 
 > nelopDLO :: Formula -> Bool
-> nelopDLO = nelop [dloLang]
+> nelopDLO = nelop (addDefault [dloLang])
 
 let langs = addDefault [intLang]
 let fm :: Formula = ATP.Util.Parse.parse "1 = 1"

@@ -11,22 +11,21 @@ Congruence closure.
 
 * Imports
                         
-> import Prelude 
-> import qualified Data.List as List
-> import qualified Data.Maybe as Maybe
-> import qualified Data.Map as Map
-> import Data.Map(Map)
-
+> import ATP.Util.Prelude 
+> import qualified ATP.Equal as Equal
+> import qualified ATP.FOL as FOL
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn
+> import qualified ATP.Prop as Prop
+> import qualified ATP.Skolem as Skolem
 > import qualified ATP.Util.Lib as Lib
 > import qualified ATP.Util.ListSet as Set
 > import qualified ATP.Util.UnionFind as UF
 > import ATP.Util.UnionFind(Partition)
-> import ATP.FormulaSyn
-> import qualified ATP.Formula as F
-> import qualified ATP.Prop as Prop
-> import qualified ATP.FOL as FOL
-> import qualified ATP.Skolem as Skolem
-> import qualified ATP.Equal as Equal
+> import qualified Data.List as List
+> import qualified Data.Map as Map
+> import Data.Map(Map)
+> import qualified Data.Maybe as Maybe
 
 * Congruence closure
 

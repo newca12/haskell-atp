@@ -14,10 +14,10 @@ Unification
 * Imports
 
 > import Prelude 
-> import qualified Data.Map as Map
-> import ATP.Util.Lib((↦))
-> import ATP.FormulaSyn
 > import qualified ATP.FOL as FOL
+> import ATP.FormulaSyn
+> import ATP.Util.Lib((↦))
+> import qualified Data.Map as Map
 
 * Unification
 

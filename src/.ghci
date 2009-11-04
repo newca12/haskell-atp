@@ -29,7 +29,9 @@
 
 :set -i/usr1/seanmcl/save/projects/atp/src
 :set -i/Users/sean/save/projects/atp/src
-:set -fbreak-on-exception
+
+--:set -fbreak-on-exception
+
 :set args "cvc" "⊤"
 :set -lcvc3 -lcvch
 

@@ -1,4 +1,6 @@
 
+* Signature 
+
 > module ATP.Util.Monad 
 >   ( puts
 >   , any
@@ -8,9 +10,13 @@
 >   ) 
 > where
 
+* Imports
+
 > import Prelude hiding (any, all)
 > import qualified Control.Monad.State as State
 > import Control.Monad.State(MonadState)
+
+* Utils
 
 > puts :: (MonadState s m) => (s -> a -> s) -> a -> m ()
 > puts f x = do s <- State.get

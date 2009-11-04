@@ -66,15 +66,14 @@ P "p" with R "p" [].  The type we use is
 >              | Ex Var Formula
 >   deriving(Eq, Ord, Data, Typeable)
 
-This choice has turned out to be a good one.
-I wanted to be explicit about types, and thus the type annotations
-are considerably simpler.  It also obviates the need for many
-type class annotations, since Harrison relies upon Ocaml's ordering
-cheat: (<) : a -> a -> bool.  This is well known to be a bad idea,
-as it breaks type abstraction.  While in ML it is an understandable
-compromise between abstraction and obviating the need to write comparison
-functions, it is not necessary in Haskell.  We can simply derive
-Ord and Eq for new types.
+This choice has turned out to be a good one.  I wanted to be explicit
+about types, and thus the type annotations are considerably simpler.
+It also obviates the need for many type class annotations, since
+Harrison relies upon Ocaml's ordering cheat: (<) : a -> a -> bool.
+This is well known to be a bad idea, as it breaks type abstraction.
+While in ML it is an understandable compromise between abstraction and
+obviating the need to write comparison functions, it is not necessary
+in Haskell.  We can simply derive Ord and Eq for new types.
 
 Other differences are mostly cosmetic.  I prefer a point free style,
 and have changed some of the code accordingly, but it is easy to

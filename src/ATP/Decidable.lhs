@@ -23,20 +23,19 @@
 
 * Imports
 
-> import Prelude 
-> import qualified Data.List as List
-> import qualified Data.Map as Map
-
-> import qualified ATP.Util.Lib as Lib
-> import qualified ATP.Util.ListSet as Set
-> import ATP.FormulaSyn
+> import ATP.Util.Prelude 
+> import qualified ATP.DP as DP
 > import qualified ATP.Formula as F
-> import qualified ATP.Prop as Prop
+> import ATP.FormulaSyn
 > import qualified ATP.FOL as FOL
 > import qualified ATP.Herbrand as Herbrand
-> import qualified ATP.DP as DP
-> import qualified ATP.Skolem as Skolem
 > import qualified ATP.Meson as Meson
+> import qualified ATP.Prop as Prop
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.ListSet as Set
+> import qualified Data.List as List
+> import qualified Data.Map as Map
 
 * Decidable Problems
 

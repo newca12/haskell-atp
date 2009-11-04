@@ -10,11 +10,10 @@ Rewriting
 * Imports
 
 > import Prelude 
-> import qualified Data.Map as Map
-
-> import ATP.FormulaSyn
 > import qualified ATP.FOL as FOL
+> import ATP.FormulaSyn
 > import qualified ATP.Resolution as Resolution
+> import qualified Data.Map as Map
 
 * Rewriting
 

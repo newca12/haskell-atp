@@ -1,4 +1,6 @@
 
+Knuth-Bendix completion.
+
 * Signature
 
 > module ATP.Completion
@@ -14,20 +16,19 @@
 * Imports
 
 > import Prelude 
-> import qualified Data.Maybe as Maybe
-> import qualified Data.List as List
-> import qualified Data.Map as Map
-
-> import qualified ATP.Util.Print as PP
+> import qualified ATP.FOL as FOL
+> import qualified ATP.Equal as Equal
+> import ATP.FormulaSyn
+> import qualified ATP.Order as Order
+> import qualified ATP.Rewrite as Rewrite
+> import qualified ATP.Unif as Unif
 > import qualified ATP.Util.Lib as Lib
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
-> import qualified ATP.FOL as FOL
-> import ATP.FormulaSyn
-> import qualified ATP.Unif as Unif
-> import qualified ATP.Equal as Equal
-> import qualified ATP.Rewrite as Rewrite
-> import qualified ATP.Order as Order
+> import qualified ATP.Util.Print as PP
+> import qualified Data.List as List
+> import qualified Data.Map as Map
+> import qualified Data.Maybe as Maybe
 
 * Completion
 
@@ -40,8 +41,7 @@
 >   in ( FOL.apply (Map.fromList (zip fvs1 nms1)) fm1, 
 >        FOL.apply (Map.fromList (zip fvs2 nms2)) fm2 )
 
-> listcases :: (a -> (Env -> a -> b) -> [c]) 
->           -> (Env -> [a] -> b) -> [a] -> [c] -> [c]
+> listcases :: (a -> (Env -> a -> b) -> [c]) -> (Env -> [a] -> b) -> [a] -> [c] -> [c]
 > listcases _ _ [] acc = acc
 > listcases fn rfn (h:t) acc = 
 >   fn h (\i h' -> rfn i (h':t)) ++ 
@@ -51,10 +51,11 @@
 > overlaps (l,r) tm rfn = 
 >   case tm of
 >     Var _ -> []
->     Fn f args -> listcases (overlaps (l,r)) (\i a -> rfn i (Fn f a)) args
->                  (case Unif.fullunify [(l, tm)] of
->                   Nothing -> []
->                   Just env -> [rfn env r])
+>     Fn f args -> 
+>       listcases (overlaps (l,r)) (\i a -> rfn i (Fn f a)) args $
+>          case Unif.fullunify [(l, tm)] of
+>            Nothing -> []
+>            Just env -> [rfn env r]
 
 > crit1 :: Formula -> Formula -> [Formula]
 > crit1 (Atom (R "=" [l1, r1])) (Atom (R "=" [l2, r2])) = 

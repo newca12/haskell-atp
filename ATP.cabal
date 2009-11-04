@@ -3,9 +3,12 @@ name:           ATP
 version:        1.0.0
 cabal-version:  >= 1.6.0.3 && < 2
 build-type:     Simple
+license:        GPL
 license-file:   LICENSE
 author:         Sean McLaughlin <seanmcl@gmail.com>
 maintainer:	Sean McLaughlin <seanmcl@gmail.com>
+homepage:       
+bug-reports:    
 category:       Theorem provers
 
 synopsis:       A Haskell port of the code from John Harrison's book 
@@ -15,26 +18,31 @@ description:    Haskell theorem proving algorithms.
 
 tested-with:    GHC == 6.10.4
 
-extra-source-files: README LICENSE
+extra-source-files: LICENSE
+                    src/undefined.h
+                    src/undefined2.h
 
 library
 
   hs-source-dirs: src
 
-  build-depends:  base,
-                  haskell98,
-                  containers,
-                  mtl,
-                  parsec,
+  include-dirs: src
+
+  build-depends:  base >= 4.1.0.0,
+                  haskell98 >= 1.0.1.0,
+                  containers >= 0.2.0.1,
+                  mtl >= 1.1.0.2,
+                  parsec >= 2.1.0.1,
                   utf8-string >= 0.3.5,
                   HUnit >= 1.2.2.0,
-                  pretty,
+                  pretty >= 1.0.1.0,
                   QuickCheck >= 2.1.0.0,
-                  template-haskell,
+                  template-haskell >= 2.3.0.1,
                   hslogger >= 1.0.7,
-                  syb
+                  syb >= 0.1.0.1
 
-  extensions:    MultiParamTypeClasses
+  extensions:    NoImplicitPrelude
+                 MultiParamTypeClasses
                  ScopedTypeVariables
                  TypeSynonymInstances
                  OverlappingInstances
@@ -42,6 +50,7 @@ library
                  DeriveDataTypeable
                  TemplateHaskell
                  QuasiQuotes
+                 CPP
 
   ghc-options: -Wall 
                -- These warnings are not turned on by -Wall
@@ -50,15 +59,23 @@ library
                -fwarn-incomplete-record-updates 
                -fwarn-tabs 
                -fwarn-simple-patterns 
-               -- -Werror
+               -fno-ignore-asserts
+               -- -v
+               -- Dump Core language
+               -- -ddump-simpl
+               -- Warnings as errors
+               -Werror
+               -- Allow comment lines next to literate lines
+               -optL -q
                -- Profiling 
                -- -prof
                -- -auto-all
-               -- Internal compiler checking
                -- Remove literate comments with BirdPP
                -- -pgmL BirdPP
 
-  exposed-modules: ATP.Util.Lex
+  exposed-modules: ATP.Util.Debug
+                   ATP.Util.Impossible
+                   ATP.Util.Lex
                    ATP.Util.Lib
                    ATP.Util.List
                    ATP.Util.ListSet
@@ -72,40 +89,42 @@ library
                    ATP.Util.Print.Print
                    ATP.Util.TH
                    ATP.Util.UnionFind
-                   
-                   ATP.IntroSyn
-                   ATP.Intro
-                   ATP.FormulaSyn
+
+                   ATP.Combining
+                   ATP.Completion
+                   ATP.Complex
+                   ATP.Cong
+                   ATP.Cooper
+                   ATP.DLO
+                   ATP.DP
+                   ATP.Decidable
+                   ATP.DefCNF
+                   ATP.EqElim
+                   ATP.Equal
+                   ATP.FOL
                    ATP.Formula
+                   ATP.FormulaSyn
+                   ATP.Geom
+                   ATP.Grobner
+                   ATP.Herbrand
+                   ATP.Interpolation
+                   ATP.Intro
+                   ATP.IntroSyn
+                   ATP.Meson
+                   ATP.Order
+                   ATP.Paramodulation
+                   ATP.Poly
+                   ATP.Prolog
                    ATP.Prop
                    ATP.PropExamples
-                   ATP.DefCNF
-                   ATP.FOL
-                   ATP.DP
-                   ATP.Skolem
-                   ATP.Herbrand
-                   ATP.Unif
-                   ATP.Tableaux
-                   ATP.Resolution
-                   ATP.Prolog
-                   ATP.Meson
-                   ATP.Equal
-                   ATP.Cong
-                   ATP.Rewrite
-                   ATP.Order
-                   ATP.Completion
-                   ATP.EqElim
-                   ATP.Paramodulation
-                   ATP.Decidable
                    ATP.Qelim
-                   ATP.Cooper
-                   ATP.Complex
                    ATP.Real
-                   ATP.Grobner
-                   ATP.Geom
-                   ATP.Interpolation
-                   ATP.Combining
+                   ATP.Resolution
+                   ATP.Rewrite
+                   ATP.Skolem
+                   ATP.Tableaux
                    ATP.TestFormulas
+                   ATP.Unif
 
 executable atp
 
@@ -113,18 +132,7 @@ executable atp
 
   hs-source-dirs: src
 
-  build-depends:  base,
-                  haskell98,
-                  containers,
-                  mtl,
-                  parsec,
-                  utf8-string >= 0.3.5,
-                  HUnit >= 1.2.2.0,
-                  pretty,
-                  QuickCheck >= 2.1.0.0,
-                  template-haskell,
-                  hslogger >= 1.0.7,
-                  syb
+  include-dirs: src
 
   extensions:    MultiParamTypeClasses
                  ScopedTypeVariables
@@ -134,20 +142,10 @@ executable atp
                  DeriveDataTypeable
                  TemplateHaskell
                  QuasiQuotes
+                 CPP
 
-  ghc-options: -Wall 
-               -- These warnings are not turned on by -Wall
-               -fwarn-implicit-prelude 
-               -fwarn-monomorphism-restriction 
-               -fwarn-incomplete-record-updates 
-               -fwarn-tabs 
-               -fwarn-simple-patterns 
-               -- -Werror
-               -- Profiling 
-               -- -prof
-               -- -auto-all
-               -- Internal compiler checking
-               -- Remove literate comments with BirdPP
-               -- -pgmL BirdPP
+  ghc-options: -fno-ignore-asserts
+               -- Allow comment lines next to literate lines
+               -optL -q
 
 

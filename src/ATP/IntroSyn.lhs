@@ -37,19 +37,18 @@ so the module can be imported unqualified.
 * Imports
 
 > import Prelude hiding (id)
+> import qualified ATP.Util.TH as TH'
+> import qualified ATP.Util.Lex as Lex
+> import qualified ATP.Util.Parse as P
+> import ATP.Util.Parse (Parse, Parser, (<|>), (<?>))
+> import qualified ATP.Util.Print as PP
+> import ATP.Util.Print(Pretty, (<+>))
 > import qualified Data.Char as Char
 > import qualified Data.Generics as G
 > import Data.Generics(Typeable, Data)
 > import qualified Language.Haskell.TH as TH
 > import qualified Language.Haskell.TH.Quote as Q
 > import Language.Haskell.TH.Quote (QuasiQuoter(..))
-
-> import qualified ATP.Util.Lex as Lex
-> import qualified ATP.Util.Parse as P
-> import qualified ATP.Util.TH as TH'
-> import ATP.Util.Parse (Parse, Parser, (<|>), (<?>))
-> import qualified ATP.Util.Print as PP
-> import ATP.Util.Print(Pretty, (<+>))
 
 * Syntax
 

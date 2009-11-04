@@ -1,6 +1,8 @@
 
 | List utilities.
 
+* Signature
+
 > module ATP.Util.List 
 >   ( allInjectiveMaps
 >   , findFirst
@@ -16,7 +18,11 @@
 >   )
 > where
 
+* Imports
+
 > import Prelude 
+
+* Utils
 
 | Given two lists l1 l2 where |l1| >= |l2|, return all
 injective maps between the two lists.  For example

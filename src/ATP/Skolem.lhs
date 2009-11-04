@@ -16,11 +16,11 @@
 * Imports
 
 > import Prelude hiding (print)
-> import qualified List 
-> import ATP.Util.Lib((⟾))
+> import qualified ATP.FOL as FOL
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
-> import qualified ATP.FOL as FOL
+> import ATP.Util.Lib((⟾))
+> import qualified Data.List as List
 
 * Simplification
 

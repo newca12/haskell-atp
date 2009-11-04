@@ -34,17 +34,16 @@ propositional variables.
 * Imports
 
 > import Prelude hiding (print)
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn 
+> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.ListSet as Set
+> import qualified ATP.Util.Print as PP
 > import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
 
-> import qualified ATP.Util.Print as PP
-> import qualified ATP.Util.Lib as Lib
-> import qualified ATP.Util.ListSet as Set
-> import ATP.FormulaSyn 
-> import qualified ATP.Formula as F
-
-Propositions
+* Propositions
 
 > apply :: Map Rel Formula -> Formula -> Formula
 > apply env = F.onatoms (\p -> case Map.lookup p env of 

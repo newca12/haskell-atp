@@ -13,16 +13,15 @@ Definitional CNF
 
 * Imports
 
-> import Prelude 
-> import qualified Char
-> import qualified List as L
+> import ATP.Util.Prelude 
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn
+> import qualified ATP.Prop as Prop
+> import qualified ATP.Util.ListSet as Set
+> import qualified Data.Char as Char
+> import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
-
-> import qualified ATP.Util.ListSet as Set
-> import ATP.FormulaSyn
-> import qualified ATP.Formula as F
-> import qualified ATP.Prop as Prop
 
 * CNF
 
@@ -89,7 +88,7 @@ corresponding to m, if any:
 >       l = length s in
 >   if l <= m || take m s /= pfx then n else
 >   let s' = take (l-m) (drop m s) in
->   if L.all Char.isDigit s' then max n (read s') else n
+>   if List.all Char.isDigit s' then max n (read s') else n
 
 Now we can implement the overall function. First the formula is simplified
 and negations are pushed down, giving fm', and we use this formula to

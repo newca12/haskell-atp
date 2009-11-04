@@ -8,9 +8,11 @@ Example formulas for testing the algorithms.
 
 > where
 
+* Imports
+
 > import Prelude hiding (lookup)
-> import qualified Data.List as List
 > import ATP.FormulaSyn
+> import qualified Data.List as List
 
 * Table
 
@@ -588,12 +590,18 @@ Bob Constable's "stamp problem".  Haskell is much faster on these problems.
 >   , ("pres46", [$form| ∃ l.
 >         ∀ x. x ≥ l
 >                   ⊃ ∃ u v. u ≥ 0 ∧ v ≥ 0 ∧ x = 3 * u + 5 * v |])
+
 >   , ("pres47", [$form| ∃ l.
 >         ∀ x. x ≥ l
 >                   ⊃ ∃ u v. u ≥ 0 ∧ v ≥ 0 ∧ x = 3 * u + 7 * v |])
+
 >   , ("pres48", [$form| ∃ l.
 >         ∀ x. x ≥ l
 >                   ⊃ ∃ u v. u ≥ 0 ∧ v ≥ 0 ∧ x = 3 * u + 8 * v |])
+
+ FIXME: This one explodes memory to 1GB within a few seconds.  Investigate
+ when you get a chance.
+
 >   , ("pres49", [$form| ∃ l.
 >         ∀ x. x ≥ l
 >                   ⊃ ∃ u v. u ≥ 0 ∧ v ≥ 0 ∧ x = 7 * u + 8 * v |])
@@ -705,7 +713,6 @@ An example where the "naive" procedure is slow but feasible
 DKAL
 
 >   , ("alice1", [$form| 
->       ∀ X Y.
 >        ((curTime(alice) < licExp(X) ∧
 >        curTime(alice) < licExp(X)) ∧
 >       curTime(alice) < licExp(Y)) ⊃

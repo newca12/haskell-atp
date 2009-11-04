@@ -20,25 +20,23 @@
 
 * Imports
 
-> import Prelude hiding (print, pred)
-> import qualified Data.Maybe as Maybe
-> import qualified Data.List as List
+> import ATP.Util.Prelude hiding (pred)
+> import qualified ATP.Util.TH as TH'
+> import qualified ATP.Util.Lex as Lex
+> import qualified ATP.Util.Parse as P
+> import ATP.Util.Parse (Parse, parse, Parser, (<|>), (<?>))
+> import qualified ATP.Util.Print as PP
+> import ATP.Util.Print (Pretty(pPrint), (<+>), (<>))
+> import qualified Data.Generics as G
+> import Data.Generics (Data, Typeable)
 > import qualified Data.Map as Map
 > import Data.Map (Map)
+> import qualified Data.Maybe as Maybe
+> import qualified Data.List as List
 > import qualified Language.Haskell.TH as TH
 > import Language.Haskell.TH(ExpQ, PatQ)
 > import qualified Language.Haskell.TH.Quote as Q
 > import Language.Haskell.TH.Quote (QuasiQuoter(..))
-> import qualified Data.Generics as G
-> import Data.Generics (Data, Typeable)
-
-> import qualified ATP.Util.Lex as Lex
-> import qualified ATP.Util.Parse as P
-> import ATP.Util.Parse (Parse, parse)
-> import qualified ATP.Util.TH as TH'
-> import ATP.Util.Parse (Parser, (<|>), (<?>))
-> import qualified ATP.Util.Print as PP
-> import ATP.Util.Print (Pretty(pPrint), (<+>), (<>))
 
 * Syntax
 

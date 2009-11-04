@@ -24,13 +24,13 @@
 * Imports
 
 > import Prelude hiding (putStrLn)
-> import qualified System.IO.UTF8 as S
 > import qualified Data.List as List
+> import qualified Data.Ratio as Ratio
 > import qualified Data.Set as Set
 > import Data.Set (Set)
+> import qualified System.IO.UTF8 as S
 > import qualified Text.PrettyPrint.HughesPJ as PP
 > import Text.PrettyPrint.HughesPJ (Doc, (<+>))
-> import qualified Data.Ratio as Ratio
 
 * Printing
 

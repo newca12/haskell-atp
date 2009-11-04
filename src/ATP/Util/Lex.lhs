@@ -30,9 +30,9 @@
 > import Prelude 
 > import qualified Text.ParserCombinators.Parsec as P
 > import Text.ParserCombinators.Parsec (Parser)
-> import qualified Text.ParserCombinators.Parsec.Token as T
-> import qualified Text.ParserCombinators.Parsec.Language as L
 > import qualified Text.ParserCombinators.Parsec.Char as C
+> import qualified Text.ParserCombinators.Parsec.Language as L
+> import qualified Text.ParserCombinators.Parsec.Token as T
 
 * Lexer
 

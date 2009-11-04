@@ -8,13 +8,12 @@
 * Imports
 
 > import Prelude 
+> import qualified ATP.Cooper as Cooper
+> import ATP.FormulaSyn
+> import qualified ATP.TestFormulas as Forms
 > import qualified Data.Maybe as Maybe
 > import qualified Test.HUnit as Test
 > import Test.HUnit(Test(..), (~:), assert)
-
-> import ATP.FormulaSyn
-> import qualified ATP.Cooper as Cooper
-> import qualified ATP.TestFormulas as Forms
 
 * Tests
 
@@ -62,8 +61,6 @@
 >   , ("pres43", [$form| ⊥ |])
 >   , ("pres45", [$form| ⊤ |])
 >   , ("pres46", [$form| ⊤ |])
->   , ("pres47", [$form| ⊤ |])
->   , ("pres48", [$form| ⊤ |])
 >   , ("pres51", [$form| ⊤ |])
 >   , ("pres53", [$form| ⊤ |])
 >   , ("pres54", [$form| ⊤ |])

@@ -15,11 +15,12 @@
 
 * Imports
 
-> import Prelude 
-> import qualified ATP.Util.ListSet as Set 
-> import ATP.FormulaSyn
+> import ATP.Util.Prelude
 > import qualified ATP.Formula as F
+> import ATP.FormulaSyn
 > import qualified ATP.Prop as P
+> import qualified ATP.Util.ListSet as Set 
+> import qualified ATP.Util.Tuple as Tuple
 
 %%%%%%%%%%%%%%%%%%%%
 %%% Ramsey's Theorem 
@@ -212,9 +213,8 @@ methods.
 
 > mkAdderTest :: Int -> Int -> Formula
 > mkAdderTest n k =
->   let [x, y, c, s, c0, s0, c1, s1, c2, s2] = 
->         map mkIndex ["x", "y", "c", "s", "c0", 
->                      "s0", "c1", "s1", "c2", "s2"]
+>   let (x, y, c, s, c0, s0, c1, s1, c2, s2) = 
+>         Tuple.map10 mkIndex ("x", "y", "c", "s", "c0", "s0", "c1", "s1", "c2", "s2")
 >   in (carryselect x y c0 c1 s0 s1 c s n k ∧ (¬) (c 0) ∧
 >      (ripplecarry0 x y c2 s2 n) ⊃ 
 >        (c n ⇔ c2 n) ∧ conjoin (\i -> s i ⇔ s2 i) [0 .. n-1])
@@ -321,9 +321,9 @@ give a tautology precisely if p is prime.
 
 > prime :: Int -> Formula
 > prime p =
->   let [x, y, out] = map mkIndex ["x", "y", "out"] 
+>   let (x, y, out) = Tuple.map3 mkIndex ("x", "y", "out")
 >       m i j = x i ∧ y j
->       [u, v] = map mkIndex2 ["u", "v"] 
+>       (u, v) = Tuple.map2 mkIndex2 ("u", "v")
 >       n = bitLength p in
 >   (¬) (multiplier m u v out (n - 1) ∧
 >         congruentTo out p (max n (2 * n - 2)))

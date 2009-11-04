@@ -1,4 +1,6 @@
 
+* Signature
+
 > module ATP.Util.Parse.Parse
 >   ( Parse(..)
 >   , tuple
@@ -8,13 +10,17 @@
 >   )
 > where
 
+* Imports
+
 > import Prelude 
+> import qualified ATP.Util.Lex as Lex
 > import Data.Ratio (Ratio, (%))
 > import qualified Data.Set as Set
 > import Data.Set (Set)
 > import qualified Text.ParserCombinators.Parsec as P
 > import Text.ParserCombinators.Parsec (Parser, (<|>))
-> import qualified ATP.Util.Lex as Lex
+
+* Utils
 
 > class Parse a where
 >   parser :: Parser a
@@ -22,8 +28,6 @@
 >   parse = Lex.makeParser parser
 >   parseFile :: String -> IO a
 >   parseFile = Lex.makeFileParser parser
->   maybe :: String -> Maybe a
->   maybe = Lex.makeParser $ P.optionMaybe parser
 
 > commas :: Parser a -> Parser [a]
 > commas p = P.sepBy p Lex.comma

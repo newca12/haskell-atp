@@ -13,16 +13,17 @@ The Davis-Putnam and Davis-Putnam-Loveland-Logemann procedures.
 
 * Imports
 
-> import Prelude 
-> import qualified Data.List as List
-
+> import ATP.Util.Prelude 
+> import qualified ATP.DefCNF as CNF
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn
+> import qualified ATP.Prop as Prop
 > import qualified ATP.Util.Lib as Lib
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
-> import ATP.FormulaSyn
-> import qualified ATP.Formula as F
-> import qualified ATP.DefCNF as CNF
-> import qualified ATP.Prop as Prop
+> import qualified Data.List as List
+
+* Davis-Putnam
 
 The One Literal Rule
 

@@ -13,8 +13,8 @@
 * Imports
 
 > import Prelude 
-> import ATP.FormulaSyn
 > import qualified ATP.FOL as FOL
+> import ATP.FormulaSyn
 
 * Order
 

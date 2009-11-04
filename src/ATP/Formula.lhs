@@ -7,15 +7,17 @@
 >   , conjuncts, disjuncts
 >   , listConj, listDisj
 >   , listAll, listEx
->   , destImp, unIff
+>   , destImp, unIff, destAnd
 >   ) 
 > where
 
 * Imports
 
-> import Prelude hiding ((-))
-> import qualified Data.List as List
+#include "undefined.h" 
+
+> import ATP.Util.Prelude hiding ((-))
 > import ATP.FormulaSyn
+> import qualified Data.List as List
 
 * Combinators
 
@@ -69,6 +71,10 @@ Collect atoms
 > atomUnion f fm = List.nub (overatoms (\h t -> f(h) ++ t) fm [])
 
 * Util
+
+> destAnd :: Formula -> (Formula, Formula)
+> destAnd (And a b) = (a, b)
+> destAnd _ = __IMPOSSIBLE__ 
 
 Make a big conjunction(disjunction resp.) from a list
 listConj [a,b,c] --> a & b & c 

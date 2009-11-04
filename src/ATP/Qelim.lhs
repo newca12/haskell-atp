@@ -12,13 +12,12 @@
 * Imports
 
 > import Prelude 
-> import qualified Data.List as List
-
-> import ATP.FormulaSyn
-> import qualified ATP.Formula as F
-> import qualified ATP.FOL as FOL
-> import qualified ATP.Skolem as Skolem
 > import qualified ATP.Decidable as Decidable
+> import qualified ATP.FOL as FOL
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn
+> import qualified ATP.Skolem as Skolem
+> import qualified Data.List as List
 
 * Quantifier Elimination
 

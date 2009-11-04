@@ -17,14 +17,13 @@ Logging utilities.
 * Imports
 
 > import Prelude hiding (log)
-> import qualified IO 
-> import qualified Directory
-> import qualified System.IO.UTF8 as S
-> import qualified System.Log.Logger as Log
-> import qualified System.Log.Handler.Simple as S
-> import System.Log.Logger (Priority(..))
-
 > import ATP.Util.Log.Class
+> import qualified Directory
+> import qualified IO 
+> import qualified System.IO.UTF8 as S
+> import qualified System.Log.Handler.Simple as S
+> import qualified System.Log.Logger as Log
+> import System.Log.Logger (Priority(..))
 
 * Implementation
 

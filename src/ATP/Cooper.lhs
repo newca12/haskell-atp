@@ -15,17 +15,17 @@
 
 * Imports
 
-> import Prelude 
-> import qualified Data.List as List
+#include "undefined.h" 
 
-> import ATP.Util.Parse as P
-> import ATP.Util.Parse (parse)
-> import qualified ATP.Util.ListSet as Set
-> import ATP.FormulaSyn
+> import ATP.Util.Prelude
 > import qualified ATP.Formula as F
-> import qualified ATP.Skolem as Skolem
-> import qualified ATP.Qelim as Qelim
+> import ATP.FormulaSyn
 > import qualified ATP.Order as Order
+> import qualified ATP.Qelim as Qelim
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Util.ListSet as Set
+> import qualified Data.Char as Char
+> import qualified Data.List as List
 
 * Numerals
 
@@ -38,15 +38,15 @@
 > mkNumeral :: Integer -> Term
 > mkNumeral n = Fn (show n) []
 
-> destNumeral :: Term -> Integer
-> destNumeral (Fn ns []) = parse ns
-> destNumeral t = error ("destNumeral: " ++ show t)
-
 > isNumeral :: Term -> Bool
-> isNumeral (Fn ns []) = case P.maybe ns of
->                          Nothing -> False
->                          Just (_ :: Integer) -> True
+> isNumeral (Fn ns []) = case ns of 
+>   '-':ns' -> List.all Char.isDigit ns'
+>   _ -> List.all Char.isDigit ns
 > isNumeral _ = False
+
+> destNumeral :: Term -> Integer
+> destNumeral (Fn ns []) = read ns
+> destNumeral _ = __IMPOSSIBLE__ 
 
 > numeral1 :: (Integer -> Integer) -> Term -> Term
 > numeral1 fn = mkNumeral . fn . destNumeral
@@ -226,13 +226,15 @@ Find the LCM of the coefficients of x
 >              ]
 
 > evalc :: Formula -> Formula 
-> evalc = F.onatoms $
->   \at@(R p [s, t]) -> case List.lookup p operations of
->    Just op -> 
->      if isNumeral s && isNumeral t then 
->        if op (destNumeral s) (destNumeral t) then (⊤) else (⊥)
->      else Atom at
->    Nothing -> Atom at
+> evalc = F.onatoms atfn 
+>  where 
+>   atfn (at@(R p [s, t])) = case List.lookup p operations of
+>     Just op -> 
+>       if isNumeral s && isNumeral t then 
+>         if op (destNumeral s) (destNumeral t) then (⊤) else (⊥)
+>       else Atom at
+>     Nothing -> Atom at
+>   atfn _ = __IMPOSSIBLE__ 
 
 > integerQelim :: Formula -> Formula 
 > integerQelim = 

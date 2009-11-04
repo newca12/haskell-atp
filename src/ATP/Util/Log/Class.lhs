@@ -1,19 +1,23 @@
 
+* Signature
+
 > module ATP.Util.Log.Class 
 >   ( Log(..)
 >   , Priority(..)
 >   )
 > where
 
+* Impots
+
 > import Prelude hiding (log)
+> import qualified ATP.Util.Print as PP
+> import ATP.Util.Print ((<>))
 > import qualified Control.Monad.State as State
 > import Control.Monad.State (StateT)
-
 > import qualified System.Log.Logger as Logger
 > import System.Log.Logger (Priority(..))
 
-> import qualified ATP.Util.Print as PP
-> import ATP.Util.Print ((<>))
+* Logging
 
 Log class
 
