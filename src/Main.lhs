@@ -13,73 +13,70 @@ The front end for the automated theorem proving Haskell port.
 
 * Imports
 
-> import Prelude hiding (putStr, putStrLn, print)
-> import qualified System
-> import qualified System.IO.UTF8 as S
-> import qualified System.Console.GetOpt as Opt
-> import qualified System.Exit as Exit
-> import System.Console.GetOpt (OptDescr(..), ArgDescr(..))
-> import qualified Codec.Binary.UTF8.String as UString
-> import qualified Control.Exception as Exn
-> import Control.Exception (Exception)
-> import qualified Data.Maybe as Maybe
-> import qualified Data.List as List
-> import Data.Generics (Data, Typeable)
-> import qualified Test.HUnit as Test
-> import Test.HUnit(Test(..), (~:))
-
-> import ATP.Util.Impossible
-> import qualified ATP.Util.List as List
-> import qualified ATP.Util.Lib as Lib
+> import ATP.Util.Prelude
+> import qualified ATP.Combining as Combining
+> import qualified ATP.Completion as Completion
+> import qualified ATP.Complex as Complex
+> import qualified ATP.Cong as Cong
+> import qualified ATP.Cooper as Cooper
+> import qualified ATP.Decidable as Decidable
+> import qualified ATP.DefCNF as CNF
+> import qualified ATP.DLO as DLO
+> import qualified ATP.DP as DP
+> import qualified ATP.EqElim as EqElim
+> import qualified ATP.Equal as Equal
+> import qualified ATP.FOL as FOL
+> import qualified ATP.Formula as F
+> import ATP.FormulaSyn
+> import qualified ATP.Geom as Geom
+> import qualified ATP.Grobner as Grobner
+> import qualified ATP.Herbrand as Herbrand
+> import qualified ATP.Interpolation as Interpolation
+> import qualified ATP.Intro as Intro
+> import ATP.IntroSyn
+> import qualified ATP.Meson as Meson
+> import qualified ATP.Order as Order
+> import qualified ATP.Paramodulation as Paramodulation
+> import qualified ATP.Poly as Poly
+> import qualified ATP.Prolog as Prolog
+> import qualified ATP.Prop  as Prop 
+> import qualified ATP.PropExamples as PropExamples
+> import qualified ATP.Qelim as Qelim
+> import qualified ATP.Real as Real
+> import qualified ATP.Resolution as Resolution
+> import qualified ATP.Rewrite as Rewrite
+> import qualified ATP.Skolem as Skolem
+> import qualified ATP.Tableaux as Tableaux
+> import qualified ATP.Test.Combining
+> import qualified ATP.Test.Cooper
+> import qualified ATP.Test.DLO 
+> import qualified ATP.TestFormulas as Forms
+> import qualified ATP.Unif as Unif
+> import ATP.Util.Impossible (catchImpossible)
 > import qualified ATP.Util.Lex as Lex
-> import qualified ATP.Util.Parse as P
-> import ATP.Util.Parse (parse)
-> import qualified ATP.Util.Print as PP
-> import ATP.Util.Print (Pretty, pPrint, (<>), (<+>), ($+$))
+> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.List as List
 > import qualified ATP.Util.Log as Log
 > import ATP.Util.Log (Priority)
 > import qualified ATP.Util.Misc as Misc
 > import qualified ATP.Util.Monad as M
-
-> import ATP.IntroSyn
-> import qualified ATP.Intro as Intro
-> import ATP.FormulaSyn
-> import qualified ATP.Formula as F
-> import qualified ATP.Prop  as Prop 
-> import qualified ATP.PropExamples as PropExamples
-> import qualified ATP.DefCNF as CNF
-> import qualified ATP.FOL as FOL
-> import qualified ATP.DP as DP
-> import qualified ATP.Skolem as Skolem
-> import qualified ATP.Herbrand as Herbrand
-> import qualified ATP.Unif as Unif
-> import qualified ATP.Tableaux as Tableaux
-> import qualified ATP.Resolution as Resolution
-> import qualified ATP.Prolog as Prolog
-> import qualified ATP.Meson as Meson
-> import qualified ATP.Equal as Equal
-> import qualified ATP.Cong as Cong
-> import qualified ATP.Rewrite as Rewrite
-> import qualified ATP.Order as Order
-> import qualified ATP.Completion as Completion
-> import qualified ATP.EqElim as EqElim
-> import qualified ATP.Paramodulation as Paramodulation
-> import qualified ATP.Decidable as Decidable
-> import qualified ATP.Qelim as Qelim
-> import qualified ATP.DLO as DLO
-> import qualified ATP.Cooper as Cooper
-> import qualified ATP.Poly as Poly
-> import qualified ATP.Complex as Complex
-> import qualified ATP.Real as Real
-> import qualified ATP.Grobner as Grobner
-> import qualified ATP.Geom as Geom
-> import qualified ATP.Interpolation as Interpolation
-> import qualified ATP.Combining as Combining
-> import qualified ATP.TestFormulas as Forms
-
-> import qualified ATP.Test.DLO 
-> import qualified ATP.Test.Cooper
-> import qualified ATP.Test.Combining
+> import qualified ATP.Util.Parse as P
+> import ATP.Util.Parse (parse)
+> import qualified ATP.Util.Print as PP
+> import ATP.Util.Print (Pretty, pPrint, (<>), (<+>), ($+$))
+> import qualified Codec.Binary.UTF8.String as UString
+> import qualified Control.Exception as Exn
+> import Control.Exception (Exception)
+> import Data.Generics (Data, Typeable)
+> import qualified Data.List as List
+> import qualified Data.Maybe as Maybe
+> import qualified System
+> import qualified System.Console.GetOpt as Opt
+> import System.Console.GetOpt (OptDescr(..), ArgDescr(..))
+> import qualified System.Exit as Exit
+> import qualified System.IO.UTF8 as S
+> import qualified Test.HUnit as Test
+> import Test.HUnit(Test(..), (~:))
 
 * Options
 
@@ -102,7 +99,7 @@ The front end for the automated theorem proving Haskell port.
 
 > options :: [OptDescr Flag]
 > options =
->  [ Option ['v'] ["Verbose"] (OptArg verbose (show Log.defaultPrio)) 
+>  [ Option ['V'] ["Verbose"] (OptArg verbose (show Log.defaultPrio)) 
 >      "Verbosity level.  (debug | info | warn | error)"
 >  , Option ['T'] ["LogToTerm"] (NoArg LogToTerm)
 >      "Log to terminal on stdout."

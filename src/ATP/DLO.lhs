@@ -58,11 +58,27 @@
 >                F.listConj (Lib.allPairs (≺) ls rs)
 > dloBasic _ = error "dloBasic" 
 
+Here we deviate slightly from Harrioson and allow integer constants in
+the atomic formulas.
+
+> getInt :: Term -> Maybe Integer
+> getInt t = case t of
+>   Fn f [] | List.all Char.isDigit f -> Just $ read f
+>           | otherwise -> Nothing
+>   _ -> Nothing
+
 > afn :: Vars -> Formula -> Formula 
-> afn _ [$form| $s ≤ $t |] = [$form| ¬ ($t < $s) |]
-> afn _ [$form| $s ≥ $t |] = [$form| ¬ ($s < $t) |]
-> afn _ [$form| $s > $t |] = [$form| $t ≺ $s |]
-> afn _ fm = fm
+> afn xs f = case f of 
+>   [$form| $s ≤ $t |] -> afn xs [$form| ¬ ($t < $s) |]
+>   [$form| $s ≥ $t |] -> afn xs [$form| ¬ ($s < $t) |]
+>   [$form| $s > $t |] -> afn xs [$form| $t ≺ $s |]
+>   [$form| $n < $m |] -> case (getInt n, getInt m) of 
+>     (Just n', Just m') -> if n' < m' then (⊤) else (⊥)
+>     _ -> f
+>   [$form| ¬ ($n < $m) |] -> case (getInt n, getInt m) of 
+>     (Just n', Just m') -> if n' > m' then (⊤) else (⊥)
+>     _ -> f
+>   _ -> f
 
 > qelim :: Formula -> Formula 
 > qelim = Qelim.lift afn (Prop.dnf . Qelim.cnnf lfn) (const dloBasic)
@@ -71,11 +87,12 @@
 
 > destNumeral :: Term -> Rational
 > destNumeral (Fn ns []) = P.parse ns
-> destNumeral t = error ("destNumeral: " ++ show t)
+> destNumeral _ = __IMPOSSIBLE__ 
 
 > isNumeral :: Term -> Bool
-> isNumeral (Fn ns []) | head ns == '-' = List.all Char.isDigit (tail ns)
->                      | otherwise = List.all Char.isDigit ns
+> isNumeral (Fn ns []) 
+>   | head ns == '-' = List.all Char.isDigit (tail ns)
+>   | otherwise = List.all Char.isDigit ns
 > isNumeral _ = False
 
 > reduce :: Formula -> Formula
@@ -86,11 +103,11 @@
 >        "=" -> if s' == t' then Top else Bot 
 >        "<" -> if s' < t' then Top else Bot 
 >        _ -> f
-> reduce (And p q) = And (reduce p) (reduce q)
-> reduce (Imp p q) = Imp (reduce p) (reduce q)
-> reduce (Iff p q) = Iff (reduce p) (reduce q)
-> reduce (Or p q) = Or (reduce p) (reduce q)
-> reduce (Not p) = Not (reduce p)
+> reduce [$form| $p ∧ $q |] = reduce p ∧ reduce q
+> reduce [$form| $p ⊃ $q |] = reduce p ⊃ reduce q
+> reduce [$form| $p ⇔ $q |] = reduce p ⇔ reduce q
+> reduce [$form| $p ∨ $q |] = reduce p ∨ reduce q
+> reduce [$form| ¬ $p |] = (¬) (reduce p)
 > reduce f = f
 
 > valid :: Formula -> Bool

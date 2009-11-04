@@ -490,6 +490,9 @@ paramodulation.ml
 >   , ("dlo28", [$form| ∀ x. x < a ⊃ x ≤ b |])
 >   , ("dlo29", [$form| ∀ a b. ∃ x. ¬ (x = a) ∨ ¬ (x = b) ∨ (a = b) |])
 >   , ("dlo30", [$form| ∀ x y. x ≤ y ∨ x > y |])
+>   , ("dlo31", [$form| 1 < 2 |])
+>   , ("dlo32", [$form| 1 < 2 ∧ 3 < 4 |])
+>   , ("dlo33", [$form| 1 < 2 ∧ 4 < 3 |])
 
 ** Presburger
 

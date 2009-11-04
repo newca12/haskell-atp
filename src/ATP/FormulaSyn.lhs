@@ -292,7 +292,7 @@ clause for antiquotes.
 > quotePatT :: String -> TH.PatQ 
 > quotePatT = quoteTP . parse
 
-*** Expressions
+| Expressions
 
 > quoteTE :: Term -> TH.ExpQ
 > quoteTE = Q.dataToExpQ (G.mkQ Nothing quoteTE')
@@ -308,7 +308,7 @@ clause for antiquotes.
 >   '^':back -> TH'.conE "Var" [TH'.varE back]
 >   _ -> error ("Impossible: " ++ v) 
 
-*** Patterns 
+| Patterns 
 
 > quoteTP :: Term -> TH.PatQ
 > quoteTP = Q.dataToPatQ (G.mkQ Nothing quoteTP')
@@ -337,7 +337,7 @@ clause for antiquotes.
 > quotePatF :: String -> TH.PatQ 
 > quotePatF = quoteFP . parse
 
-*** Expressions
+| Expressions
 
 > quoteFE :: Formula -> TH.ExpQ
 > quoteFE = Q.dataToExpQ (G.mkQ Nothing quoteFE')
@@ -361,7 +361,7 @@ clause for antiquotes.
 > boundFE ('$':x) = TH'.varE x 
 > boundFE x = TH.stringE x
 
-*** Patterns 
+| Patterns 
 
 > quoteFP :: Formula -> TH.PatQ
 > quoteFP = Q.dataToPatQ (G.mkQ Nothing quoteFP')
