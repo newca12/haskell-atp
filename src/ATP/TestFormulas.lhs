@@ -731,4 +731,21 @@ DKAL
 >        curTime(alice) < licExp(Y) ∧ ⊤ ∧ ⊤ ∧ ⊤) ∧
 >       curTime(alice) < licExp(Y) ∧ ⊤ ∧ ⊤ ∧ ⊤ |])
 
+Complex
+
+>   , ("cplx1", [$form| ∀ a x. a^2 = 2 ∧ x^2 + a * x + 1 = 0 ⊃ x^4 + 1 = 0 |])
+>   , ("cplx2", [$form| ∀ a x. a^2 = 2 ∧ x^2 + a * x + 1 = 0 ⊃ x^4 + c = 0 |])
+>   , ("cplx3", [$form| 
+>        ∀ c. (∀ a x. a^2 = 2 ∧ x^2 + a * x + 1 = 0 ⊃ x^4 + c = 0)
+>            ⇔ c = 1 |])
+>   , ("cplx4", [$form| 
+>      ∀ a b c x y.
+>       a * x^2 + b * x + c = 0 ∧ a * y^2 + b * y + c = 0 ∧ ~(x = y)
+>       ⊃ a * x * y = c ∧ a * (x + y) + b = 0 |])
+
+End
+
 >   ]
+
+
+

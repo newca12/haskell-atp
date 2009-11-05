@@ -42,7 +42,7 @@ so the module can be imported unqualified.
 > import qualified ATP.Util.Parse as P
 > import ATP.Util.Parse (Parse, Parser, (<|>), (<?>))
 > import qualified ATP.Util.Print as PP
-> import ATP.Util.Print(Pretty, (<+>))
+> import ATP.Util.Print(Print, (<+>))
 > import qualified Data.Char as Char
 > import qualified Data.Generics as G
 > import Data.Generics(Typeable, Data)
@@ -139,7 +139,7 @@ a precedence argument.
 
 We use the Hughes pretty printing library for layout.
 
-> instance Pretty Expr where
+> instance Print Expr where
 >   pPrint = pp 0
 
 > instance Show Expr where

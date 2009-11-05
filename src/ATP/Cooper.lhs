@@ -7,6 +7,7 @@
 >   , isNumeral
 >   , numeral1
 >   , numeral2
+>   , evalc
 >   , destNumeral
 >   , integerQelim
 >   , naturalQelim

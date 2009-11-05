@@ -5,7 +5,7 @@
 
 PP.Doc is an orphan instance of Monoid.  Don't warn about it.
 
-* Signature 
+* Signature
 
 > module ATP.Util.Print 
 >   ( module Text.PrettyPrint.HughesPJ
@@ -16,12 +16,12 @@ PP.Doc is an orphan instance of Monoid.  Don't warn about it.
 * Imports
 
 > import Prelude hiding (print, putStr, putStrLn) 
-> import ATP.Util.Print.Print hiding (render)
-> import Data.Monoid 
-> import Text.PrettyPrint.HughesPJ
+> import Text.PrettyPrint.HughesPJ hiding (render)
+> import ATP.Util.Print.Print 
+> --import Data.Monoid 
 
 * Util
 
-> instance Monoid Doc where
->   mempty = empty
->   mappend = ($$)
+-- > instance Monoid Doc where
+-- >   mempty = empty
+-- >   mappend = ($$)

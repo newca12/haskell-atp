@@ -7,7 +7,9 @@
 
 * Imports
 
-> import Prelude 
+#include "undefined.h" 
+
+> import ATP.Util.Prelude
 > import qualified ATP.Completion as Completion
 > import qualified ATP.Equal as Equal
 > import qualified ATP.FOL as FOL
@@ -29,7 +31,7 @@
 >     Atom (R f args) -> Completion.listcases (Completion.overlaps lr)
 >                        (\i a -> rfn i (Atom (R f a))) args []
 >     Not p -> overlap1 lr p (\i p' -> rfn i (Not p'))
->     _ -> error "Impossible" 
+>     _ -> __IMPOSSIBLE__ 
 
 > overlapc :: (Term, Term) -> Clause -> (Env -> Clause -> a) 
 >             -> [a] -> [a]

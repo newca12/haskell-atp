@@ -26,7 +26,7 @@
 > import qualified ATP.Util.Parse as P
 > import ATP.Util.Parse (Parse, parse, Parser, (<|>), (<?>))
 > import qualified ATP.Util.Print as PP
-> import ATP.Util.Print (Pretty(pPrint), (<+>), (<>))
+> import ATP.Util.Print (Print(pPrint), (<+>), (<>))
 > import qualified Data.Generics as G
 > import Data.Generics (Data, Typeable)
 > import qualified Data.Map as Map
@@ -90,7 +90,7 @@
 > type Clauses = [Clause]
 > type Env = Map Var Term
 
-> instance Pretty Env where
+> instance Print Env where
 >   pPrint m = PP.set (map pr $ Map.toList m)
 >     where pr (x, t) = PP.hsep [pPrint x, PP.text "↦", pPrint t]
 
@@ -391,12 +391,12 @@ clause for antiquotes.
 
 * Printing
 
-> pp :: Pretty a => a -> IO ()
+> pp :: Print a => a -> IO ()
 > pp = PP.putStrLn . pPrint
 
 Terms
 
-> instance Pretty Term where
+> instance Print Term where
 >   pPrint = ppTerm' 0
 
 > ppTerm' :: Int -> Term -> PP.Doc
@@ -430,7 +430,7 @@ Relations
 > isInfixRel (R p ts) = 
 >   List.elem p ["=", "<", "≺", "<=", "≤", ">", "≻", ">=", "≥"] && length ts == 2 
 
-> instance Pretty Rel where
+> instance Print Rel where
 >   pPrint (R p []) = PP.text p
 >   pPrint r@(R p args) = 
 >       if isInfixRel r
@@ -445,7 +445,7 @@ Relations
 
 Formulas
 
-> instance Pretty Formula where
+> instance Print Formula where
 >   pPrint = ppForm 0
 
 Since all infix formulas associate to the right, we don't need

@@ -4,7 +4,8 @@
 * Signature
 
 > module ATP.Util.List 
->   ( allInjectiveMaps
+>   ( module Data.List
+>   , allInjectiveMaps
 >   , findFirst
 >   , findRemFirst
 >   , partitions
@@ -12,15 +13,17 @@
 >   , sublists
 >   , splits
 >   , classify
->   , partition
+>   , partition'
 >   , uncons
 >   , foldr2
+>   , insertAt
 >   )
 > where
 
 * Imports
 
 > import Prelude 
+> import Data.List
 
 * Utils
 
@@ -106,10 +109,10 @@ the modified list.
 >     Right b -> (as, b:bs)
 >   where (as, bs) = classify f xs
 
-> partition :: (a -> Maybe (Either b c)) -> [a] -> ([b], [c])
-> partition _ [] = ([], [])
-> partition f (x:xs) =
->   let yzs@(ys, zs) = partition f xs in
+> partition' :: (a -> Maybe (Either b c)) -> [a] -> ([b], [c])
+> partition' _ [] = ([], [])
+> partition' f (x:xs) =
+>   let yzs@(ys, zs) = partition' f xs in
 >   case f x of 
 >     Nothing -> yzs
 >     Just (Left y) -> (y:ys, zs)
@@ -123,3 +126,8 @@ the modified list.
 > foldr2 _ b [] [] = b
 > foldr2 f b (x:xs) (y:ys) = foldr2 f (f x y b) xs ys
 > foldr2 _ _ _ _ = error "foldr2: length mismatch"
+
+> insertAt :: Int -> a -> [a] -> [a]
+> insertAt 0 x xs = x:xs
+> insertAt _ _ [] = error "insertAt: empty"
+> insertAt n x xs = x:insertAt (n-1) x xs

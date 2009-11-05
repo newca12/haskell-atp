@@ -13,6 +13,8 @@
 
 * Imports
 
+#include "undefined.h" 
+
 > import ATP.Util.Prelude 
 > import qualified ATP.Equal as Equal
 > import qualified ATP.FOL as FOL
@@ -58,7 +60,7 @@
 > findNvSubterm (Not p) = findNvSubterm p
 > findNvSubterm (Atom (R "=" st)) = Lib.findApply findNestNonvar st
 > findNvSubterm (Atom (R _ args)) = List.find (not . FOL.isVar) args
-> findNvSubterm _ = error "Impossible" 
+> findNvSubterm _ = __IMPOSSIBLE__ 
 
 > replacet :: Map Term Term -> Term -> Term
 > replacet rfn tm = case Map.lookup tm rfn of

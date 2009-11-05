@@ -23,6 +23,8 @@
 
 * Imports
 
+#include "undefined.h" 
+
 > import ATP.Util.Prelude 
 > import qualified ATP.DP as DP
 > import qualified ATP.Formula as F
@@ -101,13 +103,13 @@
 >    All _ (Imp (Atom(R p _)) (Not(Atom(R q _)))) -> "no " ++ p ++ " are " ++ q
 >    Ex _ (And (Atom(R p _)) (Atom(R q _))) -> "some " ++ p ++ " are " ++ q
 >    Ex _ (And (Atom(R p _)) (Not(Atom(R q _)))) -> "some " ++ p ++ " are not " ++ q
->    _ -> error "Impossible" 
+>    _ -> __IMPOSSIBLE__ 
 
 > anglicizeSyllogism :: Formula -> String
 > anglicizeSyllogism (Imp (And t1 t2) t3) =
 >  "If " ++ anglicizePremiss t1 ++ " and " ++ anglicizePremiss t2 ++
 >  ", then " ++ anglicizePremiss t3
-> anglicizeSyllogism _ = error "Impossible" 
+> anglicizeSyllogism _ = __IMPOSSIBLE__ 
 
 > allPossibleSyllogisms :: [Formula]
 > allPossibleSyllogisms =

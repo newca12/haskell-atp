@@ -94,7 +94,7 @@ The Nelson-Oppen method.
 >     Atom (R p args) -> 
 >       let lang = case chooseLang langs fm of 
 >                    Just l -> l 
->                    Nothing -> error "Impossible" in
+>                    Nothing -> __IMPOSSIBLE__ in
 >       listify (homot lang) args (\a -> cont (Atom (R p a))) n defs
 >     _ -> error "homol: not a literal"
 
@@ -146,7 +146,7 @@ The Nelson-Oppen method.
 >   case List.find (Maybe.isJust . destDef) eqs of
 >     Just eq -> let (x, t) = case destDef eq of 
 >                               Just xt -> xt 
->                               Nothing -> error "Impossible" in
+>                               Nothing -> __IMPOSSIBLE__ in
 >                redeqs (map (FOL.apply (x ⟾ t)) (eqs \\ [eq]))
 >     Nothing -> eqs
 

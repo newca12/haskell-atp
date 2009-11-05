@@ -13,6 +13,8 @@ The Davis-Putnam and Davis-Putnam-Loveland-Logemann procedures.
 
 * Imports
 
+#include "undefined.h" 
+
 > import ATP.Util.Prelude 
 > import qualified ATP.DefCNF as CNF
 > import qualified ATP.Formula as F
@@ -53,7 +55,7 @@ clauses by deleting other literals.
 >     Just [u] -> Just (Set.image (\\ [u']) clauses1) 
 >       where u' = F.opp u
 >             clauses1 = filter (not . elem u) clauses 
->     _ -> error "Impossible" 
+>     _ -> __IMPOSSIBLE__ 
 
 The affirmative-negative rule
 

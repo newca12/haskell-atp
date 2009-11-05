@@ -25,7 +25,7 @@
 > import qualified ATP.Util.Parse as P
 > import ATP.Util.Parse (Parse, Parser, parser)
 > import qualified ATP.Util.Print as PP
-> import ATP.Util.Print(Pretty, pPrint, (<+>), (<>)) 
+> import ATP.Util.Print(Print, pPrint, (<+>), (<>)) 
 > import qualified Data.List as List
 > import qualified Data.Map as Map
 > import qualified Data.Maybe as Maybe
@@ -162,7 +162,7 @@ left-to-right. Thus we can modify the interpreter:
 
 * Printing
 
-> instance Pretty Rule where
+> instance Print Rule where
 >   pPrint (Rule [] f) = pPrint f <> PP.text "."
 >   pPrint (Rule fs f) =
 >     pPrint f <+> PP.text ":-" 

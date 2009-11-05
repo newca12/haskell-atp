@@ -1,0 +1,154 @@
+
+name:           ATP
+version:        1.0.0
+cabal-version:  >= 1.6.0.3 && < 2
+build-type:     Simple
+license:        GPL
+license-file:   LICENSE
+author:         Sean McLaughlin <seanmcl@gmail.com>
+maintainer:	Sean McLaughlin <seanmcl@gmail.com>
+homepage:       
+bug-reports:    
+category:       Theorem provers
+
+synopsis:       A Haskell port of the code from John Harrison's book 
+                Handbook of Practical Logic and Automated Reasoning.
+
+description:    Haskell theorem proving algorithms.
+
+tested-with:    GHC == 6.10.4
+
+extra-source-files: LICENSE
+                    src/undefined.h
+                    src/undefined2.h
+
+library
+
+  hs-source-dirs: src
+
+  include-dirs: src
+
+  build-depends:  base >= 4.1.0.0,
+                  haskell98 >= 1.0.1.0,
+                  containers >= 0.2.0.1,
+                  mtl >= 1.1.0.2,
+                  parsec >= 2.1.0.1,
+                  utf8-string >= 0.3.5,
+                  HUnit >= 1.2.2.0,
+                  pretty >= 1.0.1.0,
+                  QuickCheck >= 2.1.0.0,
+                  template-haskell >= 2.3.0.1,
+                  hslogger >= 1.0.7,
+                  syb >= 0.1.0.1
+
+  extensions:    NoImplicitPrelude
+                 MultiParamTypeClasses
+                 ScopedTypeVariables
+                 TypeSynonymInstances
+                 OverlappingInstances
+                 FlexibleInstances
+                 DeriveDataTypeable
+                 TemplateHaskell
+                 QuasiQuotes
+                 CPP
+
+  ghc-options: -Wall 
+               -- These warnings are not turned on by -Wall
+               -fwarn-implicit-prelude 
+               -fwarn-monomorphism-restriction 
+               -fwarn-incomplete-record-updates 
+               -fwarn-tabs 
+               -fwarn-simple-patterns 
+               -fno-ignore-asserts
+               -- -v
+               -- Dump Core language
+               -- -ddump-simpl
+               -- Warnings as errors
+               -Werror
+               -- Allow comment lines next to literate lines
+               -optL -q
+               -- Profiling 
+               -- -prof
+               -- -auto-all
+               -- Remove literate comments with BirdPP
+               -- -pgmL BirdPP
+
+  exposed-modules: ATP.Util.Debug
+                   ATP.Util.Impossible
+                   ATP.Util.Lex
+                   ATP.Util.Lib
+                   ATP.Util.List
+                   ATP.Util.ListSet
+                   ATP.Util.Log
+                   ATP.Util.Log.Class
+                   ATP.Util.Misc
+                   ATP.Util.Monad
+                   ATP.Util.Parse
+                   ATP.Util.Parse.Parse
+                   ATP.Util.Prelude
+                   ATP.Util.Print
+                   ATP.Util.Print.Print
+                   ATP.Util.TH
+                   ATP.Util.Tuple
+                   ATP.Util.UnionFind
+
+                   ATP.Combining
+                   ATP.Completion
+                   ATP.Complex
+                   ATP.Cong
+                   ATP.Cooper
+                   ATP.DLO
+                   ATP.DP
+                   ATP.Decidable
+                   ATP.DefCNF
+                   ATP.EqElim
+                   ATP.Equal
+                   ATP.FOL
+                   ATP.Formula
+                   ATP.FormulaSyn
+                   ATP.Geom
+                   ATP.Grobner
+                   ATP.Herbrand
+                   ATP.Interpolation
+                   ATP.Intro
+                   ATP.IntroSyn
+                   ATP.Meson
+                   ATP.Order
+                   ATP.Paramodulation
+                   ATP.Poly
+                   ATP.Prolog
+                   ATP.Prop
+                   ATP.PropExamples
+                   ATP.Qelim
+                   ATP.Real
+                   ATP.Resolution
+                   ATP.Rewrite
+                   ATP.Skolem
+                   ATP.Tableaux
+                   ATP.TestFormulas
+                   ATP.Unif
+
+executable atp
+
+  main-is:       Main.lhs
+
+  hs-source-dirs: src
+
+  include-dirs: src
+
+  extensions:    NoImplicitPrelude
+                 MultiParamTypeClasses
+                 ScopedTypeVariables
+                 TypeSynonymInstances
+                 OverlappingInstances
+                 FlexibleInstances
+                 DeriveDataTypeable
+                 TemplateHaskell
+                 QuasiQuotes
+                 CPP
+
+  ghc-options: -fno-ignore-asserts
+               -- Allow comment lines next to literate lines
+               -optL -q
+
+

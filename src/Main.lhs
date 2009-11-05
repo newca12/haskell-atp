@@ -63,7 +63,7 @@ The front end for the automated theorem proving Haskell port.
 > import qualified ATP.Util.Parse as P
 > import ATP.Util.Parse (parse)
 > import qualified ATP.Util.Print as PP
-> import ATP.Util.Print (Pretty, pPrint, (<>), (<+>), ($+$))
+> import ATP.Util.Print (Print, pPrint, (<>), (<+>), ($+$))
 > import qualified Codec.Binary.UTF8.String as UString
 > import qualified Control.Exception as Exn
 > import Control.Exception (Exception)
@@ -90,7 +90,7 @@ The front end for the automated theorem proving Haskell port.
 
 > type Flags = [Flag]
 
-> instance Pretty Flag where
+> instance Print Flag where
 >   pPrint = PP.text . show
 
 > decodeFlag :: Flag -> Flag
@@ -203,7 +203,7 @@ Get rewriting rules.
 >          , ("Equality",
 >             [ bmeson, paramod, ccvalid, rewrite ])
 >          , ("Decidable problems",
->             [ aedecide, dlo, dlovalid, cooper, nelop, nelopDLO ])
+>             [ aedecide, dlo, dlovalid, cooper, nelop, nelopDLO, complex ])
 >          ]
 
 > commands :: [Command]
@@ -357,7 +357,7 @@ Show a test formula
 
 ** Propositional solvers
 
-> run :: Pretty a => (Formula -> IO a) -> Flags -> Args -> IO ()
+> run :: Print a => (Formula -> IO a) -> Flags -> Args -> IO ()
 > run f flags args = 
 >   let fm = getFormula flags args in
 >   do res <- f fm 
@@ -565,6 +565,13 @@ Show a test formula
 >         usage = PP.vcat [ PP.text "nelop -f <formula>"
 >                         , PP.text "nelop <id>" ] 
 >         f = run (return . Combining.nelopDLO)
+
+> complex :: Command
+> complex = Com "complex" summ usage f
+>   where summ = "Complex quantifier elimination"
+>         usage = PP.vcat [ PP.text "complex -f <formula>"
+>                         , PP.text "complex <id>" ] 
+>         f = run (return . Complex.qelim)
 
 * Top
 

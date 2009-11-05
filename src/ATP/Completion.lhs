@@ -15,7 +15,9 @@ Knuth-Bendix completion.
 
 * Imports
 
-> import Prelude 
+#include "undefined.h" 
+
+> import ATP.Util.Prelude
 > import qualified ATP.FOL as FOL
 > import qualified ATP.Equal as Equal
 > import ATP.FormulaSyn
@@ -60,7 +62,7 @@ Knuth-Bendix completion.
 > crit1 :: Formula -> Formula -> [Formula]
 > crit1 (Atom (R "=" [l1, r1])) (Atom (R "=" [l2, r2])) = 
 >   overlaps (l1, r1) l2 (\i t -> FOL.apply i (Equal.mkEq t r2))
-> crit1 _ _ = error "Impossible" 
+> crit1 _ _ = __IMPOSSIBLE__ 
 
 > criticalPairs :: Formula -> Formula -> [Formula]
 > criticalPairs fma fmb = 
@@ -75,7 +77,7 @@ Knuth-Bendix completion.
 >   if ord s' t' then Just (s', t') 
 >   else if ord t' s' then Just (t', s')
 >   else Nothing 
-> normalizeAndOrient _ _ _ = error "Impossible" 
+> normalizeAndOrient _ _ _ = __IMPOSSIBLE__ 
 
 > status :: ([Formula], [Formula], [Formula]) -> [Formula] -> IO ()
 > status (eqs, def, crs) eqs0 = 

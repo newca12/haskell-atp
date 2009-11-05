@@ -2,8 +2,8 @@
 * Signature
 
 > module ATP.Util.Print.Print
->   ( Pretty(..)
->   , GenPretty(..)
+>   ( Print(..)
+>   , GenPrint(..)
 >   , prettyShow
 >   , paren
 >   , commas
@@ -16,23 +16,27 @@
 >   , set
 >   , setVert
 >   , setHoriz
->   , render
 >   , putStrLn
+>   , render
+>   , dot
 >   )
->   where
+> where
 
 * Imports
 
 > import Prelude hiding (putStrLn)
+> import qualified System.IO.UTF8 as S
 > import qualified Data.List as List
-> import qualified Data.Ratio as Ratio
 > import qualified Data.Set as Set
 > import Data.Set (Set)
-> import qualified System.IO.UTF8 as S
 > import qualified Text.PrettyPrint.HughesPJ as PP
 > import Text.PrettyPrint.HughesPJ (Doc, (<+>))
+> import qualified Data.Ratio as Ratio
 
 * Printing
+
+> dot :: PP.Doc
+> dot = PP.text "."
 
 > paren :: Bool -> PP.Doc -> PP.Doc
 > paren False = id
@@ -73,12 +77,11 @@
 FIXME: Trying to make the lines longer doesn't seem to be working at all.
 
 > render :: PP.Doc -> String
-> --render = PP.renderStyle (PP.Style PP.LeftMode 1000 1.5)
-> render = PP.render
+> render = PP.renderStyle (PP.Style PP.PageMode 100 1.5)
 
 * Type class
 
-> class Pretty a where
+> class Print a where
 >   pPrintPrec :: PrettyLevel -> Rational -> a -> Doc
 >   pPrint :: a -> Doc
 >   pPrintList :: PrettyLevel -> [a] -> Doc
@@ -94,89 +97,89 @@ FIXME: Trying to make the lines longer doesn't seem to be working at all.
 > prettyNormal :: PrettyLevel
 > prettyNormal = PrettyLevel 0
 
-> prettyShow :: (Pretty a) => a -> String
+> prettyShow :: Print a => a -> String
 > prettyShow = PP.render . pPrint
 
-> pPrint0 :: (Pretty a) => PrettyLevel -> a -> Doc
+> pPrint0 :: Print a => PrettyLevel -> a -> Doc
 > pPrint0 l = pPrintPrec l 0
 
 > appPrec :: Rational
 > appPrec = 10
 
 > putStrLn :: PP.Doc -> IO ()
-> putStrLn = S.putStrLn . render
+> putStrLn = S.putStrLn . PP.render
 
 ** Instances
 
-> instance Pretty Int where pPrint = PP.int
+> instance Print Int where pPrint = PP.int
 
-> instance Pretty Integer where pPrint = PP.integer
+> instance Print Integer where pPrint = PP.integer
 
-> instance Pretty Float where pPrint = PP.float
+> instance Print Float where pPrint = PP.float
 
-> instance Pretty Double where pPrint = PP.double
+> instance Print Double where pPrint = PP.double
 
-> instance Pretty () where pPrint _ = PP.text "()"
+> instance Print () where pPrint _ = PP.text "()"
 
-> instance Pretty Bool where pPrint = PP.text . show
+> instance Print Bool where pPrint = PP.text . show
 
-> instance Pretty Ordering where pPrint = PP.text . show
+> instance Print Ordering where pPrint = PP.text . show
 
-> instance Pretty Char where
+> instance Print Char where
 >     pPrint = PP.char
 >     pPrintList _ = PP.text . show
 
-> instance (Pretty a) => Pretty (Maybe a) where
+> instance (Print a) => Print (Maybe a) where
 >     pPrintPrec _ _ Nothing = PP.text "Nothing"
 >     pPrintPrec l p (Just x) = paren (p > appPrec) $ PP.text "Just" <+> pPrintPrec l (appPrec+1) x
 
-> instance (Pretty a, Pretty b) => Pretty (Either a b) where
+> instance (Print a, Print b) => Print (Either a b) where
 >     pPrintPrec l p (Left x) = paren (p > appPrec) $ PP.text "Left" <+> pPrintPrec l (appPrec+1) x
 >     pPrintPrec l p (Right x) = paren (p > appPrec) $ PP.text "Right" <+> pPrintPrec l (appPrec+1) x
 > 
-> instance (Pretty a) => Pretty [a] where
+> instance (Print a) => Print [a] where
 >     pPrintPrec l _ xs = pPrintList l xs
 > 
-> instance (Pretty a, Pretty b) => Pretty (a, b) where
+> instance (Print a, Print b) => Print (a, b) where
 >     pPrintPrec l _ (a, b) =
 >         PP.parens $ PP.fsep $ PP.punctuate PP.comma [pPrint0 l a, pPrint0 l b]
 > 
-> instance (Pretty a, Pretty b, Pretty c) => Pretty (a, b, c) where
+> instance (Print a, Print b, Print c) => Print (a, b, c) where
 >     pPrintPrec l _ (a, b, c) =
 >         PP.parens $ PP.fsep $ PP.punctuate PP.comma [pPrint0 l a, pPrint0 l b, pPrint0 l c]
 > 
-> instance (Pretty a, Pretty b, Pretty c, Pretty d) => Pretty (a, b, c, d) where
+> instance (Print a, Print b, Print c, Print d) => Print (a, b, c, d) where
 >     pPrintPrec l _ (a, b, c, d) =
 >         PP.parens $ PP.fsep $ PP.punctuate PP.comma [pPrint0 l a, pPrint0 l b, pPrint0 l c, pPrint0 l d]
 > 
-> instance (Pretty a, Pretty b, Pretty c, Pretty d, Pretty e) => Pretty (a, b, c, d, e) where
+> instance (Print a, Print b, Print c, Print d, Print e) => Print (a, b, c, d, e) where
 >     pPrintPrec l _ (a, b, c, d, e) =
 >         PP.parens $ PP.fsep $ PP.punctuate PP.comma [pPrint0 l a, pPrint0 l b, pPrint0 l c, pPrint0 l d, pPrint0 l e]
 > 
-> instance (Pretty a, Pretty b, Pretty c, Pretty d, Pretty e, Pretty f) => Pretty (a, b, c, d, e, f) where
+> instance (Print a, Print b, Print c, Print d, Print e, Print f) => Print (a, b, c, d, e, f) where
 >     pPrintPrec l _ (a, b, c, d, e, f) =
 >         PP.parens $ PP.fsep $ PP.punctuate PP.comma [pPrint0 l a, pPrint0 l b, pPrint0 l c, pPrint0 l d, pPrint0 l e, pPrint0 l f]
 > 
-> instance (Pretty a, Pretty b, Pretty c, Pretty d, Pretty e, Pretty f, Pretty g) =>
->          Pretty (a, b, c, d, e, f, g) where
+> instance (Print a, Print b, Print c, Print d, Print e, Print f, Print g) =>
+>          Print (a, b, c, d, e, f, g) where
 >     pPrintPrec l _ (a, b, c, d, e, f, g) =
 >         PP.parens $ PP.fsep $ PP.punctuate PP.comma [pPrint0 l a, pPrint0 l b, pPrint0 l c, pPrint0 l d, pPrint0 l e, pPrint0 l f, pPrint0 l g]
 > 
-> instance (Pretty a, Pretty b, Pretty c, Pretty d, Pretty e, Pretty f, Pretty g, Pretty h) =>
->          Pretty (a, b, c, d, e, f, g, h) where
+> instance (Print a, Print b, Print c, Print d, Print e, Print f, Print g, Print h) =>
+>          Print (a, b, c, d, e, f, g, h) where
 >     pPrintPrec l _ (a, b, c, d, e, f, g, h) =
 >         PP.parens $ PP.fsep $ PP.punctuate PP.comma [pPrint0 l a, pPrint0 l b, pPrint0 l c, pPrint0 l d, pPrint0 l e, pPrint0 l f, pPrint0 l g, pPrint0 l h]
 
-> instance Pretty a => Pretty (Set a) where
+> instance Print a => Print (Set a) where
 >   pPrint x = setHoriz $ map pPrint $ Set.toList x
 
 This is needed for proper unicode printing.
 
-> instance Pretty [String] where
+> instance Print [String] where
 >   pPrint = listHoriz . map PP.text 
 
-> class GenPretty s a where
+> class GenPrint s a where
 >   pPrintEnv :: s -> a -> Doc
 
-> instance Pretty a => GenPretty () a where
+> instance Print a => GenPrint () a where
 >   pPrintEnv _ = pPrint

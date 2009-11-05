@@ -26,11 +26,13 @@
 :set -XDeriveDataTypeable
 :set -XTemplateHaskell
 :set -XQuasiQuotes
+:set -XCPP
+:set -XNoImplicitPrelude
 
 :set -i/usr1/seanmcl/save/projects/atp/src
 :set -i/Users/sean/save/projects/atp/src
-
---:set -fbreak-on-exception
+:set -optL -q
+:set -fbreak-on-exception
 
 :set args "cvc" "⊤"
 :set -lcvc3 -lcvch

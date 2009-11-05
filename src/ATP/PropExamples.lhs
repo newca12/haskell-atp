@@ -15,6 +15,8 @@
 
 * Imports
 
+#include "undefined.h"
+
 > import ATP.Util.Prelude
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
@@ -41,7 +43,7 @@ p_m_n that we think of as 'm is connected to n' (or 'm knows n' etc.):
 >       yesgrps = map (Set.allSets 2) (Set.allSets s vertices)
 >       nogrps = map (Set.allSets 2) (Set.allSets t vertices) 
 >       e [m, n'] = Atom $ R ("p_" ++ show m ++ "_" ++ show n') [] 
->       e _ = error "Impossible" 
+>       e _ = __IMPOSSIBLE__ 
 >   in (F.listDisj $ map (F.listConj . map e) yesgrps)
 >        ∨ (F.listDisj $ map (F.listConj . map ((¬) . e)) nogrps)
 
