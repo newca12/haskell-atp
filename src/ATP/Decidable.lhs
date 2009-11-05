@@ -26,10 +26,10 @@
 #include "undefined.h" 
 
 > import ATP.Util.Prelude 
-> import qualified ATP.DP as DP
+> import qualified ATP.Dp as Dp
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Herbrand as Herbrand
 > import qualified ATP.Meson as Meson
 > import qualified ATP.Prop as Prop
@@ -44,28 +44,28 @@
 > aedecide :: Formula -> Bool
 > aedecide fm = 
 >   let sfm = Skolem.skolemize (Not fm)
->       fvs = FOL.fv sfm
->       (cnsts, funcs) = List.partition (\(_, ar) -> ar == 0) (FOL.functions sfm) in
+>       fvs = Fol.fv sfm
+>       (cnsts, funcs) = List.partition (\(_, ar) -> ar == 0) (Fol.functions sfm) in
 >   if funcs /= [] then error "Not in AE fragment" else
 >   let consts = if cnsts == [] then [("c", 0)] else cnsts
 >       cntms = map (\(c, _) -> Fn c []) consts
 >       alltups = Herbrand.groundtuples cntms [] 0 (length fvs)
 >       cjs = Prop.simpcnf sfm
 >       grounds = map (\tup -> Set.image  
->                                (Set.image (FOL.apply (Map.fromList $ zip fvs tup)))
+>                                (Set.image (Fol.apply (Map.fromList $ zip fvs tup)))
 >                                cjs) alltups in
->   not $ DP.dpll $ Set.unions grounds
+>   not $ Dp.dpll $ Set.unions grounds
 
 > separate :: Var -> [Formula] -> Formula
 > separate x cjs = 
->   let (yes, no) = List.partition (elem x . FOL.fv) cjs in
+>   let (yes, no) = List.partition (elem x . Fol.fv) cjs in
 >   if yes == [] then F.listConj no
 >   else if no == [] then Ex x (F.listConj yes)
 >   else And (Ex x (F.listConj yes)) (F.listConj no)
 
 > pushquant :: Var -> Formula -> Formula
 > pushquant x p = 
->   if not (List.elem x (FOL.fv p)) then p else
+>   if not (List.elem x (Fol.fv p)) then p else
 >   let djs = Prop.purednf (Prop.nnf p) in
 >   F.listDisj (map (separate x) djs)
 
@@ -157,14 +157,14 @@
 
 > decideFinite :: Int -> Formula -> Bool
 > decideFinite n fm =
->   let funcs = FOL.functions fm
->       preds = FOL.predicates fm
+>   let funcs = Fol.functions fm
+>       preds = Fol.predicates fm
 >       dom = [1 .. n]
 >       fints = alldepmappings funcs (allfunctions dom)
 >       pints = alldepmappings preds (allpredicates dom)
 >       interps = Lib.allPairs (\f p -> (dom, f, p)) fints pints
->       fm' = FOL.generalize fm in
->   List.all (\md -> FOL.holds md Map.empty fm') interps
+>       fm' = Fol.generalize fm in
+>   List.all (\md -> Fol.holds md Map.empty fm') interps
 
 > limmeson :: Int -> Formula -> Maybe (Env, Int, Int)
 > limmeson n fm = 
@@ -174,7 +174,7 @@
 
 > limitedMeson :: Int -> Formula -> Maybe [(Env, Int, Int)]
 > limitedMeson n fm =
->   let fm1 = Skolem.askolemize(Not(FOL.generalize fm)) in
+>   let fm1 = Skolem.askolemize(Not(Fol.generalize fm)) in
 >   mapM (limmeson n . F.listConj) (Prop.simpdnf fm1)
 
 > decideFmp :: Formula -> Bool
@@ -186,8 +186,8 @@
 
 > decideMonadic :: Formula -> Bool
 > decideMonadic fm =
->   let funcs = FOL.functions fm 
->       preds = FOL.predicates fm 
+>   let funcs = Fol.functions fm 
+>       preds = Fol.predicates fm 
 >       (monadic, other) = List.partition (\(_, ar) -> ar == 1) preds in
 >   if funcs /= [] || List.any (\(_, ar) -> ar > 1) other 
 >   then error "Not in the monadic subset" else

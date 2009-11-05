@@ -16,7 +16,7 @@
 * Imports
 
 > import Prelude 
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
@@ -56,9 +56,9 @@ the following function, which adds a prefix to each variable name in a clause:
 
 > rename :: String -> Clause -> Clause
 > rename pfx cls =
->   let fvs = FOL.fv(F.listDisj cls)
+>   let fvs = Fol.fv(F.listDisj cls)
 >       vvs = map (Var . (pfx ++)) fvs in
->             map (FOL.apply (Map.fromList (zip fvs vvs))) cls
+>             map (Fol.apply (Map.fromList (zip fvs vvs))) cls
 
 We find all resolvents of two clauses cl1 and cl2 via an auxiliary function
 that takes a particular literal p in cl1 and an accumulator acc of results
@@ -83,7 +83,7 @@ and add it into the accumulator:
 >               case mgu (s1 ++ map F.opp s2) Map.empty of
 >                 Just env' -> 
 >                   let cs = Set.union (cl1 \\ s1) (cl2 \\ s2) in
->                   Set.image (FOL.apply env') cs : sof
+>                   Set.image (Fol.apply env') cs : sof
 >                 Nothing -> sof 
 
 The overall function to generate all possible resolvents of a set of clauses
@@ -129,7 +129,7 @@ main loop.
 
 > basicResolution :: Formula -> IO ()
 > basicResolution fm = 
->   let fm1 = Skolem.askolemize $ Not $ FOL.generalize fm in
+>   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   do mapM_ (pureBasicResolution . F.listConj) (Prop.simpdnf fm1)
 >      T.printf "Solution found!\n"
 
@@ -230,7 +230,7 @@ main loop.
 
 > resolution :: Formula -> IO ()
 > resolution fm = 
->   let fm1 = Skolem.askolemize $ Not $ FOL.generalize fm in
+>   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   do mapM_ (pureResolution . F.listConj) (Prop.simpdnf fm1)
 >      T.printf "Solution found!\n"
 
@@ -273,7 +273,7 @@ main loop.
 
 > positiveResolution :: Formula -> IO ()
 > positiveResolution fm = 
->   let fm1 = Skolem.askolemize $ Not $ FOL.generalize fm in
+>   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   do mapM_ (purePositiveResolution . F.listConj) (Prop.simpdnf fm1)
 >      T.printf "Solution found!\n"
 
@@ -298,7 +298,7 @@ make the following modification:
 
 > sosResolution :: Formula -> IO ()
 > sosResolution fm = 
->   let fm1 = Skolem.askolemize $ Not $ FOL.generalize fm in
+>   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   do mapM_ (pureSosResolution . F.listConj) (Prop.simpdnf fm1)
 >      T.printf "Solution found!\n"
 

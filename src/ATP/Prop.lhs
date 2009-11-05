@@ -162,6 +162,7 @@ Simplification
 > simplify1 fm = case fm of
 >   [$form| ¬ ⊥ |] -> (⊤)
 >   [$form| ¬ ⊤ |] -> (⊥)
+>   [$form| ¬ ¬ $p |] -> p
 >   [$form| ⊥ ∧ _ |] -> (⊥)
 >   [$form| _ ∧ ⊥ |] -> (⊥)
 >   [$form| ⊤ ∧ $q |] -> q

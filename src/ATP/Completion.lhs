@@ -18,7 +18,7 @@ Knuth-Bendix completion.
 #include "undefined.h" 
 
 > import ATP.Util.Prelude
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Equal as Equal
 > import ATP.FormulaSyn
 > import qualified ATP.Order as Order
@@ -36,12 +36,12 @@ Knuth-Bendix completion.
 
 > renamePair :: (Formula, Formula) -> (Formula, Formula) 
 > renamePair (fm1, fm2) = 
->   let fvs1 = FOL.fv fm1
->       fvs2 = FOL.fv fm2
+>   let fvs1 = Fol.fv fm1
+>       fvs2 = Fol.fv fm2
 >       (nms1, nms2) = splitAt (length fvs1) 
 >          (map (Var . ("x" ++) . show) [0 .. length fvs1 + length fvs2 - 1]) 
->   in ( FOL.apply (Map.fromList (zip fvs1 nms1)) fm1, 
->        FOL.apply (Map.fromList (zip fvs2 nms2)) fm2 )
+>   in ( Fol.apply (Map.fromList (zip fvs1 nms1)) fm1, 
+>        Fol.apply (Map.fromList (zip fvs2 nms2)) fm2 )
 
 > listcases :: (a -> (Env -> a -> b) -> [c]) -> (Env -> [a] -> b) -> [a] -> [c] -> [c]
 > listcases _ _ [] acc = acc
@@ -61,7 +61,7 @@ Knuth-Bendix completion.
 
 > crit1 :: Formula -> Formula -> [Formula]
 > crit1 (Atom (R "=" [l1, r1])) (Atom (R "=" [l2, r2])) = 
->   overlaps (l1, r1) l2 (\i t -> FOL.apply i (Equal.mkEq t r2))
+>   overlaps (l1, r1) l2 (\i t -> Fol.apply i (Equal.mkEq t r2))
 > crit1 _ _ = __IMPOSSIBLE__ 
 
 > criticalPairs :: Formula -> Formula -> [Formula]

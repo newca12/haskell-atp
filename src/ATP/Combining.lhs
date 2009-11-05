@@ -9,7 +9,7 @@ The Nelson-Oppen method.
 >   , dloLang
 >   , nelop
 >   , nelopInt
->   , nelopDLO
+>   , nelopDlo
 >   , addDefault
 >   )
 > where
@@ -21,10 +21,10 @@ The Nelson-Oppen method.
 > import ATP.Util.Prelude 
 > import qualified ATP.Cong as Cong
 > import qualified ATP.Cooper as Cooper
-> import qualified ATP.DefCNF as CNF
-> import qualified ATP.DLO as DLO
+> import qualified ATP.DefCnf as Cnf
+> import qualified ATP.Dlo as Dlo
 > import qualified ATP.Equal as Equal
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
@@ -46,12 +46,12 @@ The Nelson-Oppen method.
 > intLang = (fdesc, pdesc, elim)
 >   where fdesc (s, n) = n == 0 && Cooper.isNumeral (Fn s []) || elem (s, n) funcs
 >         pdesc sn = elem sn preds
->         elim fm = Cooper.integerQelim(FOL.generalize fm) == Top
+>         elim fm = Cooper.integerQelim(Fol.generalize fm) == Top
 >         funcs = [("-", 1::Int), ("+", 2), ("-", 2), ("*", 2)]
 >         preds = [("<=", 2::Int), ("≤", 2), ("<", 2), (">=", 2), ("≥", 2), (">", 2)]
 
 > dloLang :: Lang
-> dloLang = (fdesc, pdesc, DLO.valid)
+> dloLang = (fdesc, pdesc, Dlo.valid)
 >   where fdesc (s, n) = n == 0 && Cooper.isNumeral (Fn s [])
 >         pdesc sn = elem sn preds
 >         preds = [("<=", 2::Int), ("≤", 2), ("<", 2), (">=", 2), ("≥", 2), (">", 2)]
@@ -107,13 +107,13 @@ The Nelson-Oppen method.
 
 > homogenize :: [Lang] -> [Formula] -> [Formula]
 > homogenize langs fms = 
->   let n = 1 + foldr (CNF.maxVarIndex "v_") 0 (FOL.fv fms) 
+>   let n = 1 + foldr (Cnf.maxVarIndex "v_") 0 (Fol.fv fms) 
 >   in homo langs fms (\res _ _ -> res) n []
 
 > belongs :: Lang -> Formula -> Bool
 > belongs (fn, pr, _) fm = 
->   List.all fn (FOL.functions fm) &&
->   List.all pr (FOL.predicates fm \\ [("=", 2)])
+>   List.all fn (Fol.functions fm) &&
+>   List.all pr (Fol.predicates fm \\ [("=", 2)])
 
 > langpartition :: [Lang] -> [Formula] -> [[Formula]]
 > langpartition langs fms = 
@@ -137,8 +137,8 @@ The Nelson-Oppen method.
 > destDef :: Formula -> Maybe (Var, Term)
 > destDef fm = 
 >   case fm of 
->     Atom (R "=" [Var x, t]) | not(elem x (FOL.fv t)) -> Just (x, t)
->     Atom (R "=" [t, Var x]) | not(elem x (FOL.fv t)) -> Just (x, t)
+>     Atom (R "=" [Var x, t]) | not(elem x (Fol.fv t)) -> Just (x, t)
+>     Atom (R "=" [t, Var x]) | not(elem x (Fol.fv t)) -> Just (x, t)
 >     _ -> Nothing 
 
 > redeqs :: Clause -> Clause
@@ -147,7 +147,7 @@ The Nelson-Oppen method.
 >     Just eq -> let (x, t) = case destDef eq of 
 >                               Just xt -> xt 
 >                               Nothing -> __IMPOSSIBLE__ in
->                redeqs (map (FOL.apply (x ⟾ t)) (eqs \\ [eq]))
+>                redeqs (map (Fol.apply (x ⟾ t)) (eqs \\ [eq]))
 >     Nothing -> eqs
 
 > trydps :: [(Lang, Clause)] -> Clause -> Bool
@@ -168,7 +168,7 @@ The Nelson-Oppen method.
 > slowNelop1 langs fms0 = 
 >   let fms = homogenize langs fms0 
 >       seps = langpartition langs fms
->       fvlist = map (Set.unions . map FOL.fv) seps
+>       fvlist = map (Set.unions . map Fol.fv) seps
 >       vars = List.filter (\x -> length (List.filter (elem x) fvlist) >= 2)
 >                          (Set.unions fvlist) in
 >   slowNelopRefute vars (zip langs seps)
@@ -201,7 +201,7 @@ The Nelson-Oppen method.
 > nelop1 langs fms0 = 
 >   let fms = homogenize langs fms0 
 >       seps = langpartition langs fms
->       fvlist = map (Set.unions . map FOL.fv) seps
+>       fvlist = map (Set.unions . map Fol.fv) seps
 >       vars = List.filter (\x -> length (List.filter (elem x) fvlist) >= 2)
 >                          (Set.unions fvlist) 
 >       eqs = map (\(a,b) -> Equal.mkEq (Var a) (Var b)) (Lib.distinctPairs vars) in
@@ -225,8 +225,8 @@ The Nelson-Oppen method.
 > nelopInt :: Formula -> Bool
 > nelopInt = nelop (addDefault [intLang])
 
-> nelopDLO :: Formula -> Bool
-> nelopDLO = nelop (addDefault [dloLang])
+> nelopDlo :: Formula -> Bool
+> nelopDlo = nelop (addDefault [dloLang])
 
 let langs = addDefault [intLang]
 let fm :: Formula = ATP.Util.Parse.parse "1 = 1"

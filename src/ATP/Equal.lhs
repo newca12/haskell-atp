@@ -14,7 +14,7 @@
 * Imports
 
 > import ATP.Util.Prelude 
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Util.ListSet as Set
@@ -75,7 +75,7 @@
 >   let allpreds = predicates fm in
 >   if not (elem ("=",2) allpreds) then fm else
 >   let preds = allpreds \\ [("=",2)]
->       funcs = FOL.functions fm
+>       funcs = Fol.functions fm
 >       axioms = foldr (Set.union . functionCongruence) 
 >                  (foldr (Set.union . predicateCongruence) equivalenceAxioms preds)
 >                    funcs in

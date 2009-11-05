@@ -17,7 +17,7 @@
 
 > import ATP.Util.Prelude 
 > import qualified ATP.Equal as Equal
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Meson as Meson
@@ -48,18 +48,18 @@
 > modifyT (p:ps) = if Equal.isEq p then
 >                    let (s, t) = Equal.destEq p 
 >                        ps' = modifyT ps
->                        w = Var (FOL.variant "w" (FOL.fv (p:ps'))) in
+>                        w = Var (Fol.variant "w" (Fol.fv (p:ps'))) in
 >                    Not(Equal.mkEq t w) : Equal.mkEq s w : ps'
 >                  else p : modifyT ps
 
 > findNestNonvar :: Term -> Maybe Term
 > findNestNonvar (Var _) = Nothing 
-> findNestNonvar (Fn _ args) = List.find (not . FOL.isVar) args
+> findNestNonvar (Fn _ args) = List.find (not . Fol.isVar) args
 
 > findNvSubterm :: Formula -> Maybe Term
 > findNvSubterm (Not p) = findNvSubterm p
 > findNvSubterm (Atom (R "=" st)) = Lib.findApply findNestNonvar st
-> findNvSubterm (Atom (R _ args)) = List.find (not . FOL.isVar) args
+> findNvSubterm (Atom (R _ args)) = List.find (not . Fol.isVar) args
 > findNvSubterm _ = __IMPOSSIBLE__ 
 
 > replacet :: Map Term Term -> Term -> Term
@@ -70,18 +70,18 @@
 >                                  Fn f args -> Fn f (map (replacet rfn) args)
 
 > replace :: Map Term Term -> Formula -> Formula
-> replace rfn = FOL.onformula (replacet rfn)
+> replace rfn = Fol.onformula (replacet rfn)
 
 > emodify :: Vars -> Clause -> Clause
 > emodify fvs cls = 
 >   case Lib.findApply findNvSubterm cls of
 >     Nothing -> cls
->     Just t -> let w = FOL.variant "w" fvs 
+>     Just t -> let w = Fol.variant "w" fvs 
 >                   cls' = map (replace (Map.singleton t (Var w))) cls in
 >               emodify (w : fvs) (Not(Equal.mkEq t (Var w)) : cls')
 
 > modifyE :: Clause -> Clause
-> modifyE cls = emodify (FOL.fv cls) cls
+> modifyE cls = emodify (Fol.fv cls) cls
 
 > brand :: Clauses -> Clauses
 > brand cls = 
@@ -98,5 +98,5 @@
 
 > bmeson :: Formula -> IO [Int]
 > bmeson fm = 
->   let fm1 = Skolem.askolemize (Not (FOL.generalize fm)) in
+>   let fm1 = Skolem.askolemize (Not (Fol.generalize fm)) in
 >   mapM (bpuremeson . F.listConj) (Prop.simpdnf fm1)

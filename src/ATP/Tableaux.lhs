@@ -13,7 +13,7 @@
 * Imports
 
 > import Prelude 
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
@@ -84,15 +84,15 @@ procedure accordingly.
 >   let l = length fvs
 >       newvars = map (\k -> Var ("_" ++ show (n * l + k))) [1 .. l]
 >       inst = Map.fromList (zip fvs newvars)
->       djs1 = Prop.distrib (Set.image (Set.image (FOL.apply inst)) djs0) djs in
+>       djs1 = Prop.distrib (Set.image (Set.image (Fol.apply inst)) djs0) djs in
 >   case unifyRefute djs1 Map.empty of
 >     Just env -> Just (env, n+1)
 >     Nothing -> prawitzLoop djs0 fvs djs1 (n+1)
 
 > prawitz :: Formula -> Maybe Int
 > prawitz fm = 
->   let fm0 = Skolem.skolemize $ Not $ FOL.generalize fm in
->   case prawitzLoop (Prop.simpdnf fm0) (FOL.fv fm0) [[]] 0 of
+>   let fm0 = Skolem.skolemize $ Not $ Fol.generalize fm in
+>   case prawitzLoop (Prop.simpdnf fm0) (Fol.fv fm0) [[]] 0 of
 >     Nothing -> Nothing
 >     Just (_, n) -> Just n
 
@@ -144,7 +144,7 @@ refutations.
 >     Or p q : unexp -> tableau (p:unexp, lits, n) (tableau (q:unexp, lits, n) cont) (env, k)
 >     fm @ (All x p) : unexp -> 
 >            let y = Var("_" ++ show k) 
->                p' = FOL.apply (x ⟾ y)  p in
+>                p' = Fol.apply (x ⟾ y)  p in
 >                     tableau (p':unexp ++ [fm], lits, n-1) cont (env, k+1)
 >     fm:unexp -> 
 >       let findFn l = do env' <- unifyComplements env (fm,l) 
@@ -167,9 +167,9 @@ refutations.
 
 > tab :: Formula -> IO Int
 > tab fm = 
->   let sfm = Skolem.askolemize $ Not $ FOL.generalize fm in
+>   let sfm = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   if sfm == Bot then return 0 else tabrefute [sfm]
 
 > splittab :: Formula -> IO [Int]
 > splittab = mapM tabrefute . Prop.simpdnf . Skolem.askolemize 
->            . Not . FOL.generalize
+>            . Not . Fol.generalize

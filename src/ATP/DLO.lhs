@@ -3,7 +3,7 @@
 
 * Signature 
 
-> module ATP.DLO
+> module ATP.Dlo
 >   ( qelim
 >   , valid
 >     -- * Hidden
@@ -18,10 +18,10 @@
 #include "undefined.h" 
 
 > import ATP.Util.Prelude
-> import qualified ATP.DP as DP
+> import qualified ATP.Dp as Dp
 > import ATP.FormulaSyn
 > import qualified ATP.Formula as F
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Equal as Equal
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Qelim as Qelim
@@ -50,7 +50,7 @@
 >   in case List.find Equal.isEq cjs of
 >     Just eqn -> let (s, t) = Equal.destEq eqn
 >                     y = if s == x' then t else s in
->                 F.listConj $ map (FOL.apply $ x ⟾ y) (cjs \\ [eqn])
+>                 F.listConj $ map (Fol.apply $ x ⟾ y) (cjs \\ [eqn])
 >     Nothing -> if elem (x' ≺ x') cjs then Bot else
 >                let (lefts, rights) = List.partition (\a -> right a == x') cjs 
 >                    ls = map left lefts
@@ -111,4 +111,4 @@ the atomic formulas.
 > reduce f = f
 
 > valid :: Formula -> Bool
-> valid = DP.dplltaut . reduce . qelim . FOL.generalize
+> valid = Dp.dplltaut . reduce . qelim . Fol.generalize

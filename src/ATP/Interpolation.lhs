@@ -12,10 +12,10 @@
 #include "undefined.h" 
 
 > import ATP.Util.Prelude
-> import qualified ATP.DefCNF as CNF
+> import qualified ATP.DefCnf as Cnf
 > import qualified ATP.EqElim as EqElim
 > import qualified ATP.Equal as Equal
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Herbrand as Herbrand
@@ -44,11 +44,11 @@ mulas p and q such that |= p ∧ q ⇒ ⊥.)
 > urinterpolate :: Formula -> Formula -> IO (Formula)
 > urinterpolate p q = 
 >   let fm = Skolem.specialize $ Skolem.prenex $ p ∧ q
->       fvs = FOL.fv fm
+>       fvs = Fol.fv fm
 >       (consts, funcs) = Herbrand.herbfuns fm
 >       cntms = map (\(c, _) -> Fn c []) consts in
 >   do tups <- Herbrand.dpRefineLoop (Prop.simpcnf fm) cntms funcs fvs 0 [] [] []
->      let fmis = map (\tup -> FOL.apply (Map.fromList (zip fvs tup)) fm) tups
+>      let fmis = map (\tup -> Fol.apply (Map.fromList (zip fvs tup)) fm) tups
 >          (ps, qs) = List.unzip (map F.destAnd fmis) 
 >      return $ pinterpolate (F.listConj(Set.setify ps)) (F.listConj(Set.setify qs))
 
@@ -73,8 +73,8 @@ then iteratively replace them by quantiﬁed variables.
 
 > uinterpolate :: Formula -> Formula -> IO (Formula)
 > uinterpolate p q = 
->   let fp = FOL.functions p
->       fq = FOL.functions q
+>   let fp = Fol.functions p
+>       fq = Fol.functions q
 >       simpinter tms n c = 
 >         case tms of
 >           [] -> c
@@ -123,8 +123,8 @@ original formulas. This is realized in the following algorithm:
 > cinterpolate :: Formula -> Formula -> IO (Formula)
 > cinterpolate p q = 
 >   let fm = Skolem.nnf (p ∧ q)
->       efm = F.listEx (FOL.fv fm) fm
->       fns = map fst (FOL.functions fm)
+>       efm = F.listEx (Fol.fv fm) fm
+>       fns = map fst (Fol.functions fm)
 >       (p', q') = F.destAnd $ fst $ Skolem.skolem efm fns 
 >   in uinterpolate p' q'
 
@@ -136,9 +136,9 @@ variables by new constants c i and then restore them afterwards.
 
 > interpolate :: Formula -> Formula -> IO (Formula)
 > interpolate p q =
->   let vs = map Var (Set.intersect (FOL.fv p) (FOL.fv q))
->       fns = FOL.functions (p ∧ q)
->       n = foldr (CNF.maxVarIndex "c_" . fst) 0 fns + 1
+>   let vs = map Var (Set.intersect (Fol.fv p) (Fol.fv q))
+>       fns = Fol.functions (p ∧ q)
+>       n = foldr (Cnf.maxVarIndex "c_" . fst) 0 fns + 1
 >       cs = map (\i -> Fn ("c_" ++ show i) []) [n .. n + length vs - 1]
 >       fn_vc = Map.fromList (zip vs cs)
 >       fn_cv = Map.fromList (zip cs vs)

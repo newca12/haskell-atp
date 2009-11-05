@@ -4,6 +4,7 @@
 > module ATP.Poly
 >   ( Poly
 >   , zero
+>   , one
 >   , add
 >   , sub
 >   , neg
@@ -61,10 +62,10 @@ We need explicit casts between Integer and Rational.
 -- > irat x = x % 1
 
 > zero :: Term
-> zero = fromInteger 0
+> zero = Fn (show (0 :: Rational)) []
 
 > one :: Term
-> one = fromInteger 1
+> one = Fn (show (1 :: Rational)) []
 
 > numeral1 :: (Rational -> Rational) -> Term -> Term
 > numeral1 fn = mkNumeral . fn . destNumeral
@@ -111,7 +112,8 @@ We need explicit casts between Integer and Rational.
 >     (Fn "+" [_, Fn "*" [Var x, _]], Fn "+" [_, Fn "*" [Var y, _]]) -> 
 >       if Order.earlier vars x y then polyLmul vars pol2 pol1
 >       else polyLmul vars pol1 pol2
->     (Fn "0" [], _) -> zero
+>     (Fn "0 % 1" [], _) -> zero
+>     (_, Fn "0 % 1" []) -> zero
 >     (_, Fn "+" _) -> polyLmul vars pol1 pol2
 >     (Fn "+" _, _) -> polyLmul vars pol2 pol1
 >     _ -> numeral2 (*) pol1 pol2
@@ -125,6 +127,8 @@ We need explicit casts between Integer and Rational.
 > pow :: Vars -> Poly -> Int -> Poly
 > pow vars p n = Lib.funpow n (mul vars p) one
 
+Divide by a constant.
+
 > div :: Vars -> Poly -> Poly -> Poly
 > div vars p q = mul vars p (numeral1 ((1::Rational) /) q)
 
@@ -132,29 +136,27 @@ We need explicit casts between Integer and Rational.
 > var x = Fn "+" [zero, Fn "*" [Var x, one]]
 
 > polynate :: Vars -> Poly -> Poly
-> polynate vars tm = 
->   let res = case tm of
->               Var x -> var x
->               Fn "-" [t] -> neg (polynate vars t)
->               Fn "+" [s, t] -> add vars (polynate vars s) (polynate vars t)
->               Fn "-" [s, t] -> sub vars (polynate vars s) (polynate vars t)
->               Fn "*" [s, t] -> mul vars (polynate vars s) (polynate vars t)
->               Fn "/" [s, t] -> div vars (polynate vars s) (polynate vars t)
->               Fn "^" [p, Fn n []] -> pow vars (polynate vars p) (read n)
->               _ -> if Cooper.isNumeral tm then tm else error "lint: unknown term"
->  in trace ("polynate: " ++ show (tm, res)) res
+> polynate vars tm = case tm of
+>   Var x -> var x
+>   Fn "-" [t] -> neg (polynate vars t)
+>   Fn "+" [s, t] -> add vars (polynate vars s) (polynate vars t)
+>   Fn "-" [s, t] -> sub vars (polynate vars s) (polynate vars t)
+>   Fn "*" [s, t] -> mul vars (polynate vars s) (polynate vars t)
+>   Fn "/" [s, t] -> div vars (polynate vars s) (polynate vars t)
+>   Fn "^" [p, Fn n []] -> pow vars (polynate vars p) (read n)
+>   _ -> if Cooper.isNumeral tm then tm else error "lint: unknown term"
 
 > atom :: Vars -> Formula -> Formula
 > atom vars (Atom (R a [s, t])) = Atom(R a [polynate vars (Fn "-" [s, t]), zero])
 > atom _ a = error' $ PP.text "polyatom: not an atom" <+> PP.pPrint a
 
-:trace atom ["w", "x", "y", "z"] [$form| ((w + x)^4 + (w + y)^4 + (w + z)^4 + (x + y)^4 + (x + z)^4 + (y + z)^4 + (w - x)^4 + (w - y)^4 + (w - z)^4 + (x - y)^4 + (x - z)^4 + (y - z)^4) / 6 = (w^2 + x^2 + y^2 + z^2)^2 |]
-
-XXX, Is the lack of an "otherwise" clause OK below?
+let x = atom ["w", "x", "y", "z"] [$form| ((w + x)^4 + (w + y)^4 + (w + z)^4 + (x + y)^4 + (x + z)^4 + (y + z)^4 + (w - x)^4 + (w - y)^4 + (w - z)^4 + (x - y)^4 + (x - z)^4 + (y - z)^4) / 6 = (w^2 + x^2 + y^2 + z^2)^2 |]
+PP.pPrint x
 
 > coefficients :: Vars -> Poly -> [Poly]
 > coefficients vars fm = case fm of
->   Fn "+" [c, Fn "*" [Var x, q]] | x == head vars -> c:coefficients vars q
+>   Fn "+" [c, Fn "*" [Var x, q]] 
+>    | x == head vars -> c:coefficients vars q
 >   _ -> [fm]
 
 > degree :: Vars -> Poly -> Int

@@ -13,7 +13,7 @@ Congruence closure.
                         
 > import ATP.Util.Prelude 
 > import qualified ATP.Equal as Equal
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
@@ -128,6 +128,6 @@ The overall decision procedure now becomes the following:
 
 > ccvalid :: Formula -> Bool
 > ccvalid fm = 
->   let fms = Prop.simpdnf $ Skolem.askolemize $ Not $ FOL.generalize fm in
+>   let fms = Prop.simpdnf $ Skolem.askolemize $ Not $ Fol.generalize fm in
 >   not $ any ccsatisfiable fms
 

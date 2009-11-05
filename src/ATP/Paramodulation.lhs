@@ -12,7 +12,7 @@
 > import ATP.Util.Prelude
 > import qualified ATP.Completion as Completion
 > import qualified ATP.Equal as Equal
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
@@ -41,7 +41,7 @@
 > paramodulate pcl ocl =
 >   foldr (\eq -> let pcl' = pcl \\ [eq]
 >                     (l, r) = Equal.destEq eq
->                     rfn i ocl' = Set.image (FOL.apply i) (pcl' ++ ocl') in
+>                     rfn i ocl' = Set.image (Fol.apply i) (pcl' ++ ocl') in
 >                 overlapc (l, r) ocl rfn . overlapc (r, l) ocl rfn)
 >          [] (List.filter Equal.isEq pcl)
 
@@ -68,5 +68,5 @@
 
 > paramodulation :: Formula -> IO [Bool]
 > paramodulation fm = 
->   let fm1 = Skolem.askolemize(Not(FOL.generalize fm)) in
+>   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   mapM (pureParamodulation . F.listConj) (Prop.simpdnf fm1)

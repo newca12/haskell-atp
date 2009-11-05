@@ -14,7 +14,7 @@ MESON: Model Elimination Subgoal OrieNted
 * Imports
                       
 > import Prelude 
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import ATP.FormulaSyn
 > import qualified ATP.Formula as F
 > import qualified ATP.Prolog as Prolog
@@ -95,7 +95,7 @@ Skolemization, then attempts to refute the clauses using MESON:
 
 > basicMeson :: Formula -> IO [Int]
 > basicMeson fm = 
->   let fm1 = Skolem.askolemize $ Not $ FOL.generalize fm in
+>   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   mapM (pureBasicMeson . F.listConj) (Prop.simpdnf fm1)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -215,5 +215,5 @@ running the continuation twice.
 
 > meson :: Formula -> IO [Int]
 > meson fm = 
->   let fm1 = Skolem.askolemize $ Not $ FOL.generalize fm in
+>   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   mapM (pureMeson . F.listConj) (Prop.simpdnf fm1)

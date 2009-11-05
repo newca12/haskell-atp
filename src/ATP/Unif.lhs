@@ -14,7 +14,7 @@ Unification
 * Imports
 
 > import Prelude 
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import ATP.FormulaSyn
 > import ATP.Util.Lib((↦))
 > import qualified Data.Map as Map
@@ -118,9 +118,9 @@ function to reach a ‘fully solved’ form:
 
 > solve' :: Env -> [(Var, Term)] -> Maybe Env
 > solve' env fs = 
->   if any (\(x,t) -> elem x (FOL.fv t)) fs
+>   if any (\(x,t) -> elem x (Fol.fv t)) fs
 >   then Nothing else 
->   let env' = foldr (\(x,t) -> Map.insert x (FOL.apply env t)) Map.empty fs
+>   let env' = foldr (\(x,t) -> Map.insert x (Fol.apply env t)) Map.empty fs
 >       fs' = Map.toList env' in
 >   if fs == fs' then Just env else solve' env' fs'
 
@@ -137,6 +137,6 @@ apply it, to check that the terms are indeed unified
 > unifyAndApply :: [(Term, Term)] -> Maybe [(Term, Term)] 
 > unifyAndApply eqs = 
 >   do env <- fullunify eqs 
->      let apply (t1, t2) = (FOL.apply env t1, FOL.apply env t2) in
+>      let apply (t1, t2) = (Fol.apply env t1, Fol.apply env t2) in
 >        return $ map apply eqs
 >        

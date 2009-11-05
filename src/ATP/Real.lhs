@@ -69,8 +69,6 @@
 >       mat3 = init $ tail $ inferisign mat2
 >   in cont $ condense $ map (\l -> head l : tail (tail l)) mat3
 
-- : string list -> (term * sign) list -> term -> term -> term = <fun>
-
 > pdividePos :: Vars -> Ctx -> Term -> Term -> Term
 > pdividePos vars sgns s p = 
 >   let a = P.phead vars p 
@@ -90,12 +88,6 @@
 > splitTrichotomy :: Ctx -> Term -> (Ctx -> Formula) -> (Ctx -> Formula) -> Formula
 > splitTrichotomy sgns pol contZ contP = 
 >   C.splitZero sgns pol contZ (\s' -> splitSign s' pol contP)
-
-- : string list ->
-    term list ->
-    term list ->
-    (sign list list -> fol formula) ->
-    (term * sign) list -> fol formula
 
 > caseSplit :: Vars -> [Term] -> [Term] -> ([[Sign]] -> Maybe Formula) -> Ctx -> Formula
 > caseSplit vars dun pols cont sgns = case pols of

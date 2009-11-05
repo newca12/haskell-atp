@@ -226,6 +226,8 @@ Find the LCM of the coefficients of x
 >              , ("divides", \x y -> y `mod` x == 0)
 >              ]
 
+Evaluate the interpreted predicate of an atomic formula.
+
 > evalc :: Formula -> Formula 
 > evalc = F.onatoms atfn 
 >  where 

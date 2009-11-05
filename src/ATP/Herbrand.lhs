@@ -1,5 +1,5 @@
 
-Relation between FOL and propositonal logic; Herbrand theorem. 
+Relation between first-order and propositonal logic; Herbrand theorem. 
 
 * Signature
 
@@ -16,8 +16,8 @@ Relation between FOL and propositonal logic; Herbrand theorem.
 * Imports
 
 > import Prelude 
-> import qualified ATP.DP as DP
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Dp as Dp
+> import qualified ATP.Fol as Fol
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Skolem as Skolem
@@ -37,7 +37,7 @@ Get the constants for Herbrand base, adding nullary one if necessary.
 
 > herbfuns :: Formula -> ([FuncA], [FuncA])
 > herbfuns fm = 
->     let syms @ (cns, fns) = List.partition ((== 0) . snd) (FOL.functions fm) in
+>     let syms @ (cns, fns) = List.partition ((== 0) . snd) (Fol.functions fm) in
 >     if cns == [] then ([("c", 0)], fns) else syms
 
 The function groundterms enumerates all ground terms involving n functions.
@@ -103,7 +103,7 @@ the successful set of instances tried; otherwise, we continue.
 >        case tuples of
 >          [] -> let newtups = groundtuples cntms funcs n (length fvs) in
 >                herbloop mfn tfn fl0 cntms funcs fvs (n+1) fl tried newtups
->          tup:tups -> let fl' = mfn fl0 (FOL.apply $ Map.fromList $ zip fvs tup) fl in
+>          tup:tups -> let fl' = mfn fl0 (Fol.apply $ Map.fromList $ zip fvs tup) fl in
 >                      if not(tfn fl') then return (tup:tried) else
 >                      herbloop mfn tfn fl0 cntms funcs fvs n fl' (tup:tried) tups
 
@@ -131,8 +131,8 @@ instances were tried:
 
 > gilmore :: Formula -> IO Int
 > gilmore fm = 
->     let sfm = Skolem.skolemize(Not(FOL.generalize fm)) 
->         fvs = FOL.fv sfm 
+>     let sfm = Skolem.skolemize(Not(Fol.generalize fm)) 
+>         fvs = Fol.fv sfm 
 >         (consts,funcs) = herbfuns sfm 
 >         cntms = map (\(c,_) -> Fn c []) consts in
 >     do tms <- gilmoreLoop (Prop.simpdnf sfm) cntms funcs fvs 0 [[]] [] []
@@ -169,12 +169,12 @@ rather than DNF:
 
 > dpLoop :: Clauses -> [Term] -> [FuncA] -> Vars 
 >           -> Int -> Clauses -> [[Term]] -> [[Term]] -> IO [[Term]] 
-> dpLoop = herbloop dpMfn DP.dpll
+> dpLoop = herbloop dpMfn Dp.dpll
 
 > davisputnam :: Formula -> IO Int
 > davisputnam fm =
->   let sfm = Skolem.skolemize(Not(FOL.generalize fm)) 
->       fvs = FOL.fv sfm 
+>   let sfm = Skolem.skolemize(Not(Fol.generalize fm)) 
+>       fvs = Fol.fv sfm 
 >       (consts, funcs) = herbfuns sfm
 >       cntms = map (\(c,_) -> Fn c []) consts in -- image
 >   do tms <- dpLoop (Prop.simpcnf sfm) cntms funcs fvs 0 [] [] []
@@ -199,8 +199,8 @@ the other instances are satisfiable:
 >   case dunno of
 >     [] -> need
 >     cl : dknow ->
->       let mfn = dpMfn cjs0 . FOL.apply . Map.fromList . zip fvs 
->           need' = if DP.dpll(foldr mfn [] (need ++ dknow)) 
+>       let mfn = dpMfn cjs0 . Fol.apply . Map.fromList . zip fvs 
+>           need' = if Dp.dpll(foldr mfn [] (need ++ dknow)) 
 >                   then cl:need else need in
 >       dpRefine cjs0 fvs dknow need'
 
@@ -214,8 +214,8 @@ We can use this refinement process after the main loop has succeeded:
 
 > davisputnam' :: Formula -> IO Int
 > davisputnam' fm =
->   let sfm = Skolem.skolemize(Not(FOL.generalize fm)) 
->       fvs = FOL.fv sfm 
+>   let sfm = Skolem.skolemize(Not(Fol.generalize fm)) 
+>       fvs = Fol.fv sfm 
 >       (consts, funcs) = herbfuns sfm 
 >       cntms = map (\(c,_) -> Fn c []) consts in
 >   do tms <- dpRefineLoop (Prop.simpcnf sfm) cntms funcs fvs 0 [] [] []

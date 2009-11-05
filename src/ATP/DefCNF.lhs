@@ -3,7 +3,7 @@ Definitional CNF
 
 * Signature
 
-> module ATP.DefCNF 
+> module ATP.DefCnf 
 >   ( maxVarIndex
 >   , defcnf
 >   , defcnf1

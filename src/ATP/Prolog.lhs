@@ -13,7 +13,7 @@
 * Imports
                       
 > import Prelude 
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
@@ -51,11 +51,11 @@ used next time.
 
 > renamer :: Int -> Rule -> (Rule, Int)
 > renamer k (Rule asm c) = 
->   let fvs = FOL.fv $ F.listConj $ c:asm
+>   let fvs = Fol.fv $ F.listConj $ c:asm
 >       n = length fvs
 >       vvs = map (\m -> Var ("_" ++ show m)) [k .. k+n-1]
 >       inst :: Formula -> Formula 
->       inst = FOL.apply $ Map.fromList (zip fvs vvs) in
+>       inst = Fol.apply $ Map.fromList (zip fvs vvs) in
 >   (Rule (map inst asm) (inst c), k+n)
 >       
 
@@ -96,7 +96,7 @@ the necessary size bound is returned.
 > hornprove :: Formula -> IO (Env, Int)
 > hornprove fm = 
 >   let rules = map hornify (Prop.simpcnf $ Skolem.skolemize 
->                            $ Not $ FOL.generalize fm) 
+>                            $ Not $ Fol.generalize fm) 
 >       rules' = if any (not . Maybe.isJust) rules 
 >                then error "clause not horn" else map Maybe.fromJust rules 
 >       tabFn n = case backchain rules' n 0 Map.empty [Bot] of
@@ -144,7 +144,7 @@ left-to-right. Thus we can modify the interpreter:
 >                        return $ Atom(R "=" [Var x, t]) in
 >   do env1 <- simpleprolog' rules gl
 >      env2 <- Unif.solve env1
->      mapM (mapFn env2) (FOL.fv gl)
+>      mapM (mapFn env2) (Fol.fv gl)
 
 * Parsing
 

@@ -19,7 +19,7 @@ Relations R ::= Var() | Var ( TS ) | Var | T = T | T < T
 
 * Signature
 
-> module ATP.FOL 
+> module ATP.Fol 
 >   ( onformula
 >   , isVar
 >   , Fv(fv)

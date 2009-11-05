@@ -10,7 +10,7 @@ Rewriting
 * Imports
 
 > import Prelude 
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import ATP.FormulaSyn
 > import qualified ATP.Resolution as Resolution
 > import qualified Data.Map as Map
@@ -26,7 +26,7 @@ does this with the first in a list of equations to succeed:
 >   Atom(R "=" [l,r]):oeqs -> 
 >     case Resolution.termMatch Map.empty [(l,t)] of
 >       Nothing -> rewrite1 oeqs t
->       Just env -> Just $ FOL.apply env r
+>       Just env -> Just $ Fol.apply env r
 >   _ -> Nothing
 
 Our interest is in rewriting at all subterms, and repeatedly, to normalize a

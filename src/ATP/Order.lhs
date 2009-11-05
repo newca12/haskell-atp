@@ -13,7 +13,7 @@
 * Imports
 
 > import Prelude 
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import ATP.FormulaSyn
 
 * Order
@@ -31,7 +31,7 @@
 > lpoGt :: ((String, Int) -> (String, Int) -> Bool) -> Term -> Term -> Bool
 > lpoGt w s t = 
 >   case (s, t) of 
->     (_, Var x) -> not(s == t) && elem x (FOL.fv s)
+>     (_, Var x) -> not(s == t) && elem x (Fol.fv s)
 >     (Fn f fargs, Fn g gargs) -> 
 >       any (\si -> lpoGe w si t) fargs ||
 >       all (lpoGt w s) gargs &&

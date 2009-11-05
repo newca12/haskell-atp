@@ -1,14 +1,14 @@
 
 * Signature 
 
-> module ATP.Test.DLO 
+> module ATP.Test.Dlo 
 >   ( tests )
 > where 
 
 * Imports
 
 > import Prelude 
-> import qualified ATP.DLO as DLO
+> import qualified ATP.Dlo as Dlo
 > import ATP.FormulaSyn
 > import qualified ATP.TestFormulas as Forms
 > import qualified Data.Maybe as Maybe
@@ -19,10 +19,10 @@
 
 > mkTest :: (String, Formula) -> Test
 > mkTest (s, f) = s ~: assert $ 
->   DLO.qelim (Maybe.fromJust (Forms.lookup s)) == f
+>   Dlo.qelim (Maybe.fromJust (Forms.lookup s)) == f
 
 > tests :: Test
-> tests = "DLO" ~: TestList $ map mkTest
+> tests = "Dlo" ~: TestList $ map mkTest
 >   [ ("dlo1", [$form| ⊤ |]) 
 >   , ("dlo2", [$form| ⊤ |]) 
 >   , ("dlo3", [$form| x < y |]) 

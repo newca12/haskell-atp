@@ -16,7 +16,7 @@
 * Imports
 
 > import Prelude hiding (print)
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
 > import ATP.Util.Lib((⟾))
@@ -37,8 +37,8 @@
 
 > simplify1 :: Formula -> Formula
 > simplify1 fm = case fm of
->   All x p -> if List.elem x (FOL.fv p) then fm else p
->   Ex x p -> if List.elem x (FOL.fv p) then fm else p
+>   All x p -> if List.elem x (Fol.fv p) then fm else p
+>   Ex x p -> if List.elem x (Fol.fv p) then fm else p
 >   _ -> Prop.simplify1 fm
 
 * Negation normal form
@@ -108,9 +108,9 @@ nnf $ parse "(∀ x. P(x)) ⊃ ((∃ y. Q(y)) ⇔ ∃ z. P(z) ∧ Q(z))"
 >       -> (Formula -> Formula -> Formula) -> Var -> Var
 >       -> Formula -> Formula -> Formula
 > pullq (l,r) fm quant op x y p q =
->   let z = FOL.variant x (FOL.fv fm) 
->       p' = if l then FOL.apply (x ⟾ Var z) p else p
->       q' = if r then FOL.apply (y ⟾ Var z) q else q in
+>   let z = Fol.variant x (Fol.fv fm) 
+>       p' = if l then Fol.apply (x ⟾ Var z) p else p
+>       q' = if r then Fol.apply (y ⟾ Var z) q else q in
 >   quant z (pullquants(op p' q'))
 
 print $ pullquants [$form| (∀ y. Q(y)) ∧ (∀ x. P(y)) |]
@@ -125,15 +125,15 @@ print $ pullquants [$form| (∀ y. Q(y)) ∧ (∀ x. P(y)) |]
 > skolemize = specialize . pnf . askolemize
 
 > askolemize :: Formula -> Formula 
-> askolemize fm = fst ((skolem $ nnf $ simplify fm) (map fst (FOL.functions fm)))
+> askolemize fm = fst ((skolem $ nnf $ simplify fm) (map fst (Fol.functions fm)))
 
 > skolem :: Formula -> Vars -> (Formula, [Func])
 > skolem fm fns = case fm of
 >     Ex y p ->
->         let xs = FOL.fv(fm) 
->             f = FOL.variant (if xs == [] then "c_" ++ y else "f_" ++ y) fns 
+>         let xs = Fol.fv(fm) 
+>             f = Fol.variant (if xs == [] then "c_" ++ y else "f_" ++ y) fns 
 >             fx = Fn f (map Var xs) in
->         skolem (FOL.apply (y ⟾ fx) p) (f:fns)
+>         skolem (Fol.apply (y ⟾ fx) p) (f:fns)
 >     All x p -> let (p', fns') = skolem p fns in (All x p', fns')
 >     And p q -> skolem2 And (p, q) fns
 >     Or p q -> skolem2 Or (p, q) fns

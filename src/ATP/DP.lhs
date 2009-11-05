@@ -3,7 +3,7 @@ The Davis-Putnam and Davis-Putnam-Loveland-Logemann procedures.
 
 * Signature
 
-> module ATP.DP
+> module ATP.Dp
 >   ( dp
 >   , dptaut
 >   , dpll
@@ -16,7 +16,7 @@ The Davis-Putnam and Davis-Putnam-Loveland-Logemann procedures.
 #include "undefined.h" 
 
 > import ATP.Util.Prelude 
-> import qualified ATP.DefCNF as CNF
+> import qualified ATP.DefCnf as Cnf
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
@@ -154,7 +154,7 @@ of atoms unchanged but reduces the total size of the clauses.
 >                  Nothing -> dp(resolutionRule clauses)
 
 > dpsat :: Formula -> Bool
-> dpsat = dp . CNF.defcnfs
+> dpsat = dp . Cnf.defcnfs
 
 > dptaut :: Formula -> Bool
 > dptaut = not . dpsat . Not
@@ -206,7 +206,7 @@ replaced by a case-split:
 >                    || dpll (Set.insert [F.opp p] clauses)
 
 > dpllsat :: Formula -> Bool
-> dpllsat = dpll . CNF.defcnfs
+> dpllsat = dpll . Cnf.defcnfs
 
 > dplltaut :: Formula -> Bool
 > dplltaut = not . dpllsat . Not

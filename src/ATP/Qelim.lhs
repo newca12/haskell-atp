@@ -13,7 +13,7 @@
 
 > import Prelude 
 > import qualified ATP.Decidable as Decidable
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Skolem as Skolem
@@ -26,7 +26,7 @@
 >      -> (Vars -> Formula -> Formula) 
 >      -> Formula -> Formula 
 > lift afn nfn qfn fm = 
->   Skolem.simplify $ qelift (FOL.fv fm) (Decidable.miniscope fm)
+>   Skolem.simplify $ qelift (Fol.fv fm) (Decidable.miniscope fm)
 >   where qelift vars f = case f of
 >           Atom _ -> afn vars f
 >           Not p -> (¬) $ qelift vars p
@@ -42,7 +42,7 @@
 > qelim :: (Formula -> Formula) -> Var -> Formula -> Formula 
 > qelim bfn x p = 
 >   let cjs = F.conjuncts p 
->       (ycjs, ncjs) = List.partition (List.elem x . FOL.fv) cjs in
+>       (ycjs, ncjs) = List.partition (List.elem x . Fol.fv) cjs in
 >   if ycjs == [] then p else
 >   let q = bfn (Ex x (F.listConj ycjs)) in
 >   foldr And q ncjs

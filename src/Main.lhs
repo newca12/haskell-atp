@@ -20,12 +20,12 @@ The front end for the automated theorem proving Haskell port.
 > import qualified ATP.Cong as Cong
 > import qualified ATP.Cooper as Cooper
 > import qualified ATP.Decidable as Decidable
-> import qualified ATP.DefCNF as CNF
-> import qualified ATP.DLO as DLO
-> import qualified ATP.DP as DP
+> import qualified ATP.DefCnf as Cnf
+> import qualified ATP.Dlo as Dlo
+> import qualified ATP.Dp as Dp
 > import qualified ATP.EqElim as EqElim
 > import qualified ATP.Equal as Equal
-> import qualified ATP.FOL as FOL
+> import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Geom as Geom
@@ -39,7 +39,7 @@ The front end for the automated theorem proving Haskell port.
 > import qualified ATP.Paramodulation as Paramodulation
 > import qualified ATP.Poly as Poly
 > import qualified ATP.Prolog as Prolog
-> import qualified ATP.Prop  as Prop 
+> import qualified ATP.Prop as Prop 
 > import qualified ATP.PropExamples as PropExamples
 > import qualified ATP.Qelim as Qelim
 > import qualified ATP.Real as Real
@@ -49,7 +49,7 @@ The front end for the automated theorem proving Haskell port.
 > import qualified ATP.Tableaux as Tableaux
 > import qualified ATP.Test.Combining
 > import qualified ATP.Test.Cooper
-> import qualified ATP.Test.DLO 
+> import qualified ATP.Test.Dlo 
 > import qualified ATP.TestFormulas as Forms
 > import qualified ATP.Unif as Unif
 > import ATP.Util.Impossible (catchImpossible)
@@ -203,7 +203,7 @@ Get rewriting rules.
 >          , ("Equality",
 >             [ bmeson, paramod, ccvalid, rewrite ])
 >          , ("Decidable problems",
->             [ aedecide, dlo, dlovalid, cooper, nelop, nelopDLO, complex ])
+>             [ aedecide, dlo, dlovalid, cooper, nelop, nelopDLO, complex, real ])
 >          ]
 
 > commands :: [Command]
@@ -250,7 +250,7 @@ Get rewriting rules.
 
 > tests :: Test
 > tests = "All" ~: TestList 
->   [ ATP.Test.DLO.tests 
+>   [ ATP.Test.Dlo.tests 
 >   , ATP.Test.Cooper.tests 
 >   , ATP.Test.Combining.tests 
 >   ]
@@ -339,7 +339,7 @@ Show a test formula
 > defcnf = Com "defcnf" "Conjunctive normal form." usage f
 >   where usage = PP.vcat [ PP.text "defcnf -f <formula>"
 >                         , PP.text "defcnf <id>" ]
->         f flags args = PP.putStrLn $ pPrint $ CNF.defcnf fm
+>         f flags args = PP.putStrLn $ pPrint $ Cnf.defcnf fm
 >           where fm = getFormula flags args
 > pnf :: Command
 > pnf = Com "pnf" "Prenex normal form" usage f
@@ -386,7 +386,7 @@ Show a test formula
 >                         , PP.text "dp <id>"
 >                         , PP.text "dp prime 17"
 >                         , PP.text "dp ramsey 2 3 5"]
->         f = run (return . DP.dptaut)
+>         f = run (return . Dp.dptaut)
 
 > dpll :: Command
 > dpll = Com "dpll" summ usage f
@@ -395,7 +395,7 @@ Show a test formula
 >                         , PP.text "dpll <id>"
 >                         , PP.text "dpll prime 17"
 >                         , PP.text "dpll ramsey 2 3 5"]
->         f = run (return . DP.dplltaut)
+>         f = run (return . Dp.dplltaut)
 
 ** First order solvers
 
@@ -536,14 +536,14 @@ Show a test formula
 >   where usage = PP.vcat [ PP.text "dlo -f <formula>"
 >                         , PP.text "dlo <id>"
 >                         ] 
->         f = run (return . DLO.qelim)
+>         f = run (return . Dlo.qelim)
 
 > dlovalid :: Command
 > dlovalid = Com "dlovalid" "Dense linear orders." usage f
 >   where usage = PP.vcat [ PP.text "dlovalid -f <formula>"
 >                         , PP.text "dlovalid <id>"
 >                         ] 
->         f = run (return . DLO.valid)
+>         f = run (return . Dlo.valid)
 
 > cooper :: Command
 > cooper = Com "cooper" "Cooper's algorithm for Presburger arithmetic." usage f
@@ -564,7 +564,7 @@ Show a test formula
 >   where summ = "The Nelson-Oppen method, dense linear orders"
 >         usage = PP.vcat [ PP.text "nelop -f <formula>"
 >                         , PP.text "nelop <id>" ] 
->         f = run (return . Combining.nelopDLO)
+>         f = run (return . Combining.nelopDlo)
 
 > complex :: Command
 > complex = Com "complex" summ usage f
@@ -572,6 +572,13 @@ Show a test formula
 >         usage = PP.vcat [ PP.text "complex -f <formula>"
 >                         , PP.text "complex <id>" ] 
 >         f = run (return . Complex.qelim)
+
+> real :: Command
+> real = Com "real" summ usage f
+>   where summ = "Real quantifier elimination"
+>         usage = PP.vcat [ PP.text "real -f <formula>"
+>                         , PP.text "real <id>" ] 
+>         f = run (return . Real.qelim)
 
 * Top
 
