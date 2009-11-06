@@ -2,10 +2,7 @@
 * Signature 
 
 > module ATP.Complex 
->   ( Err
->   , failwith
->   , can
->   , Sign(..)
+>   ( Sign(..)
 >   , Ctx
 >   , swap
 >   , initSgns
@@ -32,21 +29,8 @@
 > import ATP.Util.ListSet ((\\))
 > import qualified ATP.Util.Print as PP
 > import ATP.Util.Print (Print, pPrint)
-> import qualified Control.Monad.Error as Error
-> import Control.Monad.Error (Error, MonadError, catchError)
 > import qualified Data.List as List
 > import qualified Data.Maybe as Maybe
-
-* Exception handling
-
-> type Err = Either String
-
-> failwith :: String -> Err a
-> failwith = Error.throwError . Error.strMsg
-
-> can :: Err a -> Bool
-> can (Left _) = False
-> can (Right _) = True
 
 * Signs
 
@@ -65,51 +49,39 @@
 >   Negative -> Positive
 >   _ -> s
 
-> findSign :: Ctx -> Term -> Err Sign
+> findSign :: Ctx -> Term -> Maybe Sign
 > findSign sgns p = 
 >   let (p', swf) = P.monic p in
->   case lookup p' sgns of 
->     Nothing -> failwith "findSign"
->     Just sgn -> return $ swap swf sgn
+>   swap swf <$> lookup p' sgns
 
-> assertSign :: Ctx -> (Term, Sign) -> Err Ctx
+> assertSign :: Ctx -> (Term, Sign) -> Maybe Ctx
 > assertSign sgns (p, s) = 
->   if p == P.zero then if s == Zero then return sgns else failwith "assertSign" else
+>   if p == P.zero then if s == Zero then Just sgns else Nothing else
 >   let (p', swf) = P.monic p
 >       s' = swap swf s
 >       s0 = maybe s' id (lookup p' sgns) 
 >   in if s' == s0 || s0 == Nonzero && (s' == Positive || s' == Negative)
->      then return $ (p', s') : (sgns \\ [(p', s0)]) else failwith "assertSign"
+>      then Just $ (p', s') : (sgns \\ [(p', s0)]) else Nothing
 
-* Main algorithm
-
-> splitZero :: Ctx -> Term -> (Ctx -> Err Formula) -> (Ctx -> Err Formula) -> Err Formula
+> splitZero :: Ctx -> Term -> (Ctx -> Formula) -> (Ctx -> Formula) -> Formula
 > splitZero sgns pol contZ contN = 
->   (do z <- findSign sgns pol
->       (if z == Zero then contZ else contN) sgns)
->    `catchError` handle
->  where 
->   handle "findSign" = 
->     let eq = Atom $ R "=" [pol, P.zero] in 
->     do ctx1 <- assertSign sgns (pol, Zero)
->        f1 <- contZ ctx1
->        ctx2 <- assertSign sgns (pol, Nonzero)
->        f2 <- contN ctx2
->        return $ (eq ∧ f1) ∨ ((¬) eq ∧ f2)
->   handle s = failwith s
+>   case findSign sgns pol of
+>     Just Zero -> contZ sgns
+>     Just _ -> contN sgns
+>     Nothing -> 
+>       let eq = Atom $ R "=" [pol, P.zero] in
+>       (eq ∧ contZ (Maybe.fromJust $ assertSign sgns (pol, Zero)))
+>       ∨ ((¬) eq ∧ contN (Maybe.fromJust $ assertSign sgns (pol, Nonzero)))
 
-> polyNonzero :: Vars -> Ctx -> Term -> Err Formula
+> polyNonzero :: Vars -> Ctx -> Term -> Formula
 > polyNonzero vars sgns pol = 
 >   let cs = P.coefficients vars pol
->       (dcs, ucs) = List.partition (can . findSign sgns) cs
->   in do 
->     dcs' <- mapM (findSign sgns) dcs
->     return $ 
->      if List.any (/= Zero) dcs' then (⊤)
->      else if ucs == [] then (⊥) 
->      else F.listDisj $ map ((¬) . flip Equal.mkEq P.zero) ucs
+>       (dcs, ucs) = List.partition (Maybe.isJust . findSign sgns) cs
+>   in if List.any (\p -> findSign sgns p /= Just Zero) dcs then (⊤)
+>      else if ucs == [] then (⊥) else
+>      F.listDisj $ map ((¬) . flip Equal.mkEq P.zero) ucs
 
-> polyNondiv :: Vars -> Ctx -> Term -> Term -> Err Formula
+> polyNondiv :: Vars -> Ctx -> Term -> Term -> Formula
 > polyNondiv vars sgns p s = polyNonzero vars sgns r
 >  where (_, r) = P.pdivide vars s p
 
@@ -118,36 +90,27 @@
  [1 % 1 + x * (0 % 1 + x * (0 % 1 + x * (0 % 1 + x * 1 % 1)))]
  [(1 % 1, Positive), (0 % 1, Zero)]
 
-> cqelim' :: Vars -> ([Term], [Term]) -> Ctx -> Err Formula
-> cqelim' vars (eqs, neqs) sgns =
+> cqelim :: Vars -> ([Term], [Term]) -> Ctx -> Formula
+> cqelim vars (eqs, neqs) sgns =
 >   case List.find (P.isConstant vars) eqs of
->     Just c -> (do 
->       sgns' <- assertSign sgns (c, Zero)
->       let eqs' = eqs \\ [c]
->       f <- cqelim' vars (eqs', neqs) sgns'
->       return $ Equal.mkEq c P.zero ∧ f) `catchError` handle
->     Nothing -> do
->       neqs' <- mapM (polyNonzero vars sgns) neqs 
->       if null eqs then return $ F.listConj neqs' else
->        let n = minimum $ map (P.degree vars) eqs
->            p = Maybe.fromJust $ List.find (\p' -> P.degree vars p' == n) eqs
->            oeqs = eqs \\ [p]
->        in do 
->          splitZero sgns (P.phead vars p) 
->            (cqelim' vars (P.behead vars p : oeqs, neqs))
+>     Just c -> case assertSign sgns (c, Zero) of
+>       Nothing -> (⊥)
+>       Just sgns' -> 
+>         let eqs' = eqs \\ [c] in
+>         Equal.mkEq c P.zero ∧ cqelim vars (eqs', neqs) sgns'
+>     Nothing -> 
+>       if null eqs then F.listConj $ map (polyNonzero vars sgns) neqs else
+>       let n = minimum $ map (P.degree vars) eqs
+>           p = Maybe.fromJust $ List.find (\p' -> P.degree vars p' == n) eqs
+>           oeqs = eqs \\ [p]
+>       in splitZero sgns (P.phead vars p) 
+>            (cqelim vars (P.behead vars p : oeqs, neqs))
 >            $ \sgns' -> 
 >               let cfn s = snd $ P.pdivide vars s p in
->               if not $ null oeqs then cqelim' vars (p : map cfn oeqs, neqs) sgns'
->               else if null neqs then return (⊤) else
+>               if not $ null oeqs then cqelim vars (p : map cfn oeqs, neqs) sgns'
+>               else if null neqs then (⊤) else
 >               let q = foldr1 (P.mul vars) neqs in
 >               polyNondiv vars sgns' p (P.pow vars q (P.degree vars p))
->  where handle "assertSign" = return (⊥)
->        handle s = failwith s
-
-> cqelim :: Vars -> ([Term], [Term]) -> Ctx -> Formula
-> cqelim vars eqs sgns = case cqelim' vars eqs sgns of
->   Left s -> error s
->   Right res -> res
 
 > initSgns :: Ctx
 > initSgns = [ (P.one, Positive), (P.zero, Zero) ]

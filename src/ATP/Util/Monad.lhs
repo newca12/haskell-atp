@@ -1,22 +1,60 @@
 
+Gracenotes:
+e.g. you can easily define 
+newtype MyReader a = MyReader (ReaderT MyEnv IO a) 
+  deriving (MonadIO), 
+with GeneralizedNewtypeDeriving
+
 * Signature 
 
 > module ATP.Util.Monad 
->   ( puts
+>   ( module Control.Monad
+>   , module Control.Monad.Trans
+>   , puts
 >   , any
 >   , all
 >   , findM
 >   , ignore
+>   , ifM
+>   , ifM'
+>   , maybeM
+>   , mapMaybeM
+>   , Has(..)
+>   , lift2
+>   , foldrM
 >   ) 
 > where
 
-* Imports
+* Imports 
 
-> import Prelude hiding (any, all)
+> import ATP.Util.Prelude hiding (any, all)
 > import qualified Control.Monad.State as State
-> import Control.Monad.State(MonadState)
+> import Control.Monad.State
+> import Control.Monad
+> import Control.Monad.Trans
+> import qualified Data.Maybe as Maybe
+> import qualified Data.Foldable as Fold
 
-* Utils
+* Classes
+
+> class Has a b where
+>   grab :: b -> a
+>   stuff :: b -> a -> b
+
+> instance Has a a where
+>   grab = id
+>   stuff _ x = x
+
+* Monad utils
+
+> foldrM :: Monad m => (a -> b -> m b) -> b -> [a] -> m b
+> foldrM = Fold.foldrM
+
+> maybeM :: Monad m => b -> (a -> b) -> m (Maybe a) -> m b
+> maybeM b f x = x >>= return . maybe b f
+
+> mapMaybeM :: Monad m => (a -> m (Maybe b)) -> [a] -> m [b]
+> mapMaybeM f xs = mapM f xs >>= return . Maybe.catMaybes
 
 > puts :: (MonadState s m) => (s -> a -> s) -> a -> m ()
 > puts f x = do s <- State.get
@@ -39,3 +77,14 @@
 
 > ignore :: Monad m => m a -> m ()
 > ignore x = x >> return ()
+
+> ifM :: Monad m => m Bool -> m a -> m a -> m a
+> ifM g x y = do b <- g
+>                if b then x else y
+
+> ifM' :: Monad m => m Bool -> a -> a -> m a
+> ifM' g x y = do b <- g
+>                 if b then return x else return y
+
+> lift2 :: (MonadTrans t1, MonadTrans t2, Monad m, Monad (t2 m)) => m a -> t1 (t2 m) a
+> lift2 = lift . lift 

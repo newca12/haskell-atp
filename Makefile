@@ -26,4 +26,4 @@ doc :
 clean :
 	runhaskell Setup.lhs clean 
 	rm -rf doc
-	find . -name "*~" -exec rm -f {} \;
+	find . -name "*~" -or -name "*.o" -exec rm -f {} \;

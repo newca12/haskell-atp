@@ -32,10 +32,12 @@
 :set -i/usr1/seanmcl/save/projects/atp/src
 :set -i/Users/sean/save/projects/atp/src
 :set -optL -q
-:set -fbreak-on-exception
 
-:set args "cvc" "⊤"
-:set -lcvc3 -lcvch
+-- :set -fobject-code
+-- :set -fbreak-on-exception
+
+-- :set args "cvc" "⊤"
+-- :set -lcvc3 -lcvch
 
 -- -----------------------------------------------------------------------------
 --  Options                                                                      
@@ -49,19 +51,19 @@
 --  Functions                                                                   
 -- -----------------------------------------------------------------------------
 
-:{
-let date _ = do { t <- Time.getClockTime 
-                ; print t
-                ; return "" }
-:}
+-- :{
+-- let date _ = do { t <- Time.getClockTime 
+--                 ; print t
+--                 ; return "" }
+-- :}
 
-:def date date
+-- :def date date
 
 -- -----------------------------------------------------------------------------
 --  Test                                                                        
 -- -----------------------------------------------------------------------------
 
-:def imodule (\_ -> return ":module ATP.Util.Print") 
+-- :def imodule (\_ -> return ":module ATP.Util.Print") 
 
 -- -----------------------------------------------------------------------------
 --  File loading                                                                

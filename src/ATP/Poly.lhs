@@ -77,8 +77,10 @@ We need explicit casts between Integer and Rational.
 > mkNumeral n = Fn (show n) []
 
 > destNumeral :: Term -> Rational
-> destNumeral (Fn ns []) = parse ns
-> destNumeral t = error ("destNumeral: " ++ show t)
+> destNumeral t = --trace' "destNumeral" (PP.pPrint t) $ 
+>   case t of 
+>     Fn ns [] -> parse ns
+>     _ -> error ("destNumeral: " ++ show t)
 
 > add :: Vars -> Poly -> Poly -> Poly
 > add vars pol1 pol2 = 
@@ -99,7 +101,7 @@ We need explicit casts between Integer and Rational.
 > polyLadd _ _ _ = __IMPOSSIBLE__ 
 
 > neg :: Poly -> Poly
-> neg (Fn "+" [c, Fn "*" [Var x, p]]) =
+> neg (Fn "+" [c, Fn "*" [Var x, p]]) = 
 >   Fn "+" [neg c, Fn "*" [Var x, neg p]]
 > neg n = numeral1 (\x -> - x) n
 
@@ -188,8 +190,10 @@ PP.pPrint x
 
 > monic :: Term -> (Term, Bool)
 > monic p = 
->   let h = headconst p in
->   if h == 0 then (p, False) else (cmul (1 / h) p, h < 0)
+>   let h = headconst p 
+>       res = if h == 0 then (p, False) else (cmul (1 / h) p, h < 0)
+>   in res
+>      -- trace' "monic" (PP.pPrint (p, res)) $ res
 
 Pseudo-division
 
@@ -215,11 +219,11 @@ Differentiation
 >     Fn "+" [c, Fn "*" [y, q]] 
 >      | y == x -> Fn "+" [cmul n' c, Fn "*" [x, diffn x (n+1) q]]
 >      | otherwise -> cmul n' p
->     _ -> __IMPOSSIBLE__ 
+>     _ -> cmul n' p
 
 > diff :: Vars -> Term -> Term
 > diff vars p = case p of
 >   Fn "+" [_c, Fn "*" [Var x, q]] 
 >    | x == head vars -> diffn (Var x) 1 q
 >    | otherwise -> zero
->   _ -> __IMPOSSIBLE__ 
+>   _ -> zero

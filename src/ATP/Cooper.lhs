@@ -39,10 +39,12 @@
 > mkNumeral :: Integer -> Term
 > mkNumeral n = Fn (show n) []
 
+Rationals have the form 'n % d'
+
 > isNumeral :: Term -> Bool
 > isNumeral (Fn ns []) = case ns of 
->   '-':ns' -> List.all Char.isDigit ns'
->   _ -> List.all Char.isDigit ns
+>   '-':ns' -> isNumeral (Fn ns' [])
+>   _ -> List.elem '%' ns || List.all Char.isDigit ns
 > isNumeral _ = False
 
 > destNumeral :: Term -> Integer

@@ -48,6 +48,8 @@ library
                  OverlappingInstances
                  FlexibleInstances
                  DeriveDataTypeable
+                 FlexibleContexts
+                 CPP
 
 executable atp
 
@@ -66,6 +68,7 @@ executable atp
                  DeriveDataTypeable
                  TemplateHaskell
                  QuasiQuotes
+                 FlexibleContexts
                  CPP
 
   ghc-options: -Wall 

@@ -137,7 +137,17 @@ The front end for the automated theorem proving Haskell port.
 >         com (Com s summ _ _) = PP.text (s ++ spaces s ++ ": " ++ summ)
 >         spaces s = concat (replicate (20 - length s) " ")
 
-Get a formula from commandline options.
+Get a term from commandline options.
+
+> getTerm :: Flags -> Args -> Term
+> getTerm flags args = case (List.findFirst isFormulaFlag flags, args) of
+>     (Just f, _) -> parse f
+>     (Nothing, [n]) -> case Forms.lookupTerm n of 
+>                          Nothing -> Exn.throw $ ComExn "Can't determine term"
+>                          Just t -> t
+>     _ -> Exn.throw $ ComExn "Can't determine term"
+>   where isFormulaFlag (FormulaFlag f) = Just f
+>         isFormulaFlag _ = Nothing
 
 > getFormula :: Flags -> Args -> Formula
 > getFormula flags args = case (List.findFirst isFormulaFlag flags, args) of
@@ -187,6 +197,8 @@ Get rewriting rules.
 >             [ parseExpr, parseTerm, parseForm ])
 >          , ("Formula kung fu", 
 >             [ nnf, cnf, dnf, defcnf, pnf, skolem ])
+>          , ("Term kung fu", 
+>             [ polytest ])
 >          , ("Propositional decision procedures",
 >             [ truthtable, tautology, dp, dpll ])
 >          , ("Basic Herbrand methods",
@@ -313,7 +325,6 @@ Show a test formula
 
 ** Formula manipulation
 
-
 > nnf :: Command
 > nnf = Com "nnf" "Negation normal form." usage f
 >   where usage = PP.vcat [ PP.text "nnf -f <formula>"
@@ -354,6 +365,13 @@ Show a test formula
 >                          , PP.text "skolem <id>" ] 
 >         f flags args = PP.putStrLn $ pPrint $ Skolem.skolemize fm
 >           where fm = getFormula flags args
+
+> polytest :: Command
+> polytest = Com "polytest" "Polynomial normalization" usage f
+>   where usage =  PP.vcat [ PP.text "polytest -f <term>"
+>                          , PP.text "polytest <id>" ] 
+>         f flags args = PP.putStrLn $ pPrint $ Poly.polynate (Fol.fv tm) tm
+>           where tm = getTerm flags args
 
 ** Propositional solvers
 
