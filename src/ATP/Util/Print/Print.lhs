@@ -17,7 +17,6 @@
 >   , setVert
 >   , setHoriz
 >   , putStrLn
->   , render
 >   , dot
 >   )
 > where
@@ -72,13 +71,6 @@
 > setHoriz :: [PP.Doc] -> PP.Doc
 > setHoriz = PP.braces . PP.hcat . commas
 
-* Modified rendering
-
-FIXME: Trying to make the lines longer doesn't seem to be working at all.
-
-> render :: PP.Doc -> String
-> render = PP.renderStyle (PP.Style PP.PageMode 100 1.5)
-
 * Type class
 
 > class Print a where
@@ -111,23 +103,34 @@ FIXME: Trying to make the lines longer doesn't seem to be working at all.
 
 ** Instances
 
-> instance Print Int where pPrint = PP.int
+> instance Print Int where 
+>   pPrint = PP.int
 
-> instance Print Integer where pPrint = PP.integer
+> instance Print Integer where 
+>   pPrint = PP.integer
 
-> instance Print Float where pPrint = PP.float
+> instance Print Float where 
+>   pPrint = PP.float
 
-> instance Print Double where pPrint = PP.double
+> instance Print Double where 
+>   pPrint = PP.double
 
-> instance Print () where pPrint _ = PP.text "()"
+> instance Print () where 
+>   pPrint _ = PP.text "()"
 
-> instance Print Bool where pPrint = PP.text . show
+> instance Print Bool where 
+>   pPrint = PP.text . show
 
-> instance Print Ordering where pPrint = PP.text . show
+> instance Print Ordering where 
+>   pPrint = PP.text . show
 
 > instance Print Char where
 >     pPrint = PP.char
 >     pPrintList _ = PP.text . show
+
+> instance Print Rational where
+>     pPrint n = if Ratio.denominator n == 1 then pPrint $ Ratio.numerator n
+>                else PP.text $ show n
 
 > instance (Print a) => Print (Maybe a) where
 >     pPrintPrec _ _ Nothing = PP.text "Nothing"

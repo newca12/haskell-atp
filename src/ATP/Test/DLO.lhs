@@ -13,16 +13,17 @@
 > import qualified ATP.TestFormulas as Forms
 > import qualified Data.Maybe as Maybe
 > import qualified Test.HUnit as Test
-> import Test.HUnit(Test(..), (~:), assert)
+> import Test.HUnit(Test(..), (~:), (@=?))
 
 * Tests
 
-> mkTest :: (String, Formula) -> Test
-> mkTest (s, f) = s ~: assert $ 
->   Dlo.qelim (Maybe.fromJust (Forms.lookup s)) == f
-
 > tests :: Test
-> tests = "Dlo" ~: TestList $ map mkTest
+> tests = "Dlo" ~: map mkTest formulas
+>   where mkTest (name, f) = name ~: 
+>           f @=? Dlo.qelim (Maybe.fromJust (Forms.lookup name)) 
+
+> formulas :: [(String, Formula)]
+> formulas = 
 >   [ ("dlo1", [$form| ⊤ |]) 
 >   , ("dlo2", [$form| ⊤ |]) 
 >   , ("dlo3", [$form| x < y |]) 

@@ -174,7 +174,7 @@
 
 > limitedMeson :: Int -> Formula -> Maybe [(Env, Int, Int)]
 > limitedMeson n fm =
->   let fm1 = Skolem.askolemize(Not(Fol.generalize fm)) in
+>   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   mapM (limmeson n . F.listConj) (Prop.simpdnf fm1)
 
 > decideFmp :: Formula -> Bool

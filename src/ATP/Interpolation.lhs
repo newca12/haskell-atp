@@ -52,12 +52,13 @@ mulas p and q such that |= p ∧ q ⇒ ⊥.)
 >          (ps, qs) = List.unzip (map F.destAnd fmis) 
 >      return $ pinterpolate (F.listConj(Set.setify ps)) (F.listConj(Set.setify qs))
 
- To turn this into an algorithm we 
-ﬁrst deﬁne a function to obtain all the topmost terms whose head function 
-is in the list fns, ﬁrst for terms:
+To turn this into an algorithm we ﬁrst deﬁne a function to obtain all
+the topmost terms whose head function is in the list fns, ﬁrst for
+terms:
 
 > toptermt :: [(Pred, Int)] -> Term -> [Term]
 > toptermt _ (Var _) = []
+> toptermt _ (Num _) = []
 > toptermt fns (tm @ (Fn f args)) = if elem (f, length args) fns then [tm]
 >                            else Set.unions (map (toptermt fns) args)
 

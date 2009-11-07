@@ -4,8 +4,6 @@
 > module ATP.Qelim
 >   ( cnnf
 >   , lift
->     -- * Hidden
->   , qelim
 >   )
 > where
 

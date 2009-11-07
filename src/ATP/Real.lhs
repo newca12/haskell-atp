@@ -44,7 +44,7 @@ A Matrix gives the signs for a list of polynomials.
 >  where 
 >   evalfn (R a [p, _z]) = 
 >     case (lookup p pmat, lookup a relSigns) of
->       (Nothing, _) -> error "testform1"
+>       (Nothing, _) -> error' $ PP.text "testform1:" <+> pPrint (pmat, fm)
 >       (_, Nothing) -> error "testform2"
 >       (Just sgn, Just sgns) -> 
 >         elem sgn sgns
@@ -79,20 +79,22 @@ In OCaml, inferisign can raise the "inferisign: inconsisitent" exception.
 >          _ -> return $ x : (l : ints) : (Zero : ints) : (r : ints) : sgns
 >   _ -> return ps
 
-> dedmatrix :: (Matrix -> Err a) -> (Matrix -> Err a)
-> dedmatrix cont mat = 
+> dedmatrix' :: Matrix -> Err Matrix
+> dedmatrix' mat = trace' "dedmatrix':in" (pPrint mat) $
 >   let -- Split the matrix in half and infer the sign for p'
 >       n = length (head mat) `div` 2 
->       mat1 = trace' "dedmatrix: mat" (PP.pPrint mat) $
->              condense $ map (inferpsign . splitAt n) mat
+>       mat1 = condense $ map (inferpsign . splitAt n) mat
 >       -- Fill in the intervals at the points at infinity
->       mat2 = trace' "dedmatrix: mat1" (PP.pPrint mat1) $ 
->              [swap True (head mat1 !! 1)] : mat1 ++ [[last mat1 !! 1]]
+>       mat2 = [swap True (head mat1 !! 1)] : mat1 ++ [[last mat1 !! 1]]
 >       -- Infer the interval signs and drop the points at infinity
 >   in do
 >     mat3 <- inferisign mat2 
 >     let mat3' = init $ tail mat3
->     cont $ condense $ map (\l -> head l : tail (tail l)) mat3'
+>         mat4 = condense $ map (\l -> head l : tail (tail l)) mat3'
+>     trace' "dedmatrix':out" (pPrint mat4) $ return $ mat4
+
+> dedmatrix :: (Matrix -> Err a) -> (Matrix -> Err a)
+> dedmatrix cont mat = dedmatrix' mat >>= cont
 
 > pdividePos :: Vars -> Ctx -> Term -> Term -> Err Term
 > pdividePos vars sgns s p = 
@@ -173,3 +175,6 @@ In OCaml, inferisign can raise the "inferisign: inconsisitent" exception.
 > qelim = 
 >   Skolem.simplify . Cooper.evalc . 
 >     Qelim.lift P.atom (Skolem.simplify . Cooper.evalc) basicQelim
+
+:break basicQelim
+:trace qelim [$form| ∃ x. x^3 + x + 1 = 0 |]

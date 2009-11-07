@@ -4,7 +4,9 @@
 > module ATP.Util.Lex 
 >   ( -- * Parser constructors
 >     genParser
+>   , genParser'
 >   , makeParser
+>   , makeParser'
 >   , genFileParser
 >   , makeFileParser
 >     -- * Lexers
@@ -105,6 +107,16 @@ Use the Haskell lexer for identifier conventions.
 
 * Parsers
 
+> genParser' :: Parser () -> Parser a -> String -> Maybe a
+> genParser' space p input = 
+>   case P.runParser p' () "" input of
+>     Left _ -> Nothing
+>     Right e -> Just e
+>  where p' = do space
+>                x <- p
+>                P.eof 
+>                return x
+
 > genParser :: Parser () -> Parser a -> String -> a
 > genParser space p input = 
 >   case P.runParser p' () "" input of
@@ -114,6 +126,9 @@ Use the Haskell lexer for identifier conventions.
 >                x <- p
 >                P.eof 
 >                return x
+
+> makeParser' :: Parser a -> String -> Maybe a
+> makeParser' = genParser' whiteSpace
 
 > makeParser :: Parser a -> String -> a
 > makeParser = genParser whiteSpace

@@ -15,6 +15,8 @@
 >   , form
 >     -- * Util
 >   , pp
+>     -- This needs to be exported for templates to work.
+>   , (%)
 >   )
 > where
 
@@ -24,7 +26,7 @@
 > import qualified ATP.Util.TH as TH'
 > import qualified ATP.Util.Lex as Lex
 > import qualified ATP.Util.Parse as P
-> import ATP.Util.Parse (Parse, parse, Parser, (<|>), (<?>))
+> import ATP.Util.Parse (Parse, parse, parser, Parser, (<|>), (<?>))
 > import qualified ATP.Util.Print as PP
 > import ATP.Util.Print (Print(pPrint), (<+>), (<>))
 > import qualified Data.Generics as G
@@ -37,6 +39,8 @@
 > import Language.Haskell.TH(ExpQ, PatQ)
 > import qualified Language.Haskell.TH.Quote as Q
 > import Language.Haskell.TH.Quote (QuasiQuoter(..))
+> import qualified Ratio
+> import Ratio ((%))
 
 * Syntax
 
@@ -47,6 +51,7 @@
 > type Func = String
 
 > data Term = Var String
+>           | Num Rational
 >           | Fn Func [Term]
 >   deriving (Eq, Ord, Show, Data, Typeable)
 
@@ -55,12 +60,9 @@
 >   t1 - t2 = Fn "-" [t1, t2]
 >   t1 * t2 = Fn "*" [t1, t2]
 >   negate t = Fn "-" [t]
->   fromInteger n = Fn (show n) []
+>   fromInteger = Num . fromInteger
 >   abs _ = error "Unimplemented" 
 >   signum _ = error "Unimplemented" 
-
-> instance Fractional Term where
->   fromRational r = Fn (show r) []
 
 ○ Relations
 
@@ -178,7 +180,7 @@ clause for antiquotes.
 >          return $ ("^" ++ x)
 >   <|> Lex.identifier
 
-○ Terms
+** Terms
 
 > termp :: Parser Term
 > termp = P.buildExpressionParser termTable atomicTerm <?> "term" 
@@ -201,15 +203,15 @@ clause for antiquotes.
 >          <|> do Lex.reservedOp "-" 
 >                 t <- atomicTerm
 >                 return $ Fn "-" [t]
->          <|> do n <- Lex.integer
->                 return $ Fn (show n) []
+>          <|> do r <- parser
+>                 return $ Num r
 >          <|> P.try (do f <- Lex.identifier
 >                        ts <- Lex.parens $ P.sepBy termp (Lex.symbol ",")
 >                        return $ Fn f ts)
 >          <|> (var >>= return . Var)
 >          <?> "atomic term"
 
-○ Relations
+** Relations
 
 > parseRel :: Parser Rel
 > parseRel = 
@@ -231,7 +233,7 @@ clause for antiquotes.
 >          return $ R p []
 >   <?> "relation"
 
-○ Formulas
+** Formulas
 
 > formula :: Parser Formula
 > formula = P.buildExpressionParser formulaTable atomicFormula <?> "formula" 
@@ -300,6 +302,10 @@ clause for antiquotes.
 > quoteTE' :: Term -> Maybe TH.ExpQ 
 > quoteTE' t = case t of 
 >   Var x -> if isQuote x then Just $ antiTE x else Nothing
+>   Num k -> 
+>     let n = Ratio.numerator k
+>         d = Ratio.denominator k 
+>     in Just $ TH'.conE "Num" [TH.appE (TH'.appE "%" (TH.litE $ TH.IntegerL n)) (TH.litE $ TH.IntegerL d)]
 >   _ -> Nothing
 
 > antiTE :: String -> TH.ExpQ
@@ -402,6 +408,7 @@ Terms
 > ppTerm' :: Int -> Term -> PP.Doc
 > ppTerm' prec t = case t of  
 >   Var x -> PP.text x
+>   Num r -> pPrint r
 >   Fn "^" [t1, t2] -> ppInfixTm True prec 24 "^" t1 t2
 >   Fn "/" [t1, t2] -> ppInfixTm True prec 22 "/" t1 t2
 >   Fn "*" [t1, t2] -> ppInfixTm False prec 20 "*" t1 t2

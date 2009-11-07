@@ -33,7 +33,7 @@ propositional variables.
 
 * Imports
 
-> import Prelude hiding (print)
+> import ATP.Util.Prelude
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn 
 > import qualified ATP.Util.Lib as Lib
@@ -287,7 +287,9 @@ Subsumption
 Disjunctive normal form
 
 > dnf :: Formula -> Formula 
-> dnf = F.listDisj . map F.listConj . simpdnf
+> dnf f = trace' "dnf: in" (pPrint f) $ 
+>   let f' = (F.listDisj . map F.listConj . simpdnf) f in
+>   trace' "dnf: out" (pPrint f') $ f'
 
 > simpdnf :: Formula -> [[Formula]]
 > simpdnf Bot = []

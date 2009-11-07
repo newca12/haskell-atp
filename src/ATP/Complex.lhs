@@ -36,6 +36,7 @@
 > import Control.Monad.Error (Error, MonadError, catchError)
 > import qualified Data.List as List
 > import qualified Data.Maybe as Maybe
+--> import qualified ATP.TestFormulas as TF
 
 * Exception handling
 

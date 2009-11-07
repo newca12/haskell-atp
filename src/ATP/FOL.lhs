@@ -65,6 +65,7 @@ Relations
 
 > instance Fv Term where
 >   fv (Var x) = [x]
+>   fv (Num _) = []
 >   fv (Fn _ args) = Set.unions (map fv args)
 
 > instance Fv Rel where
@@ -97,6 +98,7 @@ Function symbols with arity
 
 > funcs :: Term -> [(Func, Int)]
 > funcs (Var _) = []
+> funcs (Num _) = []
 > funcs (Fn f args) = foldr (Set.union . funcs) [(f, length args)] args 
 
 > predicates :: Formula -> [(Func, Int)]
@@ -114,10 +116,11 @@ Substitutions
 
 > instance Subst Term where
 >   apply env tm = case tm of
->                  Var x -> case Map.lookup x env of
->                           Just t -> t
->                           Nothing -> tm
->                  Fn f args -> Fn f (map (apply env) args)
+>     Var x -> case Map.lookup x env of
+>       Just t -> t
+>       Nothing -> tm
+>     Fn f args -> Fn f $ map (apply env) args
+>     Num _ -> tm
 
 > instance Subst Rel where
 >   apply env (R p args) = R p (map (apply env) args)
@@ -151,33 +154,32 @@ The following functions need the type variable, as they are used at multiple typ
 > variant :: Var -> Vars -> Var
 > variant x vars = if List.elem x vars then variant (x ++ "'") vars else x
 
-> applyq :: Env -> (Var -> Formula -> Formula) 
->        -> Var -> Formula -> Formula
+> applyq :: Env -> (Var -> Formula -> Formula) -> Var -> Formula -> Formula
 > applyq env quant x p = quant x' (apply ((x ↦ Var x') env) p)
->     where x' = if List.any (\k -> case Map.lookup k env of
->                                   Just v -> List.elem x (fv v)
->                                   Nothing -> False) (fv p \\ [x]) 
->                then variant x (fv(apply (Map.delete x env) p)) else x
+>  where 
+>   x' = if List.any (\k -> case Map.lookup k env of
+>                            Just v -> List.elem x (fv v)
+>                            Nothing -> False) (fv p \\ [x]) 
+>        then variant x (fv(apply (Map.delete x env) p)) else x
 
-> termval :: ([a], Var -> [b] -> b, Var -> [b] -> Bool) -> Map Var b -> Term -> b
-> termval m@(_, func, _) v tm =
->   case tm of 
->     Var x -> case Map.lookup x v of
->                Nothing -> error "not in domain" 
->                Just y -> y
->     Fn f args -> func f (map (termval m v) args)
+> termval :: ([a], Func -> [b] -> b, Pred -> [b] -> Bool) -> Map Var b -> Term -> b
+> termval m@(_, func, _) v tm = case tm of 
+>   Var x -> case Map.lookup x v of
+>     Nothing -> error "not in domain" 
+>     Just y -> y
+>   Fn f args -> func f $ map (termval m v) args
+>   Num _ -> error "Unimplemented" 
 
-> holds :: ([a], Var -> [a] -> a, Var -> [a] -> Bool) -> Map Var a -> Formula -> Bool
-> holds m@(domain, _, f) v fm =
->   case fm of 
->     [$form| ⊥ |] -> False
->     [$form| ⊤ |] -> True
->     Atom (R r args) -> f r (map (termval m v) args)
->     [$form| ¬ $p |] -> not(holds m v p)
->     [$form| $p ∧ $q |] -> holds m v p && holds m v q
->     [$form| $p ∨ $q |] -> holds m v p || holds m v q
->     [$form| $p ⊃ $q |] -> not (holds m v p) || holds m v q
->     [$form| $p ⇔ $q |] -> holds m v p == holds m v q
->     [$form| ∀ $x. $p |] -> List.all (\a -> holds m (Map.insert x a v) p) domain
->     [$form| exists $x. $p |] -> List.any (\a -> holds m (Map.insert x a v) p) domain
+> holds :: ([a], Func -> [a] -> a, Pred -> [a] -> Bool) -> Map Var a -> Formula -> Bool
+> holds m@(domain, _, f) v fm = case fm of 
+>   [$form| ⊥ |] -> False
+>   [$form| ⊤ |] -> True
+>   Atom (R r args) -> f r (map (termval m v) args)
+>   [$form| ¬ $p |] -> not(holds m v p)
+>   [$form| $p ∧ $q |] -> holds m v p && holds m v q
+>   [$form| $p ∨ $q |] -> holds m v p || holds m v q
+>   [$form| $p ⊃ $q |] -> not (holds m v p) || holds m v q
+>   [$form| $p ⇔ $q |] -> holds m v p == holds m v q
+>   [$form| ∀ $x. $p |] -> List.all (\a -> holds m (Map.insert x a v) p) domain
+>   [$form| exists $x. $p |] -> List.any (\a -> holds m (Map.insert x a v) p) domain
 

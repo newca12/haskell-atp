@@ -58,29 +58,23 @@
 >                F.listConj (Lib.allPairs (≺) ls rs)
 > dloBasic _ = error "dloBasic" 
 
-Here we deviate slightly from Harrioson and allow integer constants in
+Here we deviate slightly from Harrison and allow integer constants in
 the atomic formulas.
-
-> getInt :: Term -> Maybe Integer
-> getInt t = case t of
->   Fn f [] | List.all Char.isDigit f -> Just $ read f
->           | otherwise -> Nothing
->   _ -> Nothing
 
 > afn :: Vars -> Formula -> Formula 
 > afn xs f = case f of 
 >   [$form| $s ≤ $t |] -> afn xs [$form| ¬ ($t < $s) |]
 >   [$form| $s ≥ $t |] -> afn xs [$form| ¬ ($s < $t) |]
 >   [$form| $s > $t |] -> afn xs [$form| $t ≺ $s |]
->   [$form| $n < $m |] -> case (getInt n, getInt m) of 
->     (Just n', Just m') -> if n' < m' then (⊤) else (⊥)
+>   [$form| $n < $m |] -> case (n, m) of 
+>     (Num n', Num m') -> if n' < m' then (⊤) else (⊥)
 >     _ -> f
->   [$form| ¬ ($n < $m) |] -> case (getInt n, getInt m) of 
->     (Just n', Just m') -> if n' > m' then (⊤) else (⊥)
+>   [$form| ¬ ($n < $m) |] -> case (n, m) of 
+>     (Num n', Num m') -> if n' > m' then (⊤) else (⊥)
 >     _ -> f
 >   _ -> f
 
-> qelim :: Formula -> Formula 
+> qelim :: Formula ->Formula 
 > qelim = Qelim.lift afn (Prop.dnf . Qelim.cnnf lfn) (const dloBasic)
 
 * Validity

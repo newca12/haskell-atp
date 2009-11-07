@@ -49,5 +49,6 @@ rewritable subterm would work equally well in our applications.
 >     Nothing -> 
 >       case tm of 
 >         Var _ -> tm
+>         Num _ -> tm
 >         Fn f args -> let tm' = Fn f (map (rewrite eqs) args) in
 >                      if tm' == tm then tm else rewrite eqs tm'

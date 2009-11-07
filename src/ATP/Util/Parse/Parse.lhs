@@ -14,7 +14,7 @@
 
 > import Prelude 
 > import qualified ATP.Util.Lex as Lex
-> import Data.Ratio (Ratio, (%))
+> import Data.Ratio ((%))
 > import qualified Data.Set as Set
 > import Data.Set (Set)
 > import qualified Text.ParserCombinators.Parsec as P
@@ -54,14 +54,16 @@
 > instance Parse Integer where
 >   parser = Lex.integer
 
-> instance Parse (Ratio Integer) where
->   parser = parseRatio
+> instance Parse Rational where
+>   parser = rational
 
-> parseRatio :: Parser (Ratio Integer) 
-> parseRatio = do n <- (parser <|> Lex.parens parser)
->                 d <- P.option 1 $ (Lex.reservedOp "/" <|> Lex.reservedOp "%") >> parser
->                 return $ n % d
->          <|> Lex.parens parseRatio
+> rational :: Parser Rational
+> rational = do x :: Integer <- integ
+>               y <- P.option 1 $ do 
+>                     Lex.reserved "%"
+>                     integ
+>               return $ x % y
+>   where integ = Lex.integer <|> Lex.parens Lex.integer
 
 > instance (Ord a, Parse a) => Parse (Set a) where
 >   parser = braces parser >>= return . Set.fromList

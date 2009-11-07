@@ -20,9 +20,10 @@ tested-with:    GHC == 6.10.4
 
 extra-source-files: LICENSE
                     src/undefined.h
-                    src/undefined2.h
 
-library
+executable atp
+
+  main-is:       Main.lhs
 
   hs-source-dirs: src
 
@@ -48,27 +49,10 @@ library
                  OverlappingInstances
                  FlexibleInstances
                  DeriveDataTypeable
-                 FlexibleContexts
-                 CPP
-
-executable atp
-
-  main-is:       Main.lhs
-
-  hs-source-dirs: src
-
-  include-dirs: src
-
-  extensions:    NoImplicitPrelude
-                 MultiParamTypeClasses
-                 ScopedTypeVariables
-                 TypeSynonymInstances
-                 OverlappingInstances
-                 FlexibleInstances
-                 DeriveDataTypeable
                  TemplateHaskell
                  QuasiQuotes
                  FlexibleContexts
+                 UndecidableInstances
                  CPP
 
   ghc-options: -Wall 
@@ -79,16 +63,19 @@ executable atp
                -fwarn-tabs 
                -fwarn-simple-patterns 
                -fno-ignore-asserts
+               -O
                -- -v
                -- Dump Core language
                -- -ddump-simpl
                -- Warnings as errors
-               -Werror
+               -- -Werror
                -- Allow comment lines next to literate lines
                -optL -q
                -- Profiling 
-               -- -prof
-               -- -auto-all
+               -prof
+               -auto-all
+               -osuf p_o 
+               -hisuf p_hi
                -- Remove literate comments with BirdPP
                -- -pgmL BirdPP
 

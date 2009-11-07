@@ -21,8 +21,7 @@ Unification
 
 * Unification
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Unification
+** Discussion
 
 Let us now turn to a general method for solving a unification problem or
 deciding that it has no solution. Our main function unify is recursive, with
@@ -31,20 +30,20 @@ and eqs, which is a list of term-term pairs to be unified. The unification
 function essentially applies some transformations to eqs and incorporates
 the resulting variable-term mappings into env. This env is not quite the final
 unifying mapping itself, because it may map a variable to a term containing
-variables that are themselves assigned, e.g. x |-> y and y |-> z instead of just
-x |-> z directly. But we will require env to be free of cycles. Write x ---> y
-to indicate that there is an assignment x |-> t in env with y \in FVT(t). By
+variables that are themselves assigned, e.g. x ↦ y and y ↦ z instead of just
+x ↦ z directly. But we will require env to be free of cycles. Write x ---> y
+to indicate that there is an assignment x ↦ t in env with y \in FVT(t). By
 a cycle, we mean a nonempty finite sequence leading back to the starting
 point:
 x0 ---> x1 ---> ... ---> xp ---> x0
-Our main unification algorithm will only incorporate new entries x |-> t
+Our main unification algorithm will only incorporate new entries x ↦ t
 into env that preserve the property of being cycle-free. It is sufficient to
 ensure the following:
-(1) There is no existing assignment x |-> s in env.
+(1) There is no existing assignment x ↦ s in env.
 (2) There is no variable y \in FVT(t) such that y ---> x, i.e. there is a sequence
 of zero or more --->-steps leading from y to x; in particular x \not\in FVT(t).
 
-To see that if env is cycle-free and these properties hold then (x |-> t)env
+To see that if env is cycle-free and these properties hold then (x ↦ t)env
 is also cycle-free, note that if there were now a cycle for the new relation
 --->': 
 
@@ -60,21 +59,23 @@ us the following, contradicting assumption (2):
 y ---> . . . ---> xp ---> z ---> x1 ---> x
 
 The following function will return `false' if condition (2) above holds for
-a new assignment x |-> t. If condition (2) does not hold then it fails, except
+a new assignment x ↦ t. If condition (2) does not hold then it fails, except
 in the case t = x when it returns `true', indicating that the assignment is
 `trivial'.
 
 > istriv :: Env -> Var -> Term -> Maybe Bool
-> istriv env x (Var y) = 
->   if x == y then Just True else
->   case Map.lookup y env of
->     Nothing -> Just False
->     Just t -> istriv env x t
-> istriv env x (Fn _ args) = 
->   if any (\t -> case istriv env x t of -- occurs check
+> istriv env x t = case t of 
+>   Var y -> if x == y then Just True else
+>     case Map.lookup y env of
+>       Nothing -> Just False
+>       Just t' -> istriv env x t'
+>   Num _ -> Just False
+>   Fn _ args ->  
+>     if any triv args then Nothing else Just False
+>  where triv t' = case istriv env x t' of -- occurs check
 >                   Just False -> False
->                   _ -> True) args 
->   then Nothing else Just False
+>                   _ -> True
+
 
 This is effectively calculating a reflexive-transitive closure of |−>, which
 could be done much more efficiently. However, this simple recursive implementation
@@ -83,23 +84,26 @@ precisely because the existing env is cycle-free.
 
 Now we come to the main unification function. This just transforms the
 list of pairs eqs from the front using various transformations until the front
-pair is of the form (x, t). If there is already a definition x |-> s in env, then
+pair is of the form (x, t). If there is already a definition x ↦ s in env, then
 the pair is expanded into (s, t) and the recursion proceeds. Otherwise we
-know that condition (1) holds, so x |-> t is a candidate for incorporation
+know that condition (1) holds, so x ↦ t is a candidate for incorporation
 into env. If there is a benign cycle istriv env x t is true and env is
 unchanged. Any other kind of cycle will cause failure, which will propagate
-out. Otherwise condition (2) holds, and x |-> t is incorporated into env for
+out. Otherwise condition (2) holds, and x ↦ t is incorporated into env for
 the next recursive call.
 
 > unify :: Env -> [(Term, Term)] -> Maybe Env
 > unify env eqs = case eqs of 
 >   [] -> Just env 
+>   (Num n, Num m) : rest 
+>    | n == m -> unify env rest
 >   (Fn f fargs, Fn g gargs):rest -> 
 >     if f == g && length fargs == length gargs then 
 >        unify env (zip fargs gargs ++ rest)
 >     else Nothing
 >   (Var x, t) : rest -> unifyVar x t rest
 >   (t, Var x) : rest -> unifyVar x t rest
+>   _ -> Nothing
 >   where unifyVar x t rest = 
 >           case Map.lookup x env of
 >             Just t' -> unify env ((t', t) : rest)

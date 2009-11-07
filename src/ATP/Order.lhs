@@ -20,6 +20,7 @@
 
 > termSize :: Term -> Int
 > termSize (Var _) = 1
+> termSize (Num _) = 1
 > termSize (Fn _ ts) = 1 + sum (map termSize ts)
 
 > lexord :: Eq a => (a -> a -> Bool) -> [a] -> [a] -> Bool

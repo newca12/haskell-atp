@@ -3,7 +3,7 @@ The front end for the automated theorem proving Haskell port.
 
 * Pragmas 
 
-> {-# OPTIONS_GHC -fno-warn-unused-imports #-}
+> {-# OPTIONS_GHC -fno-warn-unused-imports -fno-warn-unused-binds #-}
 
 * Signature
 
@@ -77,6 +77,7 @@ The front end for the automated theorem proving Haskell port.
 > import qualified System.IO.UTF8 as S
 > import qualified Test.HUnit as Test
 > import Test.HUnit(Test(..), (~:))
+> import qualified Test.QuickCheck.Test as QC
 
 * Options
 
@@ -260,6 +261,8 @@ Get rewriting rules.
 
 ** Tests
 
+HUnit
+
 > tests :: Test
 > tests = "All" ~: TestList 
 >   [ ATP.Test.Dlo.tests 
@@ -267,13 +270,21 @@ Get rewriting rules.
 >   , ATP.Test.Combining.tests 
 >   ]
 
+Quickcheck
+
+> qtests :: IO ()
+> qtests = do List.tests
+
 > test :: Command
 > test = Com "test" summ usage f
 >   where summ = "Run unit tests."
 >         usage = PP.text "test"
 >         f [] [] = do 
 >           S.putStrLn "Running all tests.  This may take awhile."
+>           S.putStrLn "HUnit Tests"
 >           M.ignore $ Test.runTestTT tests
+>           S.putStrLn "QuickCheck"
+>           qtests
 >         f _ _ = Exn.throw $ ComExn "'test' takes no arguments."
 
 Show a test formula
@@ -606,7 +617,6 @@ Show a test formula
 > doit :: Args -> IO ()
 > doit args = do 
 >   S.putStrLn "Welcome to Haskell ATP!"
->   S.putStrLn ""
 >   -- Parse arguments.  Opts is the unknown options that will be parsed by
 >   -- the individual prover.  
 >   (flags, args', opts) <- parseOptions args

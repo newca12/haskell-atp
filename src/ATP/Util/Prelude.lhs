@@ -1,4 +1,8 @@
 
+* Pragmas
+
+> {-# OPTIONS_GHC -fno-warn-orphans #-} 
+
 * Signature
 
 > module ATP.Util.Prelude 
@@ -11,6 +15,7 @@
 >   , trace
 >   , trace'
 >   , fromJust
+>   , pPrint
 >   )
 > where
 
@@ -22,15 +27,17 @@ Use System.IO.UTF8 for printing
 > import ATP.Util.Impossible
 > import Control.Applicative ((<$>))
 > import qualified ATP.Util.Debug as Debug
-> import ATP.Util.Print as PP
+> import ATP.Util.Print
 > import Data.Maybe (fromJust)
 > import Debug.Trace (trace)
 
 * Util
 
-> error' :: PP.Doc -> a
+> error' :: Doc -> a
 > error' = Debug.error
 
-> trace' :: String -> PP.Doc -> a -> a
+> trace' :: String -> Doc -> a -> a
 > trace' = Debug.trace'
 
+> instance Monad m => Functor m where
+>   fmap f x = x >>= return . f

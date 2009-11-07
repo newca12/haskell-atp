@@ -2,7 +2,11 @@
 * Signature
 
 > module ATP.Poly
->   ( Poly
+>   ( isRational
+>   , rational1
+>   , rational2
+>   , destRational
+>   , Poly
 >   , zero
 >   , one
 >   , add
@@ -36,11 +40,28 @@
 > import ATP.FormulaSyn
 > import qualified ATP.Order as Order
 > import qualified ATP.Util.Lib as Lib
-> import ATP.Util.Parse as P
-> import ATP.Util.Parse (parse)
 > import qualified ATP.Util.Print as PP
 > import qualified Data.List as List
 > import qualified Ratio
+
+* Rationals
+
+> makeRational :: Rational -> Term
+> makeRational = Num
+
+> isRational :: Term -> Bool
+> isRational (Num _) = True
+> isRational _ = False
+
+> destRational :: Term -> Rational
+> destRational (Num r) = r
+> destRational _ = __IMPOSSIBLE__ 
+
+> rational1 :: (Rational -> Rational) -> Term -> Term
+> rational1 fn = makeRational . fn . destRational
+
+> rational2 :: (Rational -> Rational -> Rational) -> Term -> Term -> Term
+> rational2 fn m n = makeRational $ fn (destRational m) (destRational n)
 
 * Polynomials
 
@@ -53,34 +74,11 @@ odd type, since it combines integers and rationals.  Operations like
 lcm applied to ratios raise exceptions.  Not very pretty...
 We need explicit casts between Integer and Rational.
 
--- > rati :: Rational -> Integer
--- > rati x = if Ratio.denominator x == 1 
--- >          then toInteger (Ratio.numerator x)
--- >       else error ("not integral: " ++ show x)
-
--- > irat :: Integer -> Rational
--- > irat x = x % 1
-
 > zero :: Term
-> zero = Fn (show (0 :: Rational)) []
+> zero = Num 0
 
 > one :: Term
-> one = Fn (show (1 :: Rational)) []
-
-> numeral1 :: (Rational -> Rational) -> Term -> Term
-> numeral1 fn = mkNumeral . fn . destNumeral
-
-> numeral2 :: (Rational -> Rational -> Rational) -> Term -> Term -> Term
-> numeral2 fn m n = mkNumeral $ fn (destNumeral m) (destNumeral n)
-
-> mkNumeral :: Rational -> Term
-> mkNumeral n = Fn (show n) []
-
-> destNumeral :: Term -> Rational
-> destNumeral t = --trace' "destNumeral" (PP.pPrint t) $ 
->   case t of 
->     Fn ns [] -> parse ns
->     _ -> error ("destNumeral: " ++ show t)
+> one = Num 1
 
 > add :: Vars -> Poly -> Poly -> Poly
 > add vars pol1 pol2 = 
@@ -93,7 +91,7 @@ We need explicit casts between Integer and Rational.
 >            if r == zero then e else Fn "+" [e, Fn "*" [Var x, r]]
 >     (_, Fn "+" _) -> polyLadd vars pol1 pol2
 >     (Fn "+" _, _) -> polyLadd vars pol2 pol1
->     _ -> numeral2 (+) pol1 pol2
+>     _ -> rational2 (+) pol1 pol2
 
 > polyLadd :: Vars -> Poly -> Poly -> Poly
 > polyLadd vars pol1 (Fn "+" [d, Fn "*" [Var y, q]]) =
@@ -103,7 +101,7 @@ We need explicit casts between Integer and Rational.
 > neg :: Poly -> Poly
 > neg (Fn "+" [c, Fn "*" [Var x, p]]) = 
 >   Fn "+" [neg c, Fn "*" [Var x, neg p]]
-> neg n = numeral1 (\x -> - x) n
+> neg n = rational1 (\x -> - x) n
 
 > sub :: Vars -> Poly -> Poly -> Poly
 > sub vars p q = add vars p (neg q)
@@ -118,7 +116,7 @@ We need explicit casts between Integer and Rational.
 >     (_, Fn "0 % 1" []) -> zero
 >     (_, Fn "+" _) -> polyLmul vars pol1 pol2
 >     (Fn "+" _, _) -> polyLmul vars pol2 pol1
->     _ -> numeral2 (*) pol1 pol2
+>     _ -> rational2 (*) pol1 pol2
 
 > polyLmul :: Vars -> Poly -> Poly -> Poly
 > polyLmul vars pol1 (Fn "+" [d, Fn "*" [Var y, q]]) =
@@ -132,7 +130,7 @@ We need explicit casts between Integer and Rational.
 Divide by a constant.
 
 > div :: Vars -> Poly -> Poly -> Poly
-> div vars p q = mul vars p (numeral1 ((1::Rational) /) q)
+> div vars p q = mul vars p (rational1 ((1::Rational) /) q)
 
 > var :: Var -> Poly
 > var x = Fn "+" [zero, Fn "*" [Var x, one]]
@@ -145,8 +143,10 @@ Divide by a constant.
 >   Fn "-" [s, t] -> sub vars (polynate vars s) (polynate vars t)
 >   Fn "*" [s, t] -> mul vars (polynate vars s) (polynate vars t)
 >   Fn "/" [s, t] -> div vars (polynate vars s) (polynate vars t)
->   Fn "^" [p, Fn n []] -> pow vars (polynate vars p) (read n)
->   _ -> if Cooper.isNumeral tm then tm else error "lint: unknown term"
+>   Fn "^" [p, Num n] -> 
+>     if Ratio.denominator n == 1 then pow vars (polynate vars p) (fromIntegral $ Ratio.numerator n)
+>     else error $ "not an integer power: " ++ show n
+>   _ -> if Cooper.isInteger tm then tm else error "lint: unknown term"
 
 > atom :: Vars -> Formula -> Formula
 > atom vars (Atom (R a [s, t])) = Atom(R a [polynate vars (Fn "-" [s, t]), zero])
@@ -158,17 +158,17 @@ PP.pPrint x
 > coefficients :: Vars -> Poly -> [Poly]
 > coefficients vars fm = case fm of
 >   Fn "+" [c, Fn "*" [Var x, q]] 
->    | x == head vars -> c:coefficients vars q
+>    | x == head vars -> c : coefficients vars q
 >   _ -> [fm]
 
 > degree :: Vars -> Poly -> Int
-> degree vars p = length(coefficients vars p) - 1
+> degree vars p = length (coefficients vars p) - 1
 
 > isConstant :: Vars -> Poly -> Bool
 > isConstant vars p = degree vars p == 0
 
 > phead :: Vars -> Poly -> Poly
-> phead vars p = last(coefficients vars p)
+> phead vars p = last $ coefficients vars p
 
 > behead :: Vars -> Poly -> Poly
 > behead vars t = case t of
@@ -180,12 +180,12 @@ PP.pPrint x
 > cmul :: Rational -> Poly -> Poly
 > cmul k p = case p of
 >   Fn "+" [c, Fn "*" [Var x, q]] -> cmul k c + Var x * cmul k q
->   _ -> numeral1 (k *) p
+>   _ -> rational1 (k *) p
 
 > headconst :: Poly -> Rational
 > headconst p = case p of
 >   Fn "+" [_, Fn "*" [Var _, q]] -> headconst q
->   Fn _ [] -> destNumeral p
+>   Num r -> r
 >   _ -> __IMPOSSIBLE__ 
 
 > monic :: Term -> (Term, Bool)

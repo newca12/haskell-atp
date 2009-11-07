@@ -33,8 +33,10 @@
 :set -i/Users/sean/save/projects/atp/src
 :set -optL -q
 
+-- :set -v
+
 -- :set -fobject-code
--- :set -fbreak-on-exception
+:set -fbreak-on-exception
 
 -- :set args "cvc" "⊤"
 -- :set -lcvc3 -lcvch
@@ -63,6 +65,8 @@
 --  Test                                                                        
 -- -----------------------------------------------------------------------------
 
+-- :def sm (\_ -> return ":stepmodule")
+
 -- :def imodule (\_ -> return ":module ATP.Util.Print") 
 
 -- -----------------------------------------------------------------------------
@@ -71,3 +75,21 @@
 
 -- :load ATP.Util.Print
 -- :module +ATP.Util.Print
+
+-- -----------------------------------------------------------------------------
+--  Tmp                                                                         
+-- -----------------------------------------------------------------------------
+
+-- :break testform
+-- :break condense
+-- :break inferisign
+-- :break dedmatrix
+-- :break pdividePos
+-- :break splitSign
+-- :break splitTrichotomy
+-- :break caseSplit
+-- :break delConst
+-- :break matrix
+-- :break basicQelim
+
+-- qelim [$form| ∃ x. x^2 = 0 |]

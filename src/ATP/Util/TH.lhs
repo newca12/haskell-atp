@@ -8,6 +8,7 @@ Template Haskell utils.
 >   , conP
 >   , varE
 >   , varP
+>   , appE
 >   )
 > where
 
@@ -17,6 +18,9 @@ Template Haskell utils.
 > import qualified Language.Haskell.TH as T
 
 * Utils
+
+> appE :: String -> T.ExpQ -> T.ExpQ
+> appE f x = T.appE (T.varE (T.mkName f)) x
 
 > conE :: String -> [T.ExpQ] -> T.ExpQ
 > conE c es = foldl1 T.appE $ (T.conE $ T.mkName c) : es
