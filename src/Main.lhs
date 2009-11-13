@@ -49,9 +49,11 @@ The front end for the automated theorem proving Haskell port.
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Tableaux as Tableaux
 > import qualified ATP.Test.Combining
+> import qualified ATP.Test.Complex
 > import qualified ATP.Test.Cooper
 > import qualified ATP.Test.Dlo 
 > import qualified ATP.Test.Fo
+> import qualified ATP.Test.Real
 > import qualified ATP.Test.Taut
 > import qualified ATP.TestFormulas as Forms
 > import qualified ATP.Unif as Unif
@@ -273,6 +275,8 @@ HUnit
 >   , ATP.Test.Dlo.tests 
 >   , ATP.Test.Cooper.tests 
 >   , ATP.Test.Combining.tests 
+>   , ATP.Test.Complex.tests 
+>   , ATP.Test.Real.tests 
 >   ]
 
 Quickcheck
@@ -294,6 +298,10 @@ Quickcheck
 >           M.ignore $ Test.runTestTT tests
 >           S.putStrLn "QuickCheck"
 >           qtests
+>         f _ [t] = case t of
+>           "complex" -> M.ignore $ Test.runTestTT ATP.Test.Complex.tests
+>           "real" -> M.ignore $ Test.runTestTT ATP.Test.Real.tests
+>           _ -> Exn.throw $ ComExn $ "Can't find test suite: " ++ t
 >         f _ _ = Exn.throw $ ComExn "'test' takes no arguments."
 
 Show a test formula
