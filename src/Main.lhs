@@ -14,6 +14,7 @@ The front end for the automated theorem proving Haskell port.
 * Imports
 
 > import ATP.Util.Prelude
+> import qualified ATP.Bdd as Bdd
 > import qualified ATP.Combining as Combining
 > import qualified ATP.Completion as Completion
 > import qualified ATP.Complex as Complex
@@ -50,6 +51,8 @@ The front end for the automated theorem proving Haskell port.
 > import qualified ATP.Test.Combining
 > import qualified ATP.Test.Cooper
 > import qualified ATP.Test.Dlo 
+> import qualified ATP.Test.Fo
+> import qualified ATP.Test.Taut
 > import qualified ATP.TestFormulas as Forms
 > import qualified ATP.Unif as Unif
 > import ATP.Util.Impossible (catchImpossible)
@@ -201,7 +204,7 @@ Get rewriting rules.
 >          , ("Term kung fu", 
 >             [ polytest ])
 >          , ("Propositional decision procedures",
->             [ truthtable, tautology, dp, dpll ])
+>             [ truthtable, tautology, dp, dpll, bddtaut ])
 >          , ("Basic Herbrand methods",
 >             [ gilmore, davisputnam ])
 >          , ("Tableaux",
@@ -265,7 +268,9 @@ HUnit
 
 > tests :: Test
 > tests = "All" ~: TestList 
->   [ ATP.Test.Dlo.tests 
+>   [ ATP.Test.Taut.tests 
+>   , ATP.Test.Fo.tests 
+>   , ATP.Test.Dlo.tests 
 >   , ATP.Test.Cooper.tests 
 >   , ATP.Test.Combining.tests 
 >   ]
@@ -274,6 +279,10 @@ Quickcheck
 
 > qtests :: IO ()
 > qtests = do List.tests
+>             Prop.tests
+>             Cnf.tests
+>             Bdd.tests
+>             ATP.Test.Taut.qtests
 
 > test :: Command
 > test = Com "test" summ usage f
@@ -425,6 +434,15 @@ Show a test formula
 >                         , PP.text "dpll prime 17"
 >                         , PP.text "dpll ramsey 2 3 5"]
 >         f = run (return . Dp.dplltaut)
+
+> bddtaut :: Command
+> bddtaut = Com "bddtaut" summ usage f
+>   where summ = "Tautology checking via BDDs"
+>         usage = PP.vcat [ PP.text "bddtaut -f <formula>"
+>                         , PP.text "bddtaut <id>"
+>                         , PP.text "bddtaut prime 17"
+>                         , PP.text "bddtaut ramsey 2 3 5"]
+>         f = run (return . Bdd.taut)
 
 ** First order solvers
 

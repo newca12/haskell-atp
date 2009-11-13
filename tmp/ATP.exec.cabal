@@ -68,14 +68,14 @@ executable atp
                -- Dump Core language
                -- -ddump-simpl
                -- Warnings as errors
-               -- -Werror
+               -Werror
                -- Allow comment lines next to literate lines
                -optL -q
                -- Profiling 
-               -prof
-               -auto-all
-               -osuf p_o 
-               -hisuf p_hi
+               -- -prof
+               -- -auto-all
+               -- -osuf p_o 
+               -- -hisuf p_hi
                -- Remove literate comments with BirdPP
                -- -pgmL BirdPP
 

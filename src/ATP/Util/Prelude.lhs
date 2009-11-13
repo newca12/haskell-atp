@@ -16,20 +16,22 @@
 >   , trace'
 >   , fromJust
 >   , pPrint
+>   , print
+>   , putStr
+>   , putStrLn
 >   )
 > where
 
 * Imports
 
-Use System.IO.UTF8 for printing
-
 > import Prelude hiding (print, putStr, putStrLn)
 > import ATP.Util.Impossible
 > import Control.Applicative ((<$>))
 > import qualified ATP.Util.Debug as Debug
-> import ATP.Util.Print
+> import ATP.Util.Print ((<>), (<+>), Doc, pPrint)
 > import Data.Maybe (fromJust)
 > import Debug.Trace (trace)
+> import System.IO.UTF8 (print, putStr, putStrLn)
 
 * Util
 

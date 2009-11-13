@@ -8,6 +8,7 @@ Definitional CNF
 >   , defcnf
 >   , defcnf1
 >   , defcnfs
+>   , tests
 >   ) 
 > where
 
@@ -23,6 +24,8 @@ Definitional CNF
 > import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
+> import qualified Test.QuickCheck as Q
+> import Test.QuickCheck (Property, (==>))
 
 * CNF
 
@@ -168,9 +171,17 @@ the intermediate result.
 > defcnf :: Formula -> Formula 
 > defcnf = F.listConj . map F.listDisj . defcnfs
 
-%%%%%%%%%%%%%
-%%% Test
+* Tests
 
- import qualified Codec.Binary.UTF8.String as UString
+> prop_defcnf_sat :: Property
+> prop_defcnf_sat = Q.label "defcnf_sat" $
+>   Q.forAll (Prop.forms 5) $ \f -> Prop.satisfiable f ==> Prop.satisfiable (defcnf f)
 
-S.putStrLn $ render $ pPrint $ defcnf [$form| (p ∨ (q ∧ ¬ r)) ∧ s |]
+> prop_defcnf_sat' :: Property
+> prop_defcnf_sat' = Q.label "defcnf_sat'" $
+>   Q.forAll (Prop.forms 5) $ \f -> Prop.satisfiable (defcnf f) ==> Prop.satisfiable f
+
+> tests :: IO ()
+> tests = do 
+>   Q.quickCheck prop_defcnf_sat
+>   Q.quickCheck prop_defcnf_sat'

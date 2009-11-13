@@ -27,12 +27,15 @@ don't care about performance, so forget about the restriction.
 
 > import Prelude hiding (print)
 > import ATP.FormulaSyn
+> import qualified ATP.Bdd as Bdd
+> import qualified ATP.Dp as Dp
 > import qualified ATP.Formula as F
 > import qualified ATP.Prop as Prop
+> import qualified ATP.PropExamples as PropExamples
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Decidable as Decidable
 > import qualified ATP.Qelim as Qelim
-> import qualified ATP.DLO as DLO
+> import qualified ATP.Dlo as DLO
 
 * Compatibility functions
 
@@ -69,13 +72,20 @@ prop.ml
 
 propexamples.ml
 
+> mk_adder_test = PropExamples.mkAdderTest
+
 defcnf.ml
 
 dp.ml
 
+> dplltaut = Dp.dplltaut
+
 stal.ml
 
 bdd.ml
+
+> bddtaut = Bdd.taut
+
 
 fol.ml
 
@@ -122,7 +132,6 @@ decidable.ml
 
 qelim.ml
 
-> qelim = Qelim.qelim
 > lift_qelim = Qelim.lift
 > cnnf = Qelim.cnnf
 > lfn_dlo = DLO.lfn

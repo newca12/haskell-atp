@@ -192,18 +192,19 @@ replaced by a case-split:
 
 > dpll :: Clauses -> Bool
 > dpll [] = True
-> dpll clauses = if elem [] clauses then False else
->                case oneLiteralRule clauses of
->                Just clauses' -> dpll clauses'
->                Nothing -> 
->                  case affirmativeNegativeRule clauses of
->                  Just clauses' -> dpll clauses'
->                  Nothing -> 
->                    let pvs = filter F.positive (Set.unions clauses) 
->                        lcounts = map (findCount clauses) pvs 
->                        (_, p) = List.maximum lcounts in
->                    dpll (Set.insert [p] clauses) 
->                    || dpll (Set.insert [F.opp p] clauses)
+> dpll clauses = 
+>   if elem [] clauses then False else
+>   case oneLiteralRule clauses of
+>     Just clauses' -> dpll clauses'
+>     Nothing -> 
+>       case affirmativeNegativeRule clauses of
+>       Just clauses' -> dpll clauses'
+>       Nothing -> 
+>         let pvs = filter F.positive (Set.unions clauses) 
+>             lcounts = map (findCount clauses) pvs 
+>             (_, p) = List.maximum lcounts in
+>         dpll (Set.insert [p] clauses) 
+>         || dpll (Set.insert [F.opp p] clauses)
 
 > dpllsat :: Formula -> Bool
 > dpllsat = dpll . Cnf.defcnfs

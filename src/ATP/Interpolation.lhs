@@ -165,6 +165,6 @@ and hence adjoins them as hypotheses):
 > einterpolate p q =
 >   let p' = Equal.equalitize p
 >       q' = Equal.equalitize q
->       p'' = if p == p' then p else fst(F.destImp p') ∧ p
->       q'' = if q == q' then q else fst(F.destImp q') ∧ q in
+>       p'' = if p == p' then p else fst (F.destImp p') ∧ p
+>       q'' = if q == q' then q else fst (F.destImp q') ∧ q in
 >   interpolate p'' q''

@@ -15,7 +15,7 @@
 >   , form
 >     -- * Util
 >   , pp
->     -- This needs to be exported for templates to work.
+>     -- (%) needs to be exported for Rational templates to work.
 >   , (%)
 >   )
 > where

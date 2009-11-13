@@ -26,8 +26,8 @@ Map
 > onatoms :: (Rel -> Formula) -> Formula -> Formula
 > onatoms f fm =
 >   case fm of 
->     [$form| true |] -> [$form| true |] 
->     [$form| false |] -> [$form| false |] 
+>     [$form| ⊤ |] -> [$form| ⊤ |] 
+>     [$form| ⊥ |] -> [$form| ⊥ |] 
 >     [$form| ^a |] -> f a
 >     [$form| ~ $p |] -> [$form| ¬ $p' |]
 >       where p' = onatoms f p
@@ -48,7 +48,7 @@ Map
 >     [$form| exists $x. $p |] -> [$form| ∃ $x. $p' |]
 >       where p' = onatoms f p
 
-Fmd
+Fold
 
 > overatoms :: (Rel -> a -> a) -> Formula -> a -> a
 > overatoms f fm b = 

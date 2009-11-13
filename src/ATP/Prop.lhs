@@ -28,6 +28,9 @@ propositional variables.
 >   , purednf
 >   , simpdnf
 >   , dnf
+>     -- * Testing
+>   , forms
+>   , tests
 >   ) 
 > where
 
@@ -39,9 +42,12 @@ propositional variables.
 > import qualified ATP.Util.Lib as Lib
 > import qualified ATP.Util.ListSet as Set
 > import qualified ATP.Util.Print as PP
+> import qualified Control.Monad as M
 > import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
+> import qualified Test.QuickCheck as Q
+> import Test.QuickCheck (Gen, Property)
 
 * Propositions
 
@@ -86,28 +92,27 @@ Truthtables.
 
 > truthtable :: Formula -> String
 > truthtable fm = PP.render (truthtableDoc fm)
->     where
->     truthtableDoc fm' =
->         let pvs = atoms fm' 
->             width = foldr (max . length . show) 5 pvs + 1 
->             fixw s = s ++ replicate (width - length s) ' ' 
->             truthstring p = fixw (if p then "⊤" else "⊥") 
->             separator = replicate (width * length pvs + 9) '-' 
->             row v =
->                 let lis = map (truthstring . v) pvs 
->                     ans = truthstring(eval fm' v) in
->                     [lis ++ [ans]]
->             rows = onallvaluations row (++) (const False) pvs
->             rowStr r = let (lis, ans) = splitAt (length r - 1) r in
->                            (foldr (++) ("| " ++ head ans) lis)
->         in
->         PP.vcat [ PP.text (foldr (\s t -> fixw(show s) ++ t) "| formula" pvs) 
->                 , PP.empty 
->                 , PP.text separator
->                 , PP.empty 
->                 , PP.vcat (map (PP.text . rowStr) rows) 
->                 , PP.text separator
->                 ]
+>  where
+>   truthtableDoc fm' =
+>     let pvs = atoms fm' 
+>         width = foldr (max . length . show) 5 pvs + 1 
+>         fixw s = s ++ replicate (width - length s) ' ' 
+>         truthstring p = fixw (if p then "⊤" else "⊥") 
+>         separator = replicate (width * length pvs + 9) '-' 
+>         row v =
+>             let lis = map (truthstring . v) pvs 
+>                 ans = truthstring(eval fm' v) in
+>                 [lis ++ [ans]]
+>         rows = onallvaluations row (++) (const False) pvs
+>         rowStr r = let (lis, ans) = splitAt (length r - 1) r in
+>                        (foldr (++) ("| " ++ head ans) lis)
+>     in PP.vcat [ PP.text (foldr (\s t -> fixw(show s) ++ t) "| formula" pvs) 
+>                , PP.empty 
+>                , PP.text separator
+>                , PP.empty 
+>                , PP.vcat (map (PP.text . rowStr) rows) 
+>                , PP.text separator
+>                ]
 
 Tautologies
 
@@ -158,6 +163,8 @@ Simplification
 >           q' = simplify q
 >   _ -> fm
 
+The order of the following clauses makes a big difference.
+
 > simplify1 :: Formula -> Formula
 > simplify1 fm = case fm of
 >   [$form| ¬ ⊥ |] -> (⊤)
@@ -172,13 +179,14 @@ Simplification
 >   [$form| ⊤ ∨ _ |] -> (⊤)
 >   [$form| _ ∨ ⊤ |] -> (⊤)
 >   [$form| ⊥ ⊃ _ |] -> (⊤)
->   [$form| $p ⊃ ⊥ |] -> (¬) p
->   [$form| ⊤ ⊃ $q |] -> q
 >   [$form| _ ⊃ ⊤ |] ->  (⊤)
->   [$form| ⊥ ⇔ $q |] -> (¬) q
->   [$form| $p ⇔ ⊥ |] -> (¬) p
+>   [$form| ⊤ ⊃ $q |] -> q
+>   [$form| $p ⊃ ⊥ |] -> (¬) p
 >   [$form| ⊤ ⇔ $q |] -> q
 >   [$form| $p ⇔ ⊤ |] -> p
+>   [$form| ⊥ ⇔ ⊥ |] -> (⊤)
+>   [$form| ⊥ ⇔ $q |] -> (¬) q
+>   [$form| $p ⇔ ⊥ |] -> (¬) p
 >   _ -> fm
 
 Negation normal form
@@ -287,9 +295,10 @@ Subsumption
 Disjunctive normal form
 
 > dnf :: Formula -> Formula 
-> dnf f = trace' "dnf: in" (pPrint f) $ 
+> dnf f = --trace' "dnf: in" (pPrint f) $ 
 >   let f' = (F.listDisj . map F.listConj . simpdnf) f in
->   trace' "dnf: out" (pPrint f') $ f'
+>   --trace' "dnf: out" (pPrint f') $ f'
+>   f'
 
 > simpdnf :: Formula -> [[Formula]]
 > simpdnf Bot = []
@@ -326,4 +335,42 @@ nnf [$form| p ⇔ (q ⇔ r) |]
 cnf [$form| p ⇔ (q ⇔ r) |]
 dnf [$form| p ⇔ (q ⇔ r) |]
 
+* Tests
 
+A small number of propositional variables
+
+> props :: Int -> Gen Rel
+> props n = fmap (\i -> R ("p" ++ show i) []) $ Q.choose (0, n)
+
+Formulas with a maximum size.
+
+> forms :: Int -> Gen Formula
+> forms 0 = Q.oneof [ fmap Atom (props 10), return Top, return Bot ]
+> forms n 
+>  | n > 0 = Q.oneof [ forms (n-1)
+>                    , M.liftM Not fms
+>                    , M.liftM2 And fms fms 
+>                    , M.liftM2 Or fms fms 
+>                    , M.liftM2 Imp fms fms 
+>                    , M.liftM2 Iff fms fms 
+>                    ]
+>  | otherwise = error "Impossible" 
+>  where fms = forms $ n - 1
+
+> prop_nnf_correct :: Property
+> prop_nnf_correct = Q.label "nnf_correct" $
+>   Q.forAll (forms 5) $ \f -> tautology (f ⇔ nnf f)
+
+> prop_cnf_correct :: Property
+> prop_cnf_correct = Q.label "cnf_correct" $
+>   Q.forAll (forms 5) $ \f -> tautology (f ⇔ cnf f)
+
+> prop_dnf_correct :: Property
+> prop_dnf_correct = Q.label "dnf_correct" $
+>   Q.forAll (forms 5) $ \f -> tautology (f ⇔ dnf f)
+
+> tests :: IO ()
+> tests = do 
+>   Q.quickCheck prop_nnf_correct
+>   Q.quickCheck prop_cnf_correct
+>   Q.quickCheck prop_dnf_correct

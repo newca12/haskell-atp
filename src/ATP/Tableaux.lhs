@@ -12,7 +12,7 @@
 
 * Imports
 
-> import Prelude 
+> import ATP.Util.Prelude 
 > import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
@@ -24,7 +24,6 @@
 > import qualified ATP.Util.ListSet as Set
 > import qualified Data.List as List
 > import qualified Data.Map as Map
-> import Text.Printf(printf)
 
 * Tableaux
 
@@ -154,7 +153,7 @@ refutations.
 >         Nothing -> tableau (unexp, fm:lits, n) cont (env,k)
 
 > deepen :: (Int -> Maybe a) -> Int -> IO a
-> deepen f n = do printf ("Searching with depth limit " ++ show n ++ "\n")
+> deepen f n = do putStrLn $ "Searching with depth limit " ++ show n
 >                 case f n of
 >                   Just x -> return x
 >                   Nothing -> deepen f (n+1)
