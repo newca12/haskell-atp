@@ -17,13 +17,13 @@ Logging utilities.
 * Imports
 
 > import Prelude hiding (log)
-> import ATP.Util.Log.Class
 > import qualified Directory
+> import ATP.Util.Log.Class
 > import qualified IO 
-> import qualified System.IO.UTF8 as S
 > import qualified System.Log.Handler.Simple as S
 > import qualified System.Log.Logger as Log
 > import System.Log.Logger (Priority(..))
+> import qualified System.IO.UTF8 as S
 
 * Implementation
 
@@ -56,7 +56,7 @@ ATP starts logging with the default priority.
 Log output to logFileName
 
 > logFileName :: String
-> logFileName = "atp.log"
+> logFileName = "imogen.log"
 
 | Initialize the log file
 
@@ -81,6 +81,8 @@ get through the logger.
 >      let termprio = if term then prio else defaultPrio
 >      tout <- S.streamHandler IO.stdout termprio
 >      update $ Log.addHandler tout
+>      -- Set the logger priority
+>      update $ Log.setLevel prio
 >      -- If we want file output, open a handler to the log file
 >      if file 
 >        then do
@@ -89,8 +91,6 @@ get through the logger.
 >          if logExists then Directory.removeFile logFileName else return ()
 >          -- Open new log file
 >          handler <- S.fileHandler logFileName DEBUG
->          -- Set the logger priority
->          update $ Log.setLevel prio
 >          -- Add our handler
 >          update $ Log.addHandler handler
 >        else return ()

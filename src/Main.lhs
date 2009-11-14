@@ -221,7 +221,7 @@ Get rewriting rules.
 >          , ("Equality",
 >             [ bmeson, paramod, ccvalid, rewrite ])
 >          , ("Decidable problems",
->             [ aedecide, dlo, dlovalid, cooper, nelop, nelopDLO, complex, real ])
+>             [ aedecide, dlo, dlovalid, cooper, slowNelop, nelop, nelopDLO, complex, real ])
 >          ]
 
 > commands :: [Command]
@@ -614,6 +614,13 @@ Show a test formula
 >                         , PP.text "nelop <id>" ] 
 >         f = run (return . Combining.nelopInt)
 
+> slowNelop :: Command
+> slowNelop = Com "slowNelop" summ usage f
+>   where summ = "The Nelson-Oppen method, linear integer arithmetic"
+>         usage = PP.vcat [ PP.text "slowNelop -f <formula>"
+>                         , PP.text "slowNelop <id>" ] 
+>         f = run (return . Combining.slowNelopInt)
+
 > nelopDLO :: Command
 > nelopDLO = Com "nelop-dlo" summ usage f
 >   where summ = "The Nelson-Oppen method, dense linear orders"
@@ -649,20 +656,22 @@ Show a test formula
 >   let flags' = map decodeFlag flags
 >   -- It's important to decode the command line arguments, since they may
 >   -- be in Unicode syntax.  UString seems to work.
->   let uargs = map UString.decodeString args'
+>       uargs = map UString.decodeString args'
 >       uopts = map UString.decodeString opts
 >       prio = maybe Log.defaultPrio id (List.findFirst getPrio flags')
 >   -- Initialize the log file
->   let logToFile = elem LogToFile flags'
->   Log.initialize prio logToFile (elem LogToTerm flags')
+>       logToFile = elem LogToFile flags
+>   Log.initialize prio logToFile (elem LogToTerm flags)
 >   -- Now we can start logging.  Start with a notification that
 >   -- logging is taking place!
 >   if logToFile
 >     then Log.stdout ("Logging output to file: " ++ Log.logFileName) 
 >     else return ()
->   Log.infoM' "ATP" $ PP.vcat [ PP.text "flags        :" <+> pPrint flags'
->                              , PP.text "args         :" <+> pPrint uargs  
->                              , PP.text "unknown opts :" <+> pPrint uopts ]
+>   Log.infoM' "Atp" $
+>     PP.vcat [ PP.text "input        :" <+> pPrint args
+>             , PP.text "flags        :" <+> pPrint flags
+>             , PP.text "unknown opts :" <+> pPrint uopts 
+>             , PP.text "args         :" <+> pPrint uargs ] 
 >   -- Run the requested command
 >   Exn.catch (forward flags' $ uopts ++ uargs) handle
 >   `catchImpossible` \e -> do

@@ -25,12 +25,13 @@
 > import qualified ATP.Unif as Unif
 > import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((↦))
+> import qualified ATP.Util.Log as Log
+> import ATP.Util.Log(Log)
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet ((\\))
 > import qualified Data.List as List
 > import qualified Data.Map as Map
 > import qualified Data.Maybe as Maybe
-> import qualified Text.Printf as T
 
 * Resolution
 
@@ -111,27 +112,26 @@ together again. (This organization, used in various resolution implementations
 at the Argonne National Lab, is often referred to as the given clause
 algorithm.)
 
-> basicResloop :: ([Clause], [Clause]) -> IO ()
+> basicResloop :: Log m => ([Clause], [Clause]) -> m ()
 > basicResloop (used, unused) = case unused of 
->   [] -> T.printf "No proof found\n"
->   cl:ros -> do { T.printf (show (length used) ++ " used; " ++
->                            show (length unused) ++ " unused.\n")
->                ; let used' = Set.insert cl used 
->                      news = List.concat (map (resolveClauses cl) used') in
->                  if elem [] news then return () else basicResloop (used',ros++news)
->                }
+>   [] -> Log.infoM "basicResloop" "No proof found"
+>   cl:ros -> do 
+>     Log.infoM "basicResloop" $ show (length used) ++ " used; " ++ show (length unused) ++ " unused."
+>     let used' = Set.insert cl used 
+>         news = List.concat (map (resolveClauses cl) used') 
+>     if elem [] news then return () else basicResloop (used', ros++news)
 
-> pureBasicResolution :: Formula -> IO ()
+> pureBasicResolution :: Log m => Formula -> m ()
 > pureBasicResolution fm = basicResloop ([], Prop.simpcnf $ Skolem.specialize $ Skolem.pnf fm)
 
 Overall, we split up the formula, put it into clausal form and start the
 main loop.
 
-> basicResolution :: Formula -> IO ()
+> basicResolution :: (Monad m, Log m) => Formula -> m ()
 > basicResolution fm = 
 >   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   do mapM_ (pureBasicResolution . F.listConj) (Prop.simpdnf fm1)
->      T.printf "Solution found!\n"
+>      Log.infoM "basicResolution" "Solution found!"
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Subsumption
@@ -211,28 +211,27 @@ main loop is almost the same as before, with incorporate used iteratively
 on all the newly generated clauses, rather than their simply being appended
 at the end.
 
-> resloop :: ([Clause], [Clause]) -> IO ()
+> resloop :: Log m => ([Clause], [Clause]) -> m ()
 > resloop (used, unused) = case unused of 
->   [] -> T.printf "No proof found\n"
->   cl:ros -> do { T.printf (show (length used) ++ " used; " ++
->                            show (length unused) ++ " unused.\n")
->                ; let used' = Set.insert cl used 
->                      news = List.concat (map (resolveClauses cl) used') in
->                  if elem [] news then return () 
->                  else resloop (used',foldr (incorporate cl) ros news)
->                }
+>   [] -> Log.infoM "resloop" "No proof found"
+>   cl:ros -> do 
+>     Log.infoM "resloop" $ show (length used) ++ " used; " ++ show (length unused) ++ " unused."
+>     let used' = Set.insert cl used 
+>         news = List.concat (map (resolveClauses cl) used') 
+>     if elem [] news then return () 
+>      else resloop (used',foldr (incorporate cl) ros news)
 
-> pureResolution :: Formula -> IO ()
+> pureResolution :: Log m => Formula -> m ()
 > pureResolution fm = resloop ([], Prop.simpcnf $ Skolem.specialize $ Skolem.pnf fm)
 
 Overall, we split up the formula, put it into clausal form and start the
 main loop.
 
-> resolution :: Formula -> IO ()
+> resolution :: Log m => Formula -> m ()
 > resolution fm = 
 >   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   do mapM_ (pureResolution . F.listConj) (Prop.simpdnf fm1)
->      T.printf "Solution found!\n"
+>      Log.infoM "resolution" "Solution found!"
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Positive resolution
@@ -251,31 +250,30 @@ Now we simply re-enter the definition of resloop, this time calling it
 presloop and replacing resolve clauses with presolve clauses, and
 then define the positive variant of pure resolution in the same way:
 
-> positiveResloop :: ([Clause], [Clause]) -> IO ()
+> positiveResloop :: Log m => ([Clause], [Clause]) -> m ()
 > positiveResloop (used, unused) = case unused of 
->   [] -> T.printf "No proof found\n"
->   cl:ros -> do { T.printf (show (length used) ++ " used; " ++
->                            show (length unused) ++ " unused.\n")
->                ; let used' = Set.insert cl used 
->                      news = List.concat (map (presolveClauses cl) used') in
->                  if elem [] news then return () 
->                  else positiveResloop (used',foldr (incorporate cl) ros news)
->                }
+>   [] -> Log.infoM "positiveResloop" "No proof found"
+>   cl:ros -> do 
+>     Log.infoM "positiveResloop" $ show (length used) ++ " used; " ++ show (length unused) ++ " unused."
+>     let used' = Set.insert cl used 
+>         news = List.concat (map (presolveClauses cl) used') 
+>     if elem [] news then return () 
+>      else positiveResloop (used',foldr (incorporate cl) ros news)
 
 followed by the same function with a different name:
 
-> purePositiveResolution :: Formula -> IO ()
+> purePositiveResolution :: Log m => Formula -> m ()
 > purePositiveResolution fm = 
 >   positiveResloop ([], Prop.simpcnf $ Skolem.specialize $ Skolem.pnf fm)
 
 Overall, we split up the formula, put it into clausal form and start the
 main loop.
 
-> positiveResolution :: Formula -> IO ()
+> positiveResolution :: Log m => Formula -> m ()
 > positiveResolution fm = 
 >   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   do mapM_ (purePositiveResolution . F.listConj) (Prop.simpdnf fm1)
->      T.printf "Solution found!\n"
+>      Log.infoM "positiveResolution" "Solution found!"
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Set of support
@@ -291,15 +289,13 @@ clause contains a positive literal is satisfiable (just interpret all predicates
 as true everywhere), so the basic theoretical condition is satisfied. Thus we
 make the following modification:
 
-> pureSosResolution :: Formula -> IO ()
+> pureSosResolution :: Log m => Formula -> m ()
 > pureSosResolution fm =
 >   resloop (List.partition (any F.positive) 
 >                        (Prop.simpcnf $ Skolem.specialize $ Skolem.pnf fm))
 
-> sosResolution :: Formula -> IO ()
+> sosResolution :: Log m => Formula -> m ()
 > sosResolution fm = 
 >   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   do mapM_ (pureSosResolution . F.listConj) (Prop.simpdnf fm1)
->      T.printf "Solution found!\n"
-
-
+>      Log.infoM "sosResolution" "Solution found!"

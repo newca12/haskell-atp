@@ -21,6 +21,8 @@
 > import qualified ATP.Unif as Unif
 > import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((⟾))
+> import qualified ATP.Util.Log as Log
+> import ATP.Util.Log(Log)
 > import qualified ATP.Util.ListSet as Set
 > import qualified Data.List as List
 > import qualified Data.Map as Map
@@ -152,11 +154,12 @@ refutations.
 >         Just x -> Just x
 >         Nothing -> tableau (unexp, fm:lits, n) cont (env,k)
 
-> deepen :: (Int -> Maybe a) -> Int -> IO a
-> deepen f n = do putStrLn $ "Searching with depth limit " ++ show n
->                 case f n of
->                   Just x -> return x
->                   Nothing -> deepen f (n+1)
+> deepen :: Log m => (Int -> Maybe a) -> Int -> m a
+> deepen f n = do 
+>   Log.infoM "deepen" $ "Searching with depth limit " ++ show n
+>   case f n of
+>     Just x -> return x
+>     Nothing -> deepen f (n+1)
 
 > tabrefute :: [Formula] -> IO Int
 > tabrefute fms =

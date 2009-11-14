@@ -21,11 +21,12 @@ Relation between first-order and propositonal logic; Herbrand theorem.
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Skolem as Skolem
+> import qualified ATP.Util.Log as Log
+> import ATP.Util.Log (Log)
 > import qualified ATP.Util.Lib as Lib
 > import qualified ATP.Util.ListSet as Set
 > import qualified Data.List as List
 > import qualified Data.Map as Map
-> import Text.Printf(printf)
 
 * Herbrand
 
@@ -93,19 +94,18 @@ and step n up to n + 1. In the other case, we use the modification function
 to update fl with another instance. If this is unsatisfiable, then we return
 the successful set of instances tried; otherwise, we continue. 
 
-> herbloop :: (a -> (Formula -> Formula) -> [b] -> [b])
+> herbloop :: Log m => (a -> (Formula -> Formula) -> [b] -> [b])
 >          -> ([b] -> Bool) 
 >          -> a -> [Term] -> [FuncA] -> Vars -> Int
->          -> [b] -> [[Term]] -> [[Term]] -> IO [[Term]]
-> herbloop mfn tfn fl0 cntms funcs fvs n fl tried tuples = 
->     do printf (show (length tried) ++ " ground instances tried; " ++
->                show (length fl) ++ " items in list\n")
->        case tuples of
->          [] -> let newtups = groundtuples cntms funcs n (length fvs) in
->                herbloop mfn tfn fl0 cntms funcs fvs (n+1) fl tried newtups
->          tup:tups -> let fl' = mfn fl0 (Fol.apply $ Map.fromList $ zip fvs tup) fl in
->                      if not(tfn fl') then return (tup:tried) else
->                      herbloop mfn tfn fl0 cntms funcs fvs n fl' (tup:tried) tups
+>          -> [b] -> [[Term]] -> [[Term]] -> m [[Term]]
+> herbloop mfn tfn fl0 cntms funcs fvs n fl tried tuples = do 
+>   Log.infoM "herbloop" $ show (length tried) ++ " ground instances tried; " ++ show (length fl) ++ " items in list"
+>   case tuples of
+>     [] -> let newtups = groundtuples cntms funcs n (length fvs) in
+>           herbloop mfn tfn fl0 cntms funcs fvs (n+1) fl tried newtups
+>     tup:tups -> let fl' = mfn fl0 (Fol.apply $ Map.fromList $ zip fvs tup) fl in
+>                 if not(tfn fl') then return (tup:tried) else
+>                 herbloop mfn tfn fl0 cntms funcs fvs n fl' (tup:tried) tups
 
 %%%%%%%%%%%%%%%%%%%%%
 %%% Gilmore procedure

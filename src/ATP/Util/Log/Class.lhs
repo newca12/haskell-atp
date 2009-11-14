@@ -7,19 +7,19 @@
 >   )
 > where
 
-* Impots
+* Imports
 
 > import Prelude hiding (log)
-> import qualified ATP.Util.Print as PP
-> import ATP.Util.Print ((<>))
+> import Control.Monad.Reader (ReaderT)
 > import qualified Control.Monad.State as State
 > import Control.Monad.State (StateT)
+> import qualified ATP.Util.Print as PP
+> import ATP.Util.Print ((<>))
+> import qualified System.IO as IO
 > import qualified System.Log.Logger as Logger
 > import System.Log.Logger (Priority(..))
 
-* Logging
-
-Log class
+* Log class
 
 While the monad requirement is not strictly needed here, (we do not
 use bind or return), it is convenient since Log will always be treated
@@ -67,10 +67,15 @@ Write a log entry in the IO monad.  If we are in the "stdout" log,
 don't record the priority. 
 
 > instance Log IO where
->   logM' log prio msg = Logger.logM log prio (PP.render doc)
+>   logM' log prio msg = do Logger.logM log prio (PP.render doc)
+>                           --IO.hFlush IO.stdout
 >     where doc = PP.vcat [ header, PP.text "  " <> msg ]
 >           header = PP.brackets $ PP.text (log ++ priop)
 >           priop = if log == "stdout" then "" else ": " ++ show prio
 
-> instance Log (StateT s IO) where
+> instance Log m => Log (StateT s m) where
 >   logM' log prio msg = State.lift $ logM' log prio msg
+
+> instance Log m => Log (ReaderT r m) where
+>   logM' log prio msg = State.lift $ logM' log prio msg
+

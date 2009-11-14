@@ -14,6 +14,12 @@
 >   , (<>), (<+>)
 >   , trace
 >   , trace'
+>   , tracef
+>   , tracef2
+>   , tracef3
+>   , tracef4
+>   , tracef4'
+>   , tracef5
 >   , fromJust
 >   , pPrint
 >   , print
@@ -28,6 +34,7 @@
 > import ATP.Util.Impossible
 > import Control.Applicative ((<$>))
 > import qualified ATP.Util.Debug as Debug
+> import ATP.Util.Debug (trace', tracef, tracef2, tracef3, tracef4, tracef4', tracef5)
 > import ATP.Util.Print ((<>), (<+>), Doc, pPrint)
 > import Data.Maybe (fromJust)
 > import Debug.Trace (trace)
@@ -37,9 +44,6 @@
 
 > error' :: Doc -> a
 > error' = Debug.error
-
-> trace' :: String -> Doc -> a -> a
-> trace' = Debug.trace'
 
 > instance Monad m => Functor m where
 >   fmap f x = x >>= return . f

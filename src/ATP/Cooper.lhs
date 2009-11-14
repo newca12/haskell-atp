@@ -413,8 +413,7 @@ can cope with any NNF formula.
 
 > integerQelim :: Formula -> Formula 
 > integerQelim = 
->  Skolem.simplify . evalc .
->     Qelim.lift linform (Qelim.cnnf posineq . evalc) cooper
+>  Skolem.simplify . evalc . Qelim.lift linform (Qelim.cnnf posineq . evalc) cooper
 
 > relativize :: (Var -> Formula) -> Formula -> Formula 
 > relativize r fm =

@@ -23,6 +23,7 @@ Relations R ::= Var() | Var ( TS ) | Var | T = T | T < T
 >   ( onformula
 >   , isVar
 >   , Fv(fv)
+>   , Nums(nums)
 >   , Subst(apply)
 >   , generalize
 >   , functions
@@ -86,7 +87,37 @@ Relations
 >     where combine p q = Set.union (fv p) (fv q)
 
 > instance Fv a => Fv [a] where
->   fv xs = Set.unions (map fv xs)
+>   fv = Set.unions . map fv
+
+* Nums
+
+> class Nums a where
+>   nums :: a -> [Rational]
+
+> instance Nums Term where
+>   nums (Var _) = []
+>   nums (Num x) = [x]
+>   nums (Fn _ args) = Set.unions (map nums args)
+
+> instance Nums Rel where
+>   nums (R _ args) = Set.unions (map nums args)
+
+> instance Nums Formula where
+>   nums fm = case fm of
+>           [$form| ⊤ |] -> []
+>           [$form| ⊥ |] -> []
+>           [$form| ¬ $p |] -> nums p
+>           [$form| ∀ $_. $p |] -> nums p 
+>           [$form| exists $_. $p |] -> nums p
+>           [$form| $p ∧ $q  |] -> combine p q
+>           [$form| $p ∨ $q |] -> combine p q
+>           [$form| $p ⊃ $q  |] -> combine p q
+>           [$form| $p ⇔ $q |] -> combine p q
+>           [$form| ^a |] -> nums a
+>     where combine p q = Set.union (nums p) (nums q)
+
+> instance Nums a => Nums [a] where
+>   nums xs = Set.unions (map nums xs)
 
 > generalize :: Formula -> Formula
 > generalize fm = foldr All fm (fv fm) 

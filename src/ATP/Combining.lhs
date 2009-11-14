@@ -5,11 +5,13 @@ The Nelson-Oppen method.
 
 > module ATP.Combining
 >   ( slowNelop
->   , intLang
->   , dloLang
+>   , slowNelopInt
+>   , slowNelopDlo
 >   , nelop
 >   , nelopInt
 >   , nelopDlo
+>   , intLang
+>   , dloLang
 >   , addDefault
 >   )
 > where
@@ -34,9 +36,14 @@ The Nelson-Oppen method.
 > import ATP.Util.Lib((⟾))
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
+> import qualified ATP.Util.Print as PP
+> import ATP.Util.Print(Print, pPrint)
 --> import qualified Control.Exception as Exn
+> import qualified Control.Monad.Reader as Reader
+> import Control.Monad.Reader (Reader)
 > import qualified Data.List as List
 > import qualified Data.Maybe as Maybe
+> import qualified Ratio
 
 * Nelson-Oppen
 
@@ -52,13 +59,22 @@ rather than lists of them. All the information is packaged up into a
 triple. For example, the following is the information needed by the
 Nelson-Oppen for the theory of reals with multiplication:
 
-> type Lang = ( (Func, Int) -> Bool, (Pred, Int) -> Bool, Formula -> Bool )
+> data Lang = Lang { name :: String
+>                  , fn :: (Func, Int) -> Bool
+>                  , rn :: Rational -> Bool
+>                  , pr :: (Pred, Int) -> Bool
+>                  , dp :: Formula -> Bool 
+>                  }
+
+> instance Print Lang where
+>   pPrint = PP.text . name
 
 > dloLang :: Lang
-> dloLang = (fdesc, pdesc, Dlo.valid)
->   where fdesc (s, n) = n == 0 && Cooper.isInteger (Fn s [])
->         pdesc sn = elem sn preds
->         preds = [("<=", 2::Int), ("≤", 2), ("<", 2), (">=", 2), ("≥", 2), (">", 2)]
+> dloLang = Lang "dloLang" fdesc ndesc pdesc Dlo.valid
+>   where fdesc = const False 
+>         ndesc = const True
+>         pdesc = flip elem preds
+>         preds = [ ("≤", 2::Int), ("<", 2), ("≥", 2), (">", 2)]
 
 Almost identical is the corresponding information for the linear theory of
 integers, decided by Cooper's method. Note that we still include multiplication
@@ -66,13 +82,19 @@ integers, decided by Cooper's method. Note that we still include multiplication
 is strictly limited; this can be considered just the acceptance of syntactic
 sugar rather than an expansion of the language.
 
+> intqelim :: Formula -> Formula
+--> intqelim = tracef "intqelim" Cooper.integerQelim
+> intqelim = Cooper.integerQelim
+
 > intLang :: Lang
-> intLang = (fdesc, pdesc, elim)
->   where fdesc (s, n) = n == 0 && Cooper.isInteger (Fn s []) || elem (s, n) funcs
->         pdesc sn = elem sn preds
->         elim fm = Cooper.integerQelim(Fol.generalize fm) == Top
+> intLang = Lang "intLant" fdesc ndesc pdesc elim
+>   where fdesc = flip elem funcs
+-->         ndesc n = Ratio.denominator n == 1
+>         ndesc = const True
+>         pdesc = flip elem preds
+>         elim fm = intqelim (Fol.generalize fm) == Top
 >         funcs = [("-", 1::Int), ("+", 2), ("-", 2), ("*", 2)]
->         preds = [("<=", 2::Int), ("≤", 2), ("<", 2), (">=", 2), ("≥", 2), (">", 2)]
+>         preds = [("≤", 2::Int), ("<", 2), ("≥", 2), (">", 2)]
 
 We might also want to use congruence closure or some other decision
 procedure for functions and predicates that are not interpreted by any of the
@@ -84,9 +106,11 @@ extension of congruence closure to the level of formulas or by using exercise
 3 of chapter 4.
 
 > addDefault :: [Lang] -> [Lang]
-> addDefault langs = langs ++ [ ( \sn -> not (List.any (\(f, _, _) -> f sn) langs)
->                               , \sn -> sn == ("=", 2)
->                               , Cong.ccvalid) ]
+> addDefault langs = langs ++ [ Lang "uninterpLang"
+>                                    (\sn -> not $ List.any (flip fn sn) langs)
+>                                    (const False)
+>                                    (\sn -> sn == ("=", 2))
+>                                    Cong.ccvalid ]
 
 The Nelson-Oppen method starts by assuming the negation of the formula
 to be proved, reducing it to DNF, and attempting to refute each
@@ -117,30 +141,27 @@ language including the equality symbol in our list (e.g. the one
 incorporated by add_default).
 
 > chooseLang :: [Lang] -> Formula -> Maybe Lang
-> chooseLang langs fm =
->   case fm of
->     Atom(R "=" [Fn f args, _]) -> 
->       List.find (\(fn,_,_) -> fn(f,length args)) langs
->     Atom(R "=" [_, Fn f args]) ->
->       List.find (\(fn,_,_) -> fn(f,length args)) langs
->     Atom(R p args) ->
->       List.find (\(_,pr,_) -> pr(p,length args)) langs
->     _ -> Debug.impossible
+> chooseLang langs fm = case fm of
+>   Atom(R "=" [Num n, _]) -> List.find (flip rn n) langs
+>   Atom(R "=" [_, Num n]) -> List.find (flip rn n) langs
+>   Atom(R "=" [Fn f args, _]) -> List.find (flip fn (f, length args)) langs
+>   Atom(R "=" [_, Fn f args]) -> List.find (flip fn (f, length args)) langs
+>   Atom(R p args) -> List.find (flip pr (p,length args)) langs
+>   _ -> Debug.impossible
 
 Once we have fixed on a language for a literal, the topmost subterms not in
 that language are replaced by new variables, with their `definitions' adjoined
 as new equations, which may themselves be homogenized later. To handle
-the recursion replacing non-homogeneous subterms, we use a continuationpassing
+the recursion replacing non-homogeneous subterms, we use a continuation passing
 style where the continuation handles the replacement within the
 current context and accumulates the new definitions. The following general
 function maps a continuation-based operator over a list, modifying the list
 elements successively:
 
 > listify :: (a -> (b -> c) -> c) -> [a] -> ([b] -> c) -> c 
-> listify f l cont = 
->   case l of 
->     [] -> cont []
->     h:t -> f h (\h' -> listify f t (\t' -> cont (h':t')))
+> listify f l cont = case l of 
+>   [] -> cont []
+>   h:t -> f h (\h' -> listify f t (\t' -> cont (h':t')))
 
 The continuations take as arguments the new term, the current variable
 index and the list of new definitions. The following homogenizes a
@@ -151,41 +172,45 @@ it but recursively modify the arguments, while for a function not in
 the language, we replace it with a new variable vn, with n picked at
 the outset to avoid existing variables:
 
-> homot :: Lang -> Term -> (Term -> Int -> [Formula] -> c) -> Int -> [Formula] -> c
-> homot (fn, pr, dp) tm cont n defs = 
->   case tm of 
->     Var _ -> cont tm n defs
->     Num _ -> cont tm n defs
->     Fn f args -> 
->       if fn(f, length args) 
->       then listify (homot (fn, pr, dp)) args (\a -> cont (Fn f a)) n defs
->       else cont (Var ("v_" ++ show n)) (n+1) (Var ("v_" ++ show n) ≡ tm : defs)
+> homot :: Print a => Lang -> Term -> (Term -> [Formula] -> Reader Int a) -> [Formula] -> Reader Int a
+> homot lang tm cont defs = case tm of 
+>   Var _ -> cont tm defs
+>   Num r -> 
+>     if rn lang r 
+>     then {-# SCC "homot1" #-} cont tm defs
+>     else {-# SCC "homot2" #-} do
+>       n <- Reader.ask
+>       Reader.local (+1) $ cont (Var ("v_" ++ show n)) (Var ("v_" ++ show n) ≡ tm : defs)
+>   Fn f args -> 
+>     if fn lang (f, length args) 
+>     then listify (homot lang) args (\a -> cont (Fn f a)) defs
+>     else do
+>       n <- Reader.ask
+>       Reader.local (+1) $ cont (Var ("v_" ++ show n)) (Var ("v_" ++ show n) ≡ tm : defs)
 
 Homogenizing a literal is similar, using homot to deal with the arguments
 of predicates.
 
-> homol :: [Lang] -> Formula -> (Formula -> Int -> [Formula] -> a) -> Int -> [Formula] -> a
-> homol langs fm cont n defs =
->   case fm of 
->     Not f -> homol langs f (\p -> cont (Not p)) n defs
->     Atom (R p args) -> 
->       let lang = case chooseLang langs fm of 
->                    Just l -> l 
->                    Nothing -> __IMPOSSIBLE__ in
->       listify (homot lang) args (\a -> cont (Atom (R p a))) n defs
->     _ -> error "homol: not a literal"
+> homol :: Print a => [Lang] -> Formula -> (Formula -> [Formula] -> Reader Int a) -> [Formula] -> Reader Int a
+> homol langs fm cont defs = case fm of 
+>   Not f -> homol langs f (\p -> cont (Not p)) defs
+>   Atom (R p args) -> 
+>     let lang = case chooseLang langs fm of 
+>           Just l -> l 
+>           Nothing -> __IMPOSSIBLE__ 
+>     in listify (homot lang) args (\a -> cont (Atom (R p a))) defs
+>   _ -> error "homol: not a literal"
 
 This only covers a single pass of homogenization, and the new definitional
 equations may also have non-homogeneous subterms on their right-hand
 sides, so we need to pass those along for another iteration as long as there
 are any pending definitions:
 
-> homo :: [Lang] -> [Formula] -> ([Formula] -> Int 
->         -> [Formula] -> a) -> Int -> [Formula] -> a
+> homo :: Print a => [Lang] -> [Formula] -> ([Formula] -> [Formula] -> Reader Int a) -> [Formula] -> Reader Int a
 > homo langs fms cont = 
 >   listify (homol langs) fms
->           (\dun n defs -> if defs == [] then cont dun n defs
->                           else homo langs defs (\res -> cont (dun ++ res)) n [])
+>           (\dun defs -> if null defs then cont dun defs
+>                         else homo langs defs (\res -> cont (dun ++ res)) [])
 
 The overall procedure just picks the appropriate variable index to start
 with:
@@ -193,34 +218,33 @@ with:
 > homogenize :: [Lang] -> [Formula] -> [Formula]
 > homogenize langs fms = 
 >   let n = 1 + foldr (Cnf.maxVarIndex "v_") 0 (Fol.fv fms) 
->   in homo langs fms (\res _ _ -> res) n []
+>   in Reader.runReader (homo langs fms (\res _ -> return res) []) n
 
 The next step is to partition the homogenized literals into those in the
 various languages. The following tells us whether a formula belongs to a
 given language, allowing equality in all languages:
 
 > belongs :: Lang -> Formula -> Bool
-> belongs (fn, pr, _) fm = 
->   List.all fn (Fol.functions fm) &&
->   List.all pr (Fol.predicates fm \\ [("=", 2)])
+> belongs lang fm = 
+>   List.all (fn lang) (Fol.functions fm) &&
+>   List.all (rn lang) (Fol.nums fm) &&
+>   List.all (pr lang) (Fol.predicates fm \\ [("=", 2)])
 
 and using that, the following partitions up literals according to a list of
 languages:
 
 > langpartition :: [Lang] -> [Formula] -> [[Formula]]
-> langpartition langs fms = 
->   case langs of
->     [] -> if fms == [] then [] else error "langpartition"
->     l:ls -> let (fms1, fms2) = List.partition (belongs l) fms in
->             fms1 : langpartition ls fms2
+> langpartition langs fms = case langs of
+>   [] -> if null fms then [] else error "langpartition"
+>   l:ls -> let (fms1, fms2) = List.partition (belongs l) fms in
+>           fms1 : langpartition ls fms2
 
 * Interpolants
 
 > arreq :: Vars -> [Formula]
-> arreq l =
->   case l of 
->     v1:v2:rest -> Var v1 ≡ Var v2 : arreq (v2 : rest)
->     _ -> []
+> arreq l = case l of 
+>   v1:v2:rest -> Var v1 ≡ Var v2 : arreq (v2 : rest)
+>   _ -> []
 
 > arrangement :: [Vars] -> [Formula]
 > arrangement part = 
@@ -229,24 +253,23 @@ languages:
 >     part
 
 > destDef :: Formula -> Maybe (Var, Term)
-> destDef fm = 
->   case fm of 
->     Atom (R "=" [Var x, t]) | not(elem x (Fol.fv t)) -> Just (x, t)
->     Atom (R "=" [t, Var x]) | not(elem x (Fol.fv t)) -> Just (x, t)
->     _ -> Nothing 
+> destDef fm = case fm of 
+>   Atom (R "=" [Var x, t]) | not (elem x $ Fol.fv t) -> Just (x, t)
+>   Atom (R "=" [t, Var x]) | not (elem x $ Fol.fv t) -> Just (x, t)
+>   _ -> Nothing 
 
 > redeqs :: Clause -> Clause
-> redeqs eqs = 
->   case List.find (Maybe.isJust . destDef) eqs of
->     Just eq -> let (x, t) = case destDef eq of 
->                               Just xt -> xt 
->                               Nothing -> __IMPOSSIBLE__ in
->                redeqs (map (Fol.apply (x ⟾ t)) (eqs \\ [eq]))
->     Nothing -> eqs
+> redeqs eqs = case List.find (Maybe.isJust . destDef) eqs of
+>   Just eq -> 
+>     let (x, t) = case destDef eq of 
+>           Just xt -> xt 
+>           Nothing -> __IMPOSSIBLE__ 
+>     in redeqs (map (Fol.apply (x ⟾ t)) (eqs \\ [eq]))
+>   Nothing -> eqs
 
 > trydps :: [(Lang, Clause)] -> Clause -> Bool
 > trydps ldseps fms =
->   List.any (\((_, _, dp), fms0) -> dp $ Not $ F.listConj $ redeqs $ fms0 ++ fms)
+>   List.any (\(lang, fms0) -> dp lang $ Not $ F.listConj $ redeqs $ fms0 ++ fms)
 >            ldseps
 
 > allpartitions :: Ord a => [a] -> [[[a]]]
@@ -262,13 +285,21 @@ languages:
 > slowNelop1 langs fms0 = 
 >   let fms = homogenize langs fms0 
 >       seps = langpartition langs fms
->       fvlist = map (Set.unions . map Fol.fv) seps
->       vars = List.filter (\x -> length (List.filter (elem x) fvlist) >= 2)
->                          (Set.unions fvlist) in
->   slowNelopRefute vars (zip langs seps)
+>       fvlist = map Fol.fv seps
+>       vars = List.filter (\x -> length (List.filter (elem x) fvlist) >= 2) (Set.unions fvlist) 
+>   in slowNelopRefute vars (zip langs seps)
 
 > slowNelop :: [Lang] -> Formula -> Bool
-> slowNelop langs fm = List.all (slowNelop1 langs) (Prop.simpdnf $ Skolem.simplify $ Not fm)
+> slowNelop langs fm = List.all (slowNelop1 langs) (dnf $ simp $ Not fm)
+>  where 
+>   simp = tracef "simp" Skolem.simplify
+>   dnf = tracef "dnf" Prop.simpdnf
+
+> slowNelopInt :: Formula -> Bool
+> slowNelopInt = slowNelop (addDefault [intLang])
+
+> slowNelopDlo :: Formula -> Bool
+> slowNelopDlo = slowNelop (addDefault [dloLang])
 
 > findasubset :: ([a] -> Maybe b) -> Int -> [a] -> Maybe b
 > findasubset p 0 _ = p []

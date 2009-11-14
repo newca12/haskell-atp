@@ -115,6 +115,9 @@
 > instance Print Double where 
 >   pPrint = PP.double
 
+> instance Print (a -> b) where 
+>   pPrint _ = PP.text "<fun>"
+
 > instance Print () where 
 >   pPrint _ = PP.text "()"
 
