@@ -46,9 +46,6 @@
 
 * Rationals
 
-> makeRational :: Rational -> Term
-> makeRational = Num
-
 > isRational :: Term -> Bool
 > isRational (Num _) = True
 > isRational _ = False
@@ -58,10 +55,10 @@
 > destRational _ = __IMPOSSIBLE__ 
 
 > rational1 :: (Rational -> Rational) -> Term -> Term
-> rational1 fn = makeRational . fn . destRational
+> rational1 fn = Num . fn . destRational
 
 > rational2 :: (Rational -> Rational -> Rational) -> Term -> Term -> Term
-> rational2 fn m n = makeRational $ fn (destRational m) (destRational n)
+> rational2 fn m n = Num $ fn (destRational m) (destRational n)
 
 * Polynomials
 
@@ -109,11 +106,11 @@ We need explicit casts between Integer and Rational.
 > mul :: Vars -> Poly -> Poly -> Poly
 > mul vars pol1 pol2 = 
 >   case (pol1, pol2) of 
+>     (Num 0, _) -> zero
+>     (_, Num 0) -> zero
 >     (Fn "+" [_, Fn "*" [Var x, _]], Fn "+" [_, Fn "*" [Var y, _]]) -> 
 >       if Order.earlier vars x y then polyLmul vars pol2 pol1
 >       else polyLmul vars pol1 pol2
->     (Fn "0 % 1" [], _) -> zero
->     (_, Fn "0 % 1" []) -> zero
 >     (_, Fn "+" _) -> polyLmul vars pol1 pol2
 >     (Fn "+" _, _) -> polyLmul vars pol2 pol1
 >     _ -> rational2 (*) pol1 pol2
@@ -221,8 +218,9 @@ Differentiation
 >      | otherwise -> cmul n' p
 >     _ -> cmul n' p
 
-> diff :: Vars -> Term -> Term
-> diff vars p = case p of
+> diff, diff' :: Vars -> Term -> Term
+> diff = tracef2 "diff" diff'
+> diff' vars p = case p of
 >   Fn "+" [_c, Fn "*" [Var x, q]] 
 >    | x == head vars -> diffn (Var x) 1 q
 >    | otherwise -> zero

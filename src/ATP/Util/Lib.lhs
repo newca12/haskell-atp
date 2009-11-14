@@ -56,7 +56,7 @@ standard library.  Most mirror functions in Harrison's lib.ml
 For use with sort
 
 > decreasing :: Ord b => (a -> b) -> a -> a -> Ordering
-> decreasing f x y = compare (f x) (f y)
+> decreasing f x y = compare (f y) (f x)
 
 * Lists
 

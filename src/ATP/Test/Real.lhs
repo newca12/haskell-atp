@@ -25,6 +25,15 @@
 > formulas :: [(String, Formula)]
 > formulas = 
 >   [ ("real0", [$form| ⊤ |])
+>   , ("real1", [$form| ⊤ |])
+>   , ("real2", [$form| ⊥ |])
+>   , ("real3", [$form| ⊥ |])
+>   , ("real4", [$form| ⊥ |])
+>   , ("real5", [$form| ⊤ |])
+>   , ("real7", [$form| ⊥ |])
+>   , ("real8", [$form| ⊤ |])
+>   , ("real9", [$form| ⊤ |])
+>   , ("real10", [$form| ⊤ |])
 >   ]
 
 

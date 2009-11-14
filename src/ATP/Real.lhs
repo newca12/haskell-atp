@@ -80,7 +80,7 @@ In OCaml, inferisign can raise the "inferisign: inconsisitent" exception.
 >   _ -> return ps
 
 > dedmatrix' :: Matrix -> Err Matrix
-> dedmatrix' mat = trace' "dedmatrix':in" (pPrint mat) $
+> dedmatrix' mat = 
 >   let -- Split the matrix in half and infer the sign for p'
 >       n = length (head mat) `div` 2 
 >       mat1 = condense $ map (inferpsign . splitAt n) mat
@@ -90,14 +90,14 @@ In OCaml, inferisign can raise the "inferisign: inconsisitent" exception.
 >   in do
 >     mat3 <- inferisign mat2 
 >     let mat3' = init $ tail mat3
->         mat4 = condense $ map (\l -> head l : tail (tail l)) mat3'
->     trace' "dedmatrix':out" (pPrint mat4) $ return $ mat4
+>     return $ condense $ map (\l -> head l : tail (tail l)) mat3'
 
 > dedmatrix :: (Matrix -> Err a) -> (Matrix -> Err a)
 > dedmatrix cont mat = dedmatrix' mat >>= cont
 
-> pdividePos :: Vars -> Ctx -> Term -> Term -> Err Term
-> pdividePos vars sgns s p = 
+> pdividePos, pdividePos' :: Vars -> Ctx -> Term -> Term -> Err Term
+> pdividePos = tracef4 "pdividePos" pdividePos'
+> pdividePos' vars sgns s p = 
 >   let a = P.phead vars p 
 >       (k, r) = P.pdivide vars s p
 >   in do 
@@ -108,8 +108,9 @@ In OCaml, inferisign can raise the "inferisign: inconsisitent" exception.
 >      else if sgn == Negative then P.neg r 
 >      else P.mul vars a r
 
-> splitSign :: Ctx -> Term -> (Ctx -> Err Formula) -> Err Formula
-> splitSign sgns pol cont = do
+> splitSign, splitSign' :: Ctx -> Term -> (Ctx -> Err Formula) -> Err Formula
+> splitSign = tracef3 "splitSign" splitSign'
+> splitSign' sgns pol cont = do
 >   mat <- C.findSign sgns pol
 >   case mat of 
 >     Nonzero -> do
@@ -121,12 +122,14 @@ In OCaml, inferisign can raise the "inferisign: inconsisitent" exception.
 >       return $ (fm ∧ f1) ∨ (((¬) fm) ∧ f2)
 >     _ -> cont sgns
 
-> splitTrichotomy :: Ctx -> Term -> (Ctx -> Err Formula) -> (Ctx -> Err Formula) -> Err Formula
-> splitTrichotomy sgns pol contZ contP = 
+> splitTrichotomy, splitTrichotomy' :: Ctx -> Term -> (Ctx -> Err Formula) -> (Ctx -> Err Formula) -> Err Formula
+> splitTrichotomy = tracef4 "splitTrichotomy" splitTrichotomy'
+> splitTrichotomy' sgns pol contZ contP = 
 >   C.splitZero sgns pol contZ (\s' -> splitSign s' pol contP)
 
-> caseSplit :: Vars -> [Term] -> [Term] -> (Matrix -> Err Formula) -> Ctx -> Err Formula
-> caseSplit vars dun pols cont sgns = case pols of
+> caseSplit, caseSplit' :: Vars -> [Term] -> [Term] -> (Matrix -> Err Formula) -> Ctx -> Err Formula
+> caseSplit = tracef5 "caseSplit" caseSplit'
+> caseSplit' vars dun pols cont sgns = case pols of
 >   [] -> matrix vars dun cont sgns
 >   p:ops -> 
 >     splitTrichotomy sgns (P.phead vars p)
@@ -135,14 +138,16 @@ In OCaml, inferisign can raise the "inferisign: inconsisitent" exception.
 >       (if P.isConstant vars p then delConst vars dun p ops cont
 >        else caseSplit vars (dun ++ [p]) ops cont)
 
-> delConst :: Vars -> [Term] -> Term -> [Term] -> (Matrix -> Err Formula) -> Ctx -> Err Formula
-> delConst vars dun p ops cont sgns = do
+> delConst, delConst' :: Vars -> [Term] -> Term -> [Term] -> (Matrix -> Err Formula) -> Ctx -> Err Formula
+> delConst = tracef6 "delConst" delConst'
+> delConst' vars dun p ops cont sgns = do
 >   sgns' <- C.findSign sgns p
 >   let cont' m = cont $ map (List.insertAt (length dun) sgns') m
 >   caseSplit vars dun ops cont' sgns
 
-> matrix :: Vars -> [Term] -> (Matrix -> Err Formula) -> Ctx -> Err Formula
-> matrix vars pols cont sgns = 
+> matrix, matrix' :: Vars -> [Term] -> (Matrix -> Err Formula) -> Ctx -> Err Formula
+> matrix = tracef4 "matrix" matrix'
+> matrix' vars pols cont sgns = 
 >   if null pols then (cont [[]]) `catchError` handle else
 >   let p = head $ List.sortBy (Lib.decreasing (P.degree vars)) pols
 >       p' = P.diff vars p 
@@ -160,7 +165,7 @@ In OCaml, inferisign can raise the "inferisign: inconsisitent" exception.
 
 > basicQelim :: Vars -> Formula -> Formula
 > basicQelim vars (Ex x p) =
->   let union (R _a [t, Fn "0 % 1" []]) = [t]
+>   let union (R _a [t, Num n]) | n == 0 = [t]
 >       union _ = []
 >       pols = F.atomUnion union p
 >       cont mat = 
@@ -174,7 +179,4 @@ In OCaml, inferisign can raise the "inferisign: inconsisitent" exception.
 > qelim :: Formula -> Formula
 > qelim = 
 >   Skolem.simplify . Cooper.evalc . 
->     Qelim.lift P.atom (Skolem.simplify . Cooper.evalc) basicQelim
-
-:break basicQelim
-:trace qelim [$form| ∃ x. x^3 + x + 1 = 0 |]
+>     Qelim.lift P.atom (Skolem.simplify . Cooper.evalc) (tracef2 "basicQelim" basicQelim)

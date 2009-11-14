@@ -14,12 +14,12 @@
 >   , (<>), (<+>)
 >   , trace
 >   , trace'
->   , tracef
->   , tracef2
->   , tracef3
->   , tracef4
->   , tracef4'
->   , tracef5
+>   , tracef, tracef'
+>   , tracef2, tracef2'
+>   , tracef3, tracef3'
+>   , tracef4, tracef4'
+>   , tracef5, tracef5'
+>   , tracef6, tracef6'
 >   , fromJust
 >   , pPrint
 >   , print
@@ -34,7 +34,14 @@
 > import ATP.Util.Impossible
 > import Control.Applicative ((<$>))
 > import qualified ATP.Util.Debug as Debug
-> import ATP.Util.Debug (trace', tracef, tracef2, tracef3, tracef4, tracef4', tracef5)
+> import ATP.Util.Debug ( trace'
+>                       , tracef, tracef'
+>                       , tracef2, tracef2'
+>                       , tracef3, tracef3'
+>                       , tracef4, tracef4'
+>                       , tracef5, tracef5'
+>                       , tracef6, tracef6'
+>                       )
 > import ATP.Util.Print ((<>), (<+>), Doc, pPrint)
 > import Data.Maybe (fromJust)
 > import Debug.Trace (trace)

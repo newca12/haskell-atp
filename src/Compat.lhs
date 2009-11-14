@@ -25,11 +25,12 @@ don't care about performance, so forget about the restriction.
 
 * Imports
 
-> import Prelude hiding (print)
+> import ATP.Util.Prelude hiding (print)
 > import ATP.FormulaSyn
 > import qualified ATP.Bdd as Bdd
 > import qualified ATP.Dp as Dp
 > import qualified ATP.Formula as F
+> import qualified ATP.Poly as Poly
 > import qualified ATP.Prop as Prop
 > import qualified ATP.PropExamples as PropExamples
 > import qualified ATP.Skolem as Skolem
@@ -142,6 +143,8 @@ qelim.ml
 cooper.ml
 
 complex.ml
+
+> polynate = Poly.polynate
 
 real.ml
 
