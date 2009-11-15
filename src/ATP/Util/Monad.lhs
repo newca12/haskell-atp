@@ -13,6 +13,7 @@ with GeneralizedNewtypeDeriving
 >   , puts
 >   , any
 >   , all
+>   , zipWith
 >   , findM
 >   , ignore
 >   , ifM
@@ -27,7 +28,7 @@ with GeneralizedNewtypeDeriving
 
 * Imports 
 
-> import ATP.Util.Prelude hiding (any, all)
+> import ATP.Util.Prelude hiding (any, all, zipWith)
 > import qualified Control.Monad.State as State
 > import Control.Monad.State
 > import Control.Monad
@@ -46,6 +47,9 @@ with GeneralizedNewtypeDeriving
 >   stuff _ x = x
 
 * Monad utils
+
+> zipWith :: Monad m => (a -> b -> m c) -> [a] -> [b] -> m [c]
+> zipWith f xs ys = mapM (uncurry f) (zip xs ys)
 
 > foldrM :: Monad m => (a -> b -> m b) -> b -> [a] -> m b
 > foldrM = Fold.foldrM

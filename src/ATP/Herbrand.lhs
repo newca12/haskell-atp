@@ -23,7 +23,7 @@ Relation between first-order and propositonal logic; Herbrand theorem.
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Util.Log as Log
 > import ATP.Util.Log (Log)
-> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
 > import qualified Data.List as List
 > import qualified Data.Map as Map
@@ -39,7 +39,7 @@ Get the constants for Herbrand base, adding nullary one if necessary.
 > herbfuns :: Formula -> ([FuncA], [FuncA])
 > herbfuns fm = 
 >     let syms @ (cns, fns) = List.partition ((== 0) . snd) (Fol.functions fm) in
->     if cns == [] then ([("c", 0)], fns) else syms
+>     if null cns then ([("c", 0)], fns) else syms
 
 The function groundterms enumerates all ground terms involving n functions.
 If n = 0 the constant terms are returned. Otherwise all possible
@@ -68,7 +68,7 @@ groundtuples
 > groundtuples _ _ 0 0 = [[]]
 > groundtuples _ _ _ 0 = []
 > groundtuples cntms funcs n m = 
->   let tups k = Lib.allPairs (:) 
+>   let tups k = List.allPairs (:) 
 >                (groundterms cntms funcs k)
 >                (groundtuples cntms funcs (n-k) (m-1)) in
 >   concat (map tups [0 .. n])

@@ -21,6 +21,7 @@
 > import qualified ATP.Unif as Unif
 > import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((⟾))
+> import qualified ATP.Util.List as List
 > import qualified ATP.Util.Log as Log
 > import ATP.Util.Log(Log)
 > import qualified ATP.Util.ListSet as Set
@@ -61,10 +62,10 @@ remaining problem with the resulting instantiation.
 > unifyRefute [] env = Just env
 > unifyRefute (d:odjs) env = 
 >   let (pos, neg) = List.partition F.positive d 
->       pairs = Lib.allPairs (,) pos neg 
+>       pairs = List.allPairs (,) pos neg 
 >       findFn pq = do env' <- unifyComplements env pq 
->                      unifyRefute odjs env' in
->   Lib.findApply findFn pairs
+>                      unifyRefute odjs env'
+>   in List.findFirst findFn pairs
 
 Now for the main loop, we maintain the original DNF of the
 uninstantiated formula djs0, the set fvs of its free variables, and a
@@ -150,7 +151,7 @@ refutations.
 >     fm:unexp -> 
 >       let findFn l = do env' <- unifyComplements env (fm,l) 
 >                         cont(env', k) in
->       case Lib.findApply findFn lits of
+>       case List.findFirst findFn lits of
 >         Just x -> Just x
 >         Nothing -> tableau (unexp, fm:lits, n) cont (env,k)
 

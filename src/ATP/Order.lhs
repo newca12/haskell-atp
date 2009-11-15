@@ -3,6 +3,7 @@
 
 > module ATP.Order 
 >   ( earlier
+>   , lexord
 >   , termSize
 >   , lpoGt
 >   , lpoGe

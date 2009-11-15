@@ -32,16 +32,14 @@ The Nelson-Oppen method.
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Util.Debug as Debug
-> import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((⟾))
+> import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
 > import qualified ATP.Util.Print as PP
 > import ATP.Util.Print(Print, pPrint)
---> import qualified Control.Exception as Exn
 > import qualified Control.Monad.Reader as Reader
 > import Control.Monad.Reader (Reader)
-> import qualified Data.List as List
 > import qualified Data.Maybe as Maybe
 > import qualified Ratio
 
@@ -249,7 +247,7 @@ languages:
 > arrangement :: [Vars] -> [Formula]
 > arrangement part = 
 >   foldr (Set.union . arreq) 
->     (map (\(v,w) -> Var v ≠ Var w) (Lib.distinctPairs (map head part))) 
+>     (map (\(v,w) -> Var v ≠ Var w) (List.distinctPairs (map head part))) 
 >     part
 
 > destDef :: Formula -> Maybe (Var, Term)
@@ -311,7 +309,7 @@ languages:
 
 > findsubset :: ([a] -> Bool) -> [a] -> Maybe [a]
 > findsubset p l = 
->   Lib.findApply (\n -> findasubset (\x -> if p x then Just x else Nothing) n l)
+>   List.findFirst (\n -> findasubset (\x -> if p x then Just x else Nothing) n l)
 >             [0 .. length l]
 >                    
 
@@ -329,7 +327,7 @@ languages:
 >       fvlist = map (Set.unions . map Fol.fv) seps
 >       vars = List.filter (\x -> length (List.filter (elem x) fvlist) >= 2)
 >                          (Set.unions fvlist) 
->       eqs = map (\(a,b) -> Equal.mkEq (Var a) (Var b)) (Lib.distinctPairs vars) in
+>       eqs = map (\(a,b) -> Equal.mkEq (Var a) (Var b)) (List.distinctPairs vars) in
 >   nelopRefute eqs (zip langs seps)
 
 > nelop :: [Lang] -> Formula -> Bool

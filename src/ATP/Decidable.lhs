@@ -35,8 +35,8 @@
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
-> import qualified Data.List as List
 > import qualified Data.Map as Map
 
 * Decidable Problems
@@ -47,7 +47,7 @@
 >       fvs = Fol.fv sfm
 >       (cnsts, funcs) = List.partition (\(_, ar) -> ar == 0) (Fol.functions sfm) in
 >   if funcs /= [] then error "Not in AE fragment" else
->   let consts = if cnsts == [] then [("c", 0)] else cnsts
+>   let consts = if null cnsts then [("c", 0)] else cnsts
 >       cntms = map (\(c, _) -> Fn c []) consts
 >       alltups = Herbrand.groundtuples cntms [] 0 (length fvs)
 >       cjs = Prop.simpcnf sfm
@@ -59,8 +59,8 @@
 > separate :: Var -> [Formula] -> Formula
 > separate x cjs = 
 >   let (yes, no) = List.partition (elem x . Fol.fv) cjs in
->   if yes == [] then F.listConj no
->   else if no == [] then Ex x (F.listConj yes)
+>   if null yes then F.listConj no
+>   else if null no then Ex x (F.listConj yes)
 >   else And (Ex x (F.listConj yes)) (F.listConj no)
 
 > pushquant :: Var -> Formula -> Formula
@@ -114,10 +114,10 @@
 > allPossibleSyllogisms :: [Formula]
 > allPossibleSyllogisms =
 >  let sylltypes = [premiss_A, premiss_E, premiss_I, premiss_O] 
->      prems1 = Lib.allPairs id sylltypes [("M","P"), ("P","M")]
->      prems2 = Lib.allPairs id sylltypes [("S","M"), ("M","S")]
->      prems3 = Lib.allPairs id sylltypes [("S","P")] in
->  Lib.allPairs Imp (Lib.allPairs And prems1 prems2) prems3
+>      prems1 = List.allPairs id sylltypes [("M","P"), ("P","M")]
+>      prems2 = List.allPairs id sylltypes [("S","M"), ("M","S")]
+>      prems3 = List.allPairs id sylltypes [("S","P")] in
+>  List.allPairs Imp (List.allPairs And prems1 prems2) prems3
 
 > allValidSyllogisms :: [Formula]
 > allValidSyllogisms = List.filter aedecide allPossibleSyllogisms
@@ -134,7 +134,7 @@
 > alltuples n l = 
 >   if n == 0 then [[]] else
 >   let tups = alltuples (n-1) l in
->   Lib.allPairs (:) l tups
+>   List.allPairs (:) l tups
 
 > valmod :: Eq a => a -> b -> (a -> b) -> a -> b
 > valmod a y f x = if x == a then y else f x
@@ -143,11 +143,11 @@
 > undef _ = error "Undefined"
 
 > allmappings :: Eq a => [a] -> [b] -> [a -> b]
-> allmappings dom ran = foldr (\p -> Lib.allPairs (valmod p) ran) [undef] dom
+> allmappings dom ran = foldr (\p -> List.allPairs (valmod p) ran) [undef] dom
 
 > alldepmappings :: Eq a => [(a, b)] -> (b -> [c]) -> [a -> c]
 > alldepmappings dom ran =
->   foldr (\(p,n) -> Lib.allPairs (valmod p) (ran n)) [undef] dom
+>   foldr (\(p,n) -> List.allPairs (valmod p) (ran n)) [undef] dom
 
 > allfunctions :: Eq a => [a] -> Int -> [[a] -> a]
 > allfunctions dom n = allmappings (alltuples n dom) dom
@@ -162,7 +162,7 @@
 >       dom = [1 .. n]
 >       fints = alldepmappings funcs (allfunctions dom)
 >       pints = alldepmappings preds (allpredicates dom)
->       interps = Lib.allPairs (\f p -> (dom, f, p)) fints pints
+>       interps = List.allPairs (\f p -> (dom, f, p)) fints pints
 >       fm' = Fol.generalize fm in
 >   List.all (\md -> Fol.holds md Map.empty fm') interps
 

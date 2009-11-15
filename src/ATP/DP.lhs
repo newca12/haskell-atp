@@ -20,10 +20,9 @@ The Davis-Putnam and Davis-Putnam-Loveland-Logemann procedures.
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
-> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
-> import qualified Data.List as List
 
 * Davis-Putnam
 
@@ -87,7 +86,7 @@ clauses.
 >       pure = Set.union posOnly (map F.opp negOnly) in
 >   case pure of
 >     [] -> Nothing
->     _ -> Just (filter (\cl -> Set.intersect cl pure == []) clauses)
+>     _ -> Just (filter (\cl -> null $ Set.intersect cl pure) clauses)
 
 Rule for eliminating atomic formulas
 
@@ -129,7 +128,7 @@ and perhaps desirable.)
 >       (neg, other) = List.partition (elem p') notpos
 >       pos' = map (filter (/= p)) pos
 >       neg' = map (filter (/= p')) neg
->       res0 = Lib.allPairs Set.union pos' neg' in
+>       res0 = List.allPairs Set.union pos' neg' in
 >   Set.union other (filter (not . Prop.trivial) res0)
 
 Davis-Putnam procedure

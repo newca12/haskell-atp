@@ -27,10 +27,10 @@
 > import qualified ATP.Qelim as Qelim
 > import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib ((⟾))
+> import qualified ATP.Util.List as List
 > import ATP.Util.ListSet ((\\))
 > import qualified ATP.Util.Parse as P
 > import qualified Data.Char as Char
-> import qualified Data.List as List
 
 * Dense linear orders
 
@@ -55,7 +55,7 @@
 >                let (lefts, rights) = List.partition (\a -> right a == x') cjs 
 >                    ls = map left lefts
 >                    rs = map right rights in
->                F.listConj (Lib.allPairs (≺) ls rs)
+>                F.listConj (List.allPairs (≺) ls rs)
 > dloBasic _ = error "dloBasic" 
 
 Here we deviate slightly from Harrison and allow integer constants in

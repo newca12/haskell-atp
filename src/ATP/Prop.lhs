@@ -39,11 +39,10 @@ propositional variables.
 > import ATP.Util.Prelude
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn 
-> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
 > import qualified ATP.Util.Print as PP
 > import qualified Control.Monad as M
-> import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
 > import qualified Test.QuickCheck as Q
@@ -284,7 +283,7 @@ Positive and negative occurrances of atoms
 Distribute clauses 
 
 > distrib :: [[Formula]] -> [[Formula]] -> [[Formula]]
-> distrib = Lib.allPairs Set.union 
+> distrib = List.allPairs Set.union 
 
 Subsumption
 

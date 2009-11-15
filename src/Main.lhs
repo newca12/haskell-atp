@@ -53,6 +53,7 @@ The front end for the automated theorem proving Haskell port.
 > import qualified ATP.Test.Cooper
 > import qualified ATP.Test.Dlo 
 > import qualified ATP.Test.Fo
+> import qualified ATP.Test.Grobner
 > import qualified ATP.Test.Real
 > import qualified ATP.Test.Taut
 > import qualified ATP.TestFormulas as Forms
@@ -221,7 +222,7 @@ Get rewriting rules.
 >          , ("Equality",
 >             [ bmeson, paramod, ccvalid, rewrite ])
 >          , ("Decidable problems",
->             [ aedecide, dlo, dlovalid, cooper, slowNelop, nelop, nelopDLO, complex, real ])
+>             [ aedecide, dlo, dlovalid, cooper, slowNelop, nelop, nelopDLO, complex, real, grobner ])
 >          ]
 
 > commands :: [Command]
@@ -277,6 +278,7 @@ HUnit
 >   , ATP.Test.Combining.tests 
 >   , ATP.Test.Complex.tests 
 >   , ATP.Test.Real.tests 
+>   , ATP.Test.Grobner.tests 
 >   ]
 
 Quickcheck
@@ -301,6 +303,7 @@ Quickcheck
 >         f _ [t] = case t of
 >           "complex" -> M.ignore $ Test.runTestTT ATP.Test.Complex.tests
 >           "real" -> M.ignore $ Test.runTestTT ATP.Test.Real.tests
+>           "grobner" -> M.ignore $ Test.runTestTT ATP.Test.Grobner.tests
 >           _ -> Exn.throw $ ComExn $ "Can't find test suite: " ++ t
 >         f _ _ = Exn.throw $ ComExn "'test' takes no arguments."
 
@@ -641,6 +644,13 @@ Show a test formula
 >         usage = PP.vcat [ PP.text "real -f <formula>"
 >                         , PP.text "real <id>" ] 
 >         f = run (return . Real.qelim)
+
+> grobner :: Command
+> grobner = Com "grobner" summ usage f
+>   where summ = "Grobner basis validity procedure"
+>         usage = PP.vcat [ PP.text "grobner -f <formula>"
+>                         , PP.text "grobner <id>" ] 
+>         f = run Grobner.decide
 
 * Top
 

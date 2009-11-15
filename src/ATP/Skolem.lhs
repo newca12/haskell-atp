@@ -131,7 +131,7 @@ print $ pullquants [$form| (∀ y. Q(y)) ∧ (∀ x. P(y)) |]
 > skolem fm fns = case fm of
 >     Ex y p ->
 >         let xs = Fol.fv(fm) 
->             f = Fol.variant (if xs == [] then "c_" ++ y else "f_" ++ y) fns 
+>             f = Fol.variant (if null xs then "c_" ++ y else "f_" ++ y) fns 
 >             fx = Fn f (map Var xs) in
 >         skolem (Fol.apply (y ⟾ fx) p) (f:fns)
 >     All x p -> let (p', fns') = skolem p fns in (All x p', fns')

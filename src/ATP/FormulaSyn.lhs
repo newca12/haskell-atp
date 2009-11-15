@@ -13,8 +13,6 @@
 >     -- * Quotations
 >   , term
 >   , form
->     -- * Util
->   , pp
 >     -- (%) needs to be exported for Rational templates to work.
 >   , (%)
 >   )
@@ -396,9 +394,6 @@ clause for antiquotes.
 > boundFP x = TH.litP $ TH.stringL x
 
 * Printing
-
-> pp :: Print a => a -> IO ()
-> pp = PP.putStrLn . pPrint
 
 Terms
 

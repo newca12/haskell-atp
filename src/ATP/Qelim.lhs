@@ -41,7 +41,7 @@
 > qelim bfn x p = 
 >   let cjs = F.conjuncts p 
 >       (ycjs, ncjs) = List.partition (List.elem x . Fol.fv) cjs in
->   if ycjs == [] then p else
+>   if null ycjs then p else
 >   let q = bfn (Ex x (F.listConj ycjs)) in
 >   foldr And q ncjs
 

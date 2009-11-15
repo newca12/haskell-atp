@@ -25,11 +25,11 @@
 > import qualified ATP.Unif as Unif
 > import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((↦))
+> import qualified ATP.Util.List as List
 > import qualified ATP.Util.Log as Log
 > import ATP.Util.Log(Log)
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet ((\\))
-> import qualified Data.List as List
 > import qualified Data.Map as Map
 > import qualified Data.Maybe as Maybe
 
@@ -78,7 +78,7 @@ and add it into the accumulator:
 >     [] -> acc 
 >     ps2 -> foldr foldFn acc pairs
 >       where ps1 = filter (\q -> q /= p && unifiable p q) cl1
->             pairs = Lib.allPairs (,) (map (p:) (Set.allSubsets ps1))
+>             pairs = List.allPairs (,) (map (p:) (Set.allSubsets ps1))
 >                                                (Set.allNonemptySubsets ps2) 
 >             foldFn (s1, s2) sof = 
 >               case mgu (s1 ++ map F.opp s2) Map.empty of
@@ -176,12 +176,12 @@ do likewise for the others.
 
 > subsumesClause :: Clause -> Clause -> Bool
 > subsumesClause cls1 cls2 = Maybe.isJust $ subsume Map.empty cls1
->   where subsume env [] = Just env
->         subsume env (l1:clt) =
->           Lib.findApply 
->             (\l2 -> case matchLiterals env (l1, l2) of
->                       Nothing -> Nothing
->                       Just env' -> subsume env' clt) cls2
+>  where 
+>   subsume env [] = Just env
+>   subsume env (l1:clt) = List.findFirst
+>     (\l2 -> case matchLiterals env (l1, l2) of
+>              Nothing -> Nothing
+>              Just env' -> subsume env' clt) cls2
 
 ... Thus, it seems that the policy of replacement, where the subsumed
 clause is replaced by the subsuming one at the original point in the unused

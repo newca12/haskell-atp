@@ -24,10 +24,9 @@
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Tableaux as Tableaux
-> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
-> import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
 > import qualified Data.Maybe as Maybe
@@ -130,7 +129,7 @@ subterm:
 
 > findNvSubterm :: Formula -> Maybe Term
 > findNvSubterm (Not p) = findNvSubterm p
-> findNvSubterm (Atom (R "=" st)) = Lib.findApply findNestNonvar st
+> findNvSubterm (Atom (R "=" st)) = List.findFirst findNestNonvar st
 > findNvSubterm (Atom (R _ args)) = List.find (not . Fol.isVar) args
 > findNvSubterm _ = __IMPOSSIBLE__ 
 
@@ -158,7 +157,7 @@ variable w, add the new disjunct :(t = w) and call recursively:
 
 > emodify :: Vars -> Clause -> Clause
 > emodify fvs cls = 
->   case Lib.findApply findNvSubterm cls of
+>   case List.findFirst findNvSubterm cls of
 >     Nothing -> cls
 >     Just t -> let w = Fol.variant "w" fvs 
 >                   cls' = map (replace (Map.singleton t (Var w))) cls in

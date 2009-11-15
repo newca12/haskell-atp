@@ -24,11 +24,10 @@ Knuth-Bendix completion.
 > import qualified ATP.Order as Order
 > import qualified ATP.Rewrite as Rewrite
 > import qualified ATP.Unif as Unif
-> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
 > import qualified ATP.Util.Print as PP
-> import qualified Data.List as List
 > import qualified Data.Map as Map
 > import qualified Data.Maybe as Maybe
 
@@ -208,7 +207,7 @@ we fail. Otherwise we terminate with success and return the new equations.
 >                                     (eqs', def, ocrits ++ (concat (map (criticalPairs eq') eqs'))) in
 >           do status trip eqs
 >              complete ord trip
->     [] -> if def == [] then return (Just eqs) else 
+>     [] -> if null def then return (Just eqs) else 
 >           case List.find (Maybe.isJust . normalizeAndOrient ord eqs) def of
 >             Nothing -> return Nothing
 >             Just e -> complete ord (eqs, def \\ [e], [e])
@@ -245,7 +244,7 @@ multiple inverse operations.
 >       eqs' = map (\e -> case normalizeAndOrient ord [] e of 
 >                           Just (l, r) -> Equal.mkEq l r
 >                           Nothing -> error "Can't orient equation") eqs in
->   do eqs'' <- complete ord (eqs', [], Set.unions(Lib.allPairs criticalPairs eqs' eqs'))
+>   do eqs'' <- complete ord (eqs', [], Set.unions(List.allPairs criticalPairs eqs' eqs'))
 >      case eqs'' of
 >        Just eqs''' -> return $ Just (interreduce [] eqs''')
 >        Nothing -> return Nothing

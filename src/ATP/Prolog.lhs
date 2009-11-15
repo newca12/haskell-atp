@@ -21,12 +21,11 @@
 > import qualified ATP.Tableaux as Tableaux
 > import qualified ATP.Unif as Unif
 > import qualified ATP.Util.Lex as Lex
-> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.List as List
 > import qualified ATP.Util.Parse as P
 > import ATP.Util.Parse (Parse, Parser, parser)
 > import qualified ATP.Util.Print as PP
 > import ATP.Util.Print(Print, pPrint, (<+>), (<>)) 
-> import qualified Data.List as List
 > import qualified Data.Map as Map
 > import qualified Data.Maybe as Maybe
 
@@ -73,7 +72,7 @@ instantiation.
 > backchain rules n k env goals = case goals of 
 >   [] -> Just env
 >   g:gs -> 
->     if n == 0 then Nothing else Lib.findApply findFn rules
+>     if n == 0 then Nothing else List.findFirst findFn rules
 >       where findFn rule = 
 >               let (Rule a c, k') = renamer k rule in
 >               do env' <- Tableaux.unifyLiterals env (c,g) 
@@ -87,7 +86,7 @@ to turn a Horn clause into a definite clause, but just use Bot directly:
 > hornify cls = 
 >   let (pos, neg) = List.partition F.positive cls in
 >   if length pos > 1 then Nothing
->   else Just $ Rule (map F.opp neg) (if pos == [] then Bot else head pos)
+>   else Just $ Rule (map F.opp neg) (if null pos then Bot else head pos)
 
 As with the tableau provers, we now simply need to iteratively increase
 the proof size bound n until a proof is found. As well as the instantiations,

@@ -11,6 +11,7 @@
 >   , throwImpossible
 >   , (<$>)
 >   , error'
+>   , first, second
 >   , (<>), (<+>)
 >   , trace
 >   , trace'
@@ -25,6 +26,7 @@
 >   , print
 >   , putStr
 >   , putStrLn
+>   , pp
 >   )
 > where
 
@@ -33,6 +35,7 @@
 > import Prelude hiding (print, putStr, putStrLn)
 > import ATP.Util.Impossible
 > import Control.Applicative ((<$>))
+> import Control.Arrow (first, second)
 > import qualified ATP.Util.Debug as Debug
 > import ATP.Util.Debug ( trace'
 >                       , tracef, tracef'
@@ -42,7 +45,8 @@
 >                       , tracef5, tracef5'
 >                       , tracef6, tracef6'
 >                       )
-> import ATP.Util.Print ((<>), (<+>), Doc, pPrint)
+> import qualified ATP.Util.Print as Print
+> import ATP.Util.Print ((<>), (<+>), Doc, pPrint, Print)
 > import Data.Maybe (fromJust)
 > import Debug.Trace (trace)
 > import System.IO.UTF8 (print, putStr, putStrLn)
@@ -51,6 +55,9 @@
 
 > error' :: Doc -> a
 > error' = Debug.error
+
+> pp :: Print a => a -> IO ()
+> pp = Print.putStrLn . pPrint
 
 > instance Monad m => Functor m where
 >   fmap f x = x >>= return . f

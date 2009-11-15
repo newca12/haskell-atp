@@ -6,6 +6,8 @@
 > module ATP.Util.List 
 >   ( module Data.List
 >   , allInjectiveMaps
+>   , allPairs
+>   , distinctPairs
 >   , findFirst
 >   , findRemFirst
 >   , partitions
@@ -17,6 +19,8 @@
 >   , uncons
 >   , foldr2
 >   , insertAt
+>   , all2
+>   , mapi
 >    -- * Tests
 >   , tests
 >   )
@@ -56,6 +60,27 @@ Lists with very few possibilities for values.
 
 * List operations absent from Data.List
 
+** all2
+
+all2 f xs ys 
+
+returns true iff the lengths of xs and ys are the same and 
+f xi yi --> True for all i < length xs
+
+> all2 :: (a -> b -> Bool) -> [a] -> [b] -> Bool
+> all2 _ [] [] = True
+> all2 f (x:xs) (y:ys) = f x y && all2 f xs ys
+> all2 _ _ _ = False
+
+** allPairs
+
+allPairs f xs ys
+
+returns f applied to all pairs of an element of xs with an element of ys
+
+> allPairs :: (a -> b -> c) -> [a] -> [b] -> [c]
+> allPairs f xs ys = [f x y | x <- xs, y <- ys]
+
 ** allInjectiveMaps
 
 | Given two lists l1 l2 where |l1| >= |l2|, return all
@@ -89,6 +114,13 @@ allInjectiveMaps [1,2,3] [4,5,6] = [[(1,4), (2,5), (3,6)], [(1,5),(2,4),(3,6)], 
 >     Right b -> (as, b:bs)
 >   where (as, bs) = classify f xs
 
+** distinctPairs 
+
+> distinctPairs :: [a] -> [(a,a)]
+> distinctPairs (x:xs) = 
+>   foldr (\y acc -> (x,y) : acc) (distinctPairs xs) xs
+> distinctPairs [] = []
+
 ** findFirst
 
 | Return the first element satisfying the function.
@@ -96,8 +128,8 @@ allInjectiveMaps [1,2,3] [4,5,6] = [[(1,4), (2,5), (3,6)], [(1,5),(2,4),(3,6)], 
 > findFirst :: (a -> Maybe b) -> [a] -> Maybe b
 > findFirst _ [] = Nothing
 > findFirst f (x:xs) = case f x of
->                        Nothing -> findFirst f xs
->                        Just y -> Just y
+>   Nothing -> findFirst f xs
+>   Just y -> Just y
 
 > prop_findFirst_correct :: Property
 > prop_findFirst_correct = Q.label "findFirst_correct" $
@@ -166,6 +198,15 @@ insertAt n x l is a list where x is the nth element.
 > foldr2 _ b [] [] = b
 > foldr2 f b (x:xs) (y:ys) = foldr2 f (f x y b) xs ys
 > foldr2 _ _ _ _ = error "foldr2: length mismatch"
+
+** mapi
+
+Map with element index as argument
+
+> mapi :: (Int -> a -> b) -> [a] -> [b]
+> mapi f = mapi' 0
+>   where mapi' _ [] = []
+>         mapi' n (h:t) = f n h : mapi' (n+1) t
 
 ** partition' 
 

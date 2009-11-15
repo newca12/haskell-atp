@@ -22,10 +22,9 @@ MESON: Model Elimination Subgoal OrieNted
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Tableaux as Tableaux
-> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
-> import qualified Data.List as List
 > import qualified Data.Map as Map
 > import qualified Data.Maybe as Maybe
 
@@ -67,7 +66,7 @@ the variable renaming counter.
 >   if n < 0 then fail "Too deep"  else
 >   let findFn a = do env' <- Tableaux.unifyLiterals env (g, F.opp a) 
 >                     cont (env', n, k) in
->   case Lib.findApply findFn ancestors of
+>   case List.findFirst findFn ancestors of
 >     Just env' -> Just env'
 >     Nothing -> 
 >       let findFn2 rule = 
@@ -75,7 +74,7 @@ the variable renaming counter.
 >             do env' <- Tableaux.unifyLiterals env (g,c)
 >                foldr (basicMexpand rules (g:ancestors)) 
 >                  cont asm (env', n - length asm, k') in
->       Lib.findApply findFn2 rules 
+>       List.findFirst findFn2 rules 
 
 This can now be packaged up into the overall function with the usual
 iterative deepening. As with tableaux, we split the input problem into
@@ -173,10 +172,10 @@ control is then passed to mexpands to deal with the multiple subgoals.
 > mexpand rules ancestors g cont (env,n,k) =
 >   if n < 0 then fail "Too deep"
 >   else if any (equal env g) ancestors then fail "repetition" else
->   case Lib.findApply (\a -> do env' <- Tableaux.unifyLiterals env (g,F.opp a)
->                                cont (env' ,n, k)) ancestors of
+>   case List.findFirst (\a -> do env' <- Tableaux.unifyLiterals env (g,F.opp a)
+>                                 cont (env', n, k)) ancestors of
 >     Just e -> Just e
->     Nothing -> Lib.findApply findFn rules
+>     Nothing -> List.findFirst findFn rules
 >         where findFn r = let (Rule asm c, k') = Prolog.renamer k r in
 >                          do env' <- Tableaux.unifyLiterals env (g,c)
 >                             mexpands rules (g:ancestors) asm cont 

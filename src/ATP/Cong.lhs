@@ -18,11 +18,10 @@ Congruence closure.
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Skolem as Skolem
-> import qualified ATP.Util.Lib as Lib
+> import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
 > import qualified ATP.Util.UnionFind as UF
 > import ATP.Util.UnionFind(Partition)
-> import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
 > import qualified Data.Maybe as Maybe
@@ -55,7 +54,7 @@ immediate subterms are already equivalent:
 
 > congruent :: Partition Term -> (Term, Term) -> Bool
 > congruent eqv (s,t) = case (s,t) of
->   (Fn f fargs, Fn g gargs) -> f == g && Lib.all2 (UF.equivalent eqv) fargs gargs
+>   (Fn f fargs, Fn g gargs) -> f == g && List.all2 (UF.equivalent eqv) fargs gargs
 >   _ -> False
 
 For the main algorithm, as well as the equivalence relation itself eqv, we
@@ -90,7 +89,7 @@ single congruence step.
 >   in foldr (\(u,v) (eq, pf) ->
 >                if congruent eq (u,v) then emerge (u,v) (eq, pf)
 >                else (eq, pf))
->         (eqv', pfn') (Lib.allPairs (,) sp tp)
+>         (eqv', pfn') (List.allPairs (,) sp tp)
 
 To set up the initial ‘predecessor’ function we use the following, which
 updates an existing function pfn with a new mapping for each immediate

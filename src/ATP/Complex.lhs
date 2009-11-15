@@ -5,6 +5,7 @@
 >   ( Err
 >   , failwith
 >   , can
+>   , tryFind
 >   , Sign(..)
 >   , Ctx
 >   , swap
@@ -48,6 +49,13 @@
 > can :: Err a -> Bool
 > can (Left _) = False
 > can (Right _) = True
+
+> tryFind :: (a -> Err b) -> [a] -> Err b
+> tryFind _ [] = failwith "tryFind"
+> tryFind f (h:t) = do
+>   case f h of 
+>     Left _ -> tryFind f t
+>     Right r -> return r
 
 * Signs
 
@@ -107,7 +115,7 @@
 >     dcs' <- mapM (findSign sgns) dcs
 >     return $ 
 >      if List.any (/= Zero) dcs' then (⊤)
->      else if ucs == [] then (⊥) 
+>      else if null ucs then (⊥) 
 >      else F.listDisj $ map ((¬) . flip Equal.mkEq P.zero) ucs
 
 > polyNondiv :: Vars -> Ctx -> Term -> Term -> Err Formula

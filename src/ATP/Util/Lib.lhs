@@ -9,12 +9,6 @@ standard library.  Most mirror functions in Harrison's lib.ml
 >   , pow
 >   , funpow
 >   , decreasing
->     -- Lists
->   , findApply
->   , mapi
->   , allPairs
->   , distinctPairs
->   , all2
 >     -- Strings
 >   , substringIndex
 >     -- Map
@@ -57,48 +51,6 @@ For use with sort
 
 > decreasing :: Ord b => (a -> b) -> a -> a -> Ordering
 > decreasing f x y = compare (f y) (f x)
-
-* Lists
-
-Return the first element of a list that returns Just.
-Equivalent to 
-
-mapM f (List.find (isJust . f) l)
-
-> findApply :: (a -> Maybe b) -> [a] -> Maybe b
-> findApply _ [] = Nothing
-> findApply f (h:t) = case f h of
->                       Nothing -> findApply f t
->                       Just x -> Just x
-
-Map with element index as argument
-
-> mapi :: (Int -> a -> b) -> [a] -> [b]
-> mapi f = mapi' 0
->   where mapi' _ [] = []
->         mapi' n (h:t) = f n h : mapi' (n+1) t
-
-allPairs f xs ys
-
-returns f applied to all pairs of an element of xs with an element of ys
-
-> allPairs :: (a -> b -> c) -> [a] -> [b] -> [c]
-> allPairs f xs ys = [f x y | x <- xs, y <- ys]
-
-> distinctPairs :: [a] -> [(a,a)]
-> distinctPairs (x:xs) = 
->   foldr (\y acc -> (x,y) : acc) (distinctPairs xs) xs
-> distinctPairs [] = []
-
-all2 f xs ys 
-
-returns true iff the lengths of xs and ys are the same and 
-f xi yi --> True for all i < length xs
-
-> all2 :: (a -> b -> Bool) -> [a] -> [b] -> Bool
-> all2 _ [] [] = True
-> all2 f (x:xs) (y:ys) = f x y && all2 f xs ys
-> all2 _ _ _ = False
 
 * Strings
 
