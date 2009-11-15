@@ -13,6 +13,7 @@ with GeneralizedNewtypeDeriving
 >   , puts
 >   , any
 >   , all
+>   , partition
 >   , zipWith
 >   , findM
 >   , ignore
@@ -47,6 +48,13 @@ with GeneralizedNewtypeDeriving
 >   stuff _ x = x
 
 * Monad utils
+
+> partition :: Monad m => (a -> m Bool) -> [a] -> m ([a], [a])
+> partition _ [] = return ([], [])
+> partition f (x:xs) = do
+>   (ys, ns) <- partition f xs
+>   b <- f x
+>   return $ if b then (x:ys, ns) else (ys, x:ns)
 
 > zipWith :: Monad m => (a -> b -> m c) -> [a] -> [b] -> m [c]
 > zipWith f xs ys = mapM (uncurry f) (zip xs ys)

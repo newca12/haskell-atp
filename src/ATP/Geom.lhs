@@ -2,7 +2,13 @@
 * Signature 
 
 > module ATP.Geom
->   ( coordinate )
+>   ( invariantUnderTranslation
+>   , invariantUnderRotation
+>   , invariantUnderScaling
+>   , invariantUnderShearing
+>   , originate
+>   , wu 
+>   )
 > where
 
 * Imports
@@ -10,10 +16,24 @@
 #include "undefined.h" 
 
 > import ATP.Util.Prelude 
+> import ATP.Equal (lhs)
 > import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
+> import qualified ATP.Grobner as Grobner
+> import qualified ATP.Poly as P
+> import ATP.Poly (zero)
+> import qualified ATP.Util.List as List
+> import qualified ATP.Util.ListSet as LSet
+> import ATP.Util.ListSet ((\\))
+> import qualified ATP.Util.Monad as M
 > import qualified Data.Map as Map
+> import qualified Data.Set as Set
+
+Allow interactive use of Grobner without unused import warning
+
+> __ :: Formula -> IO Bool
+> __ = Grobner.decide
 
 * Geometry 
 
@@ -63,20 +83,141 @@ transformation. The following generates an assertion that one of our
 geometric properties is unchanged if we systematically map each x ↦ x'
 and y ↦ y':
 
--- > invariant :: (Term, Term) -> (String, Formula) -> Formula
--- > invariant (x', y') (s, z) = z ⇔ Fol.apply θ z
--- >  where 
--- >   m n = 
--- >     let x = "x_" ++ show n
--- >         y = "y_" ++ show n
--- >         i = Map.fromList $ zip ["x", "y"] [Var x, Var y]
--- >     in Map.insert x (Fol.apply i x') . Map.insert y (Fol.apply i y')
--- >   θ = foldr m Map.empty [1..5]
+> invariant :: (Term, Term) -> (String, Formula) -> Formula
+> invariant (x', y') (_s, z) = z ⇔ Fol.apply θ z
+>  where 
+>   m n = 
+>     let x = "x_" ++ show n
+>         y = "y_" ++ show n
+>         i = Map.fromList $ zip ["x", "y"] [Var x, Var y]
+>     in Map.insert x (Fol.apply i x') . Map.insert y (Fol.apply i y')
+>   θ = foldr m Map.empty [1..5]
 
 We will check the invariance of our properties under various transformations
 of this sort. (We check them over the complex numbers for eciency;
 if a universal formula holds over C it also holds over R.) Under a spatial
 translation x ↦ x + X, y ↦ y + Y :
 
--- > invariantUnderTranslation :: (String, Formula) -> Formula
--- > invariantUnderTranslation = invariant ([$term| x + x' |], [$term| y + y' |])
+> invariantUnderTranslation :: (String, Formula) -> Formula
+> invariantUnderTranslation = invariant ([$term| x + x' |], [$term| y + y' |])
+
+M.all (Grobner.decide . invariantUnderTranslation) coordinations
+
+> invariantUnderRotation :: (String, Formula) -> Formula
+> invariantUnderRotation fm = 
+>   [$form| s^2 + c^2 = 1 |] ⊃ (invariant ([$term| c * x - s * y |], [$term| s * x + c * y |]) fm)
+
+M.all (Grobner.decide . invariantUnderRotation) coordinations
+
+Given any point (x; y), we can choose s and c subject to s2+c2 = 1 to
+make sx + cy = 0.  Thus, given two points A and B in the original
+problem, we may take them to be (0, 0) and (x, 0) respectively:
+
+> originate :: Formula -> Formula
+> originate fm = case Fol.fv fm of
+>   a:b:_ -> Fol.apply (Map.fromList [ (a ++ "_x", zero), (a ++ "_y", zero), (b ++ "_y", zero)]) (coordinate fm)
+>   _ -> error "Impossible" 
+
+Two other important transformations are scaling and shearing. Any combination
+of translation, rotation, scaling and shearing is called an affine
+transformation.
+
+> invariantUnderScaling :: (String, Formula) -> Formula
+> invariantUnderScaling fm = 
+>   [$form| ¬ A = 0 |] ⊃ (invariant ([$term| A * x |], [$term| A * y |]) fm)
+
+Because all our geometric properties are invariant under scaling:
+
+M.all (Grobner.decide . invariantUnderScaling) coordinations
+
+we might be tempted to go further and use (1; 0) for the point B, but we can
+only do this if we are happy to rule out the possibility that A = B. Similarly,
+we might want to use shearing invariance to justify taking three of the points
+as (0; 0), (x; 0) and (0; y), but this is problematic if the three points may be
+collinear. In any case, while some properties are invariant under shearing,
+perpendicularity and equality of lengths are not, as the reader can conrm
+thus:
+
+M.partition (Grobner.decide . invariantUnderShearing) coordinations
+
+Thus, the special choice of coordinates based on invariance under scaling
+and shearing seems best left to the user setting up the problem.
+
+> invariantUnderShearing :: (String, Formula) -> Formula
+> invariantUnderShearing = invariant ([$term| x + b * y |], [$term| y |])
+
+:{
+(Grobner.decide . originate) 
+  [$form| is_midpoint(m,a,c) ∧ perpendicular(a,c,m,b) ⊃ lengths_eq(a,b,b,c) |]
+:}
+
+> pprove :: Vars -> [Term] -> Term -> [Formula] -> [Formula]
+> pprove vars triang p degens 
+>  | p == zero = degens
+>  | otherwise = case triang of
+>    [] -> p ≡ zero : degens
+>    q@[$term| $_ + ^x * _ |] : qs 
+>     | x /= head vars -> 
+>       if elem (head vars) (Fol.fv p) 
+>       then foldr (pprove vars triang) degens (P.coefficients vars p) 
+>       else pprove (tail vars) triang p degens
+>     | otherwise -> 
+>       let (k, p') = P.pdivide vars p q in
+>       if k == 0 then pprove vars qs p' degens else
+>       let degens' = (¬) (P.phead vars q ≡ zero) : degens in
+>       foldr (pprove vars qs) degens' (P.coefficients vars p') 
+>    _ -> __IMPOSSIBLE__ 
+
+Any set of polynomials can be transformed into a triangular set of polynomials
+that are all zero whenever all the initial polynomials are. If the
+desired `top' variable xk+m occurs in at most one polynomial, we set that
+one aside and triangulate the rest with respect to the remaining variables.
+Otherwise, we can pick the polynomial p with the lowest degree in xk+m
+and pseudo-divide all the other polynomials by p, then repeat. We must
+reach a stage where xk+m is confined to one polynomial, since each time we
+run pseudo-division we reduce the aggregate degree of xk+m. This is implemented
+in the following function, where we assume that polynomials in the
+list consts do not involve the head variable in vars, but those in pols may
+do:
+
+> triangulate :: Vars -> [Term] -> [Term] -> [Term]
+> triangulate vars consts pols 
+>  | null vars = pols
+>  | otherwise = 
+>    let (cns, tpols) = List.partition (P.isConstant vars) pols in
+>    if null cns then triangulate vars (cns ++ consts) tpols else
+>    if length pols <= 1 then pols ++ triangulate (tail vars) [] consts else
+>    let n = minimum $ map (P.degree vars) pols
+>        p = fromJust $ List.find (\p' -> P.degree vars p' == n) pols
+>        ps = pols \\ [p]
+>    in triangulate vars consts $ p : map (\q -> snd $ P.pdivide vars q p) ps
+
+Because geometry statements tend to be of the constructive type, they
+are already in `almost triangular' form and the triangulation tends to be
+quick and efficient. Constructions like `M is the midpoint of the line AB'
+or `P is the intersection of lines AB and CD' define points by one or two
+constraints on their coordinates. Assuming all coordinates introduced later
+have been triangulated, we now only need to triangulate the two equations
+defining these constraints by pseudo-division within this pair, and need not
+modify other equations. Thus, forming a triangular set tends to be much
+more efficient than forming a Gröobner basis. However, when it comes to
+actually reducing with the set, a Gröobner basis is often much more efficient.
+
+Now we will implement the overall procedure that returns a set of sufficient
+conditions for one conjunction of polynomial equations to imply another.
+The user is expected to list the variables in elimination order in vars, and
+specify which coordinates are to be set to zero in zeros. We could attempt
+to infer an order automatically, and rely on originate for the choice of
+zeros, but since both these parameters can affect efficiency dramatically, a
+finer degree of control is useful.
+
+> wu :: Formula -> Vars -> Vars -> [Formula]
+> wu fm vars zeros =
+>   let gfm0 = coordinate fm
+>       gfm = Fol.apply (foldr (flip Map.insert zero) Map.empty zeros) gfm0
+>   in if not $ Set.fromList vars == Set.fromList (Fol.fv gfm) then error "wu: bad parameters" else
+>   let (ant, con) = F.destImp gfm
+>       pols = map (lhs . P.atom vars) (F.conjuncts ant)
+>       ps = map (lhs . P.atom vars) (F.conjuncts con)
+>       tri = triangulate vars [] pols
+>   in foldr (\p -> LSet.union (pprove vars tri p [])) [] ps 
