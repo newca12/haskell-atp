@@ -2,7 +2,7 @@
 default : dist
 
 configure : ATP.cabal ATP.cabal.lib
-	runhaskell Setup.lhs configure --user # --enable-library-profiling
+	runhaskell Setup.lhs configure --user --enable-library-profiling
 
 build : 
 	runhaskell Setup.lhs build
