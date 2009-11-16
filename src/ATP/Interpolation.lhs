@@ -26,6 +26,8 @@
 > import ATP.Util.ListSet((\\), (∪))
 > import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((⟾))
+> import qualified ATP.Util.Log as Log
+> import ATP.Util.Log (Log)
 > import qualified Data.List as List
 > import qualified Data.Map as Map
 
@@ -41,7 +43,7 @@ Davis-Putnam procedure from section 3.8 to ﬁnd the set of ground instances.
 (This will usually loop indeﬁnitely unless the user does indeed supply for- 
 mulas p and q such that |= p ∧ q ⇒ ⊥.) 
 
-> urinterpolate :: Formula -> Formula -> IO (Formula)
+> urinterpolate :: Log m => Formula -> Formula -> m (Formula)
 > urinterpolate p q = 
 >   let fm = Skolem.specialize $ Skolem.prenex $ p ∧ q
 >       fvs = Fol.fv fm
@@ -72,7 +74,7 @@ For the main algorithm, we ﬁnd the pre-interpolant using urinterpolate,
 in decreasing order of size (so no earlier one is a subterm of a later one), 
 then iteratively replace them by quantiﬁed variables. 
 
-> uinterpolate :: Formula -> Formula -> IO (Formula)
+> uinterpolate :: Log m => Formula -> Formula -> m Formula
 > uinterpolate p q = 
 >   let fp = Fol.functions p
 >       fq = Fol.functions q
@@ -121,7 +123,7 @@ assures us that
 |= p ⇒ c and |= q ⇒ ¬c, and it is also an interpolant for the 
 original formulas. This is realized in the following algorithm:      
 
-> cinterpolate :: Formula -> Formula -> IO (Formula)
+> cinterpolate :: Log m => Formula -> Formula -> m Formula
 > cinterpolate p q = 
 >   let fm = Skolem.nnf (p ∧ q)
 >       efm = F.listEx (Fol.fv fm) fm
@@ -135,7 +137,7 @@ that we need to replace them by variables again in the ﬁnal result to respect
 the conditions for an interpolant. We elect to ‘manually’ replace the common 
 variables by new constants c i and then restore them afterwards.
 
-> interpolate :: Formula -> Formula -> IO (Formula)
+> interpolate :: Log m => Formula -> Formula -> m Formula
 > interpolate p q =
 >   let vs = map Var (Set.intersect (Fol.fv p) (Fol.fv q))
 >       fns = Fol.functions (p ∧ q)
@@ -161,7 +163,7 @@ formulas and possibly the equality sign. To implement this, we can extract
 the equality axioms from equalitize (which is designed for validity-proving 
 and hence adjoins them as hypotheses): 
 
-> einterpolate :: Formula -> Formula -> IO (Formula)
+> einterpolate :: Log m => Formula -> Formula -> m Formula
 > einterpolate p q =
 >   let p' = Equal.equalitize p
 >       q' = Equal.equalitize q

@@ -669,7 +669,7 @@ Show a test formula
 > main = System.getArgs >>= doit
 
 > doit :: Args -> IO ()
-> doit args = do 
+> doit args = Lib.timeIO $ do 
 >   S.putStrLn "Welcome to Haskell ATP!"
 >   -- Parse arguments.  Opts is the unknown options that will be parsed by
 >   -- the individual prover.  

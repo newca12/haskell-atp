@@ -6,6 +6,7 @@ standard library.  Most mirror functions in Harrison's lib.ml
 
 > module ATP.Util.Lib 
 >   ( time
+>   , timeIO
 >   , pow
 >   , funpow
 >   , decreasing
@@ -20,6 +21,7 @@ standard library.  Most mirror functions in Harrison's lib.ml
 * Imports
 
 > import Prelude
+> import qualified Control.Exception as Exn
 > import qualified Data.Char as Char
 > import qualified Data.List as List
 > import qualified Data.Map as Map
@@ -29,13 +31,27 @@ standard library.  Most mirror functions in Harrison's lib.ml
 
 * Misc
 
-> time :: Show a => IO a -> IO a
-> time a = do start <- Time.getCPUTime
->             v <- a
->             end <- Time.getCPUTime
->             let diff :: Double = (fromIntegral (end - start)) / (10E12) 
->             Printf.printf "Computation time: %0.3f sec\n" diff
->             return v
+> timeIO :: Show a => IO a -> IO a
+> timeIO a = do 
+>   start <- Time.getCPUTime
+>   v <- a
+>   end <- Time.getCPUTime
+>   let diff :: Double = (fromIntegral (end - start)) / (1E12) 
+>   Printf.printf "Computation time: %0.4f sec\n" diff
+>   return v
+
+> time :: (a -> b) -> a -> IO b
+> time f x = do
+>   start <- Time.getCPUTime
+>   y <- Exn.evaluate $ f x
+>   end <- Time.getCPUTime
+>   let diff :: Double = (fromIntegral (end - start)) / (1E12)
+>   Printf.printf "Computation time: %0.4f sec\n" diff
+>   return y
+
+-- > fib 0 = 0
+-- > fib 1 = 1
+-- > fib n = fib (n-1) + fib (n-2
 
 > pow' :: Int -> Int -> Int -> Int
 > pow' _ 0 acc = acc

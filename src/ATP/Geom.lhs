@@ -91,7 +91,7 @@ and y ↦ y':
 >         y = "y_" ++ show n
 >         i = Map.fromList $ zip ["x", "y"] [Var x, Var y]
 >     in Map.insert x (Fol.apply i x') . Map.insert y (Fol.apply i y')
->   θ = foldr m Map.empty [1..5]
+>   θ = foldr m Map.empty [1 .. (5 :: Integer)]
 
 We will check the invariance of our properties under various transformations
 of this sort. (We check them over the complex numbers for eciency;

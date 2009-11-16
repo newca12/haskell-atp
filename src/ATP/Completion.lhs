@@ -27,6 +27,8 @@ Knuth-Bendix completion.
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\), (∪))
+> import qualified ATP.Util.Log as Log
+> import ATP.Util.Log (Log)
 > import qualified ATP.Util.Print as PP
 > import qualified Data.Map as Map
 > import qualified Data.Maybe as Maybe
@@ -178,12 +180,12 @@ them, putting the rst orientable one back in the main list of critical pairs.
 The following auxiliary function is used to conditionally emit a report on
 current status, so that the user gets an idea what's going on.
 
-> status :: ([Formula], [Formula], [Formula]) -> [Formula] -> IO ()
+> status :: Log m => ([Formula], [Formula], [Formula]) -> [Formula] -> m ()
 > status (eqs, def, crs) eqs0 = 
 >   if eqs == eqs0 && not (length crs `mod` 1000 == 0) then return () else
->   do PP.putStrLn $ PP.hsep [ PP.int (length eqs), PP.text "equations and"
->                            , PP.int (length crs), PP.text "pending critical pairs +"
->                            , PP.int (length def), PP.text "deferred" ]
+>   Log.putStrLn' $ PP.hsep [ PP.int (length eqs), PP.text "equations and"
+>                           , PP.int (length crs), PP.text "pending critical pairs +"
+>                           , PP.int (length def), PP.text "deferred" ]
 
 In the main completion loop, if there is a critical pair left to be examined,
 we attempt to normalize and orient it; if it is nontrivial (i.e. not of the form
@@ -195,7 +197,7 @@ orient and deal with the deferred critical pairs, starting with any found to
 be orientable. If we are ultimately left with some that are non-orientable,
 we fail. Otherwise we terminate with success and return the new equations.
 
-> complete :: (Term -> Term -> Bool) -> ([Formula], [Formula], [Formula]) -> IO (Maybe [Formula])
+> complete :: Log m => (Term -> Term -> Bool) -> ([Formula], [Formula], [Formula]) -> m (Maybe [Formula])
 > complete ord (eqs, def, crits) =
 >   case crits of
 >     eq:ocrits -> 
@@ -238,7 +240,7 @@ multiple inverse operations.
 >   interreduce dun' oeqs
 > interreduce dun _ = reverse dun
 
-> completeAndSimplify :: Vars -> [Formula] -> IO (Maybe [Formula])
+> completeAndSimplify :: Log m => Vars -> [Formula] -> m (Maybe [Formula])
 > completeAndSimplify wts eqs =
 >   let ord = Order.lpoGe (Order.weight wts)
 >       eqs' = map (\e -> case normalizeAndOrient ord [] e of 
@@ -250,6 +252,7 @@ multiple inverse operations.
 >        Nothing -> return Nothing
 
 -- FIXME: 
+
 -- > example = criticalPairs eq eq
 -- >   where eq = Fol.parse "f(f(x)) = g(x)"
 

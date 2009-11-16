@@ -25,6 +25,8 @@ MESON: Model Elimination Subgoal OrieNted
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
+> import qualified ATP.Util.Log as Log
+> import ATP.Util.Log(Log)
 > import qualified Data.Map as Map
 > import qualified Data.Maybe as Maybe
 
@@ -82,7 +84,7 @@ subproblems as much as possible. This is particularly worthwhile here
 when we reduce the problem to clausal form, since otherwise the
 translated form often becomes significantly more complicated.
 
-> pureBasicMeson :: Formula -> IO Int
+> pureBasicMeson :: Log m => Formula -> m Int
 > pureBasicMeson fm = 
 >   let cls = Prop.simpcnf $ Skolem.specialize $ Skolem.pnf fm 
 >       rules = concat (map contrapositives cls) in
@@ -92,7 +94,7 @@ translated form often becomes significantly more complicated.
 The overall function starts with the usual generalization, negation and
 Skolemization, then attempts to refute the clauses using MESON:
 
-> basicMeson :: Formula -> IO [Int]
+> basicMeson :: Log m => Formula -> m [Int]
 > basicMeson fm = 
 >   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   mapM (pureBasicMeson . F.listConj) (Prop.simpdnf fm1)
@@ -205,14 +207,14 @@ running the continuation twice.
 >     Just e -> Just e
 >     Nothing -> expfn goals2 n1 goals1 n2 n1 cont env k
 
-> pureMeson :: Formula -> IO Int
+> pureMeson :: Log m => Formula -> m Int
 > pureMeson fm = 
 >   let cls = Prop.simpcnf $ Skolem.specialize $ Skolem.pnf fm 
 >       rules = concat (map contrapositives cls) in
 >   Tableaux.deepen (\n -> do mexpand rules [] Bot Just (Map.empty, n, 0) 
 >                             return n) 0
 
-> meson :: Formula -> IO [Int]
+> meson :: Log m => Formula -> m [Int]
 > meson fm = 
 >   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   mapM (pureMeson . F.listConj) (Prop.simpdnf fm1)

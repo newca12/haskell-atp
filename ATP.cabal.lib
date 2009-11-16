@@ -11,16 +11,19 @@ homepage:
 bug-reports:    
 category:       Theorem provers
 
-synopsis:       A Haskell port of the code from John Harrison's book 
-                Handbook of Practical Logic and Automated Reasoning.
+synopsis:       Haskell theorem proving algorithms.
 
-description:    Haskell theorem proving algorithms.
+description:    A Haskell port of the code from John Harrison's book 
+                Handbook of Practical Logic and Automated Reasoning.
 
 tested-with:    GHC == 6.10.4
 
 extra-source-files: LICENSE
+                    README
+                    Makefile
                     src/undefined.h
-                    src/undefined2.h
+                    ATP.cabal.lib
+                    notes/haskell.tex
 
 library
 
@@ -64,7 +67,7 @@ library
                -- Dump Core language
                -- -ddump-simpl
                -- Warnings as errors
-               -Werror
+               -- -Werror
                -- Allow comment lines next to literate lines
                -optL -q
                -- Profiling 
@@ -91,7 +94,6 @@ library
                    ATP.Util.TH
                    ATP.Util.Tuple
                    ATP.Util.UnionFind
-
                    ATP.Bdd
                    ATP.Combining
                    ATP.Completion
@@ -99,7 +101,7 @@ library
                    ATP.Cong
                    ATP.Cooper
                    ATP.Decidable
-                   ATP.DefCNF
+                   ATP.DefCnf
                    ATP.Dlo
                    ATP.Dp
                    ATP.EqElim
@@ -126,19 +128,21 @@ library
                    ATP.Resolution
                    ATP.Rewrite
                    ATP.Skolem
+                   ATP.Stal
                    ATP.Tableaux
                    ATP.TestFormulas
                    ATP.Unif
-
                    ATP.Test.Combining
                    ATP.Test.Complex
                    ATP.Test.Cooper
                    ATP.Test.Dlo
                    ATP.Test.Fo
                    ATP.Test.Grobner
-                   ATP.Test.Misc
                    ATP.Test.Real
                    ATP.Test.Taut
+
+  other-modules : Compat
+                  
 
 executable atp
 
@@ -162,5 +166,3 @@ executable atp
   ghc-options: -fno-ignore-asserts
                -- Allow comment lines next to literate lines
                -optL -q
-
-

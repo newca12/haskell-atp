@@ -22,6 +22,8 @@
 > import qualified ATP.Unif as Unif
 > import qualified ATP.Util.Lex as Lex
 > import qualified ATP.Util.List as List
+> import qualified ATP.Util.Log as Log
+> import ATP.Util.Log(Log)
 > import qualified ATP.Util.Parse as P
 > import ATP.Util.Parse (Parse, Parser, parser)
 > import qualified ATP.Util.Print as PP
@@ -92,7 +94,7 @@ As with the tableau provers, we now simply need to iteratively increase
 the proof size bound n until a proof is found. As well as the instantiations,
 the necessary size bound is returned. 
 
-> hornprove :: Formula -> IO (Env, Int)
+> hornprove :: Log m => Formula -> m (Env, Int)
 > hornprove fm = 
 >   let rules = map hornify (Prop.simpcnf $ Skolem.skolemize 
 >                            $ Not $ Fol.generalize fm) 

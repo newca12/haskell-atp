@@ -121,15 +121,15 @@ set up the appropriate sets of free variables, functions and constants. Then
 we simply start the main loop, and report if it terminates how many ground
 instances were tried:
 
-> gilmoreLoop :: Clauses -> [Term] -> [FuncA] -> Vars -> Int
->             -> Clauses -> [[Term]] -> [[Term]] -> IO [[Term]] 
+> gilmoreLoop :: Log m => Clauses -> [Term] -> [FuncA] -> Vars -> Int
+>             -> Clauses -> [[Term]] -> [[Term]] -> m [[Term]] 
 > gilmoreLoop =
 >   let mfn djs0 ifn djs =
 >           filter (not . Prop.trivial) 
 >              (Prop.distrib (Set.image (Set.image ifn) djs0) djs) in 
 >   herbloop mfn (/= [])
 
-> gilmore :: Formula -> IO Int
+> gilmore :: Log m => Formula -> m Int
 > gilmore fm = 
 >     let sfm = Skolem.skolemize(Not(Fol.generalize fm)) 
 >         fvs = Fol.fv sfm 
@@ -167,11 +167,11 @@ rather than DNF:
 > dpMfn :: Clauses -> (Formula -> Formula) -> Clauses -> Clauses
 > dpMfn cjs0 ifn cjs = Set.union (map (map ifn) cjs0) cjs
 
-> dpLoop :: Clauses -> [Term] -> [FuncA] -> Vars 
->           -> Int -> Clauses -> [[Term]] -> [[Term]] -> IO [[Term]] 
+> dpLoop :: Log m => Clauses -> [Term] -> [FuncA] -> Vars 
+>           -> Int -> Clauses -> [[Term]] -> [[Term]] -> m [[Term]] 
 > dpLoop = herbloop dpMfn Dp.dpll
 
-> davisputnam :: Formula -> IO Int
+> davisputnam :: Log m => Formula -> m Int
 > davisputnam fm =
 >   let sfm = Skolem.skolemize(Not(Fol.generalize fm)) 
 >       fvs = Fol.fv sfm 
@@ -206,13 +206,13 @@ the other instances are satisfiable:
 
 We can use this refinement process after the main loop has succeeded:
 
-> dpRefineLoop :: Clauses -> [Term] -> [FuncA] -> Vars 
->                 -> Int -> Clauses -> [[Term]] -> [[Term]] -> IO [[Term]]
+> dpRefineLoop :: Log m => Clauses -> [Term] -> [FuncA] -> Vars 
+>                 -> Int -> Clauses -> [[Term]] -> [[Term]] -> m [[Term]]
 > dpRefineLoop cjs0 cntms funcs fvs n cjs tried tuples =
 >   do tups <- dpLoop cjs0 cntms funcs fvs n cjs tried tuples 
 >      return (dpRefine cjs0 fvs tups [])
 
-> davisputnam' :: Formula -> IO Int
+> davisputnam' :: Log m => Formula -> m Int
 > davisputnam' fm =
 >   let sfm = Skolem.skolemize(Not(Fol.generalize fm)) 
 >       fvs = Fol.fv sfm 

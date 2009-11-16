@@ -22,9 +22,9 @@
 > import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((⟾))
 > import qualified ATP.Util.List as List
+> import qualified ATP.Util.ListSet as Set
 > import qualified ATP.Util.Log as Log
 > import ATP.Util.Log(Log)
-> import qualified ATP.Util.ListSet as Set
 > import qualified Data.List as List
 > import qualified Data.Map as Map
 
@@ -162,17 +162,17 @@ refutations.
 >     Just x -> return x
 >     Nothing -> deepen f (n+1)
 
-> tabrefute :: [Formula] -> IO Int
+> tabrefute :: Log m => [Formula] -> m Int
 > tabrefute fms =
 >   let tabFn n = do tableau (fms, [], n) Just (Map.empty, 0) 
 >                    return n in
 >   deepen tabFn 0
 
-> tab :: Formula -> IO Int
+> tab :: Log m => Formula -> m Int
 > tab fm = 
 >   let sfm = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   if sfm == Bot then return 0 else tabrefute [sfm]
 
-> splittab :: Formula -> IO [Int]
+> splittab :: Log m => Formula -> m [Int]
 > splittab = mapM tabrefute . Prop.simpdnf . Skolem.askolemize 
 >            . Not . Fol.generalize

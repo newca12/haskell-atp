@@ -22,6 +22,13 @@ when type classes are involved.  For interactive use, we really
 don't care about performance, so forget about the restriction. 
 
 > {-# LANGUAGE NoMonomorphismRestriction #-}
+> {-# OPTIONS_GHC -fno-warn-unused-binds 
+>                 -fno-warn-unused-imports
+>                 -fno-warn-missing-signatures #-}
+
+* Signature
+
+> module Compat where
 
 * Imports
 

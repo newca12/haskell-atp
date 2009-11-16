@@ -20,8 +20,9 @@
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
+> import qualified ATP.Util.Log as Log
+> import ATP.Util.Log(Log)
 > import qualified Data.List as List
-> import qualified System.IO.UTF8 as S
 
 * Paramodulation
 
@@ -51,22 +52,22 @@
 >       cls2' = Resolution.rename "y" cls2 in
 >   paramodulate cls1' cls2' ++ paramodulate cls2' cls1'
 
-> paraloop :: ([Clause], [Clause]) -> IO Bool
+> paraloop :: Log m => ([Clause], [Clause]) -> m Bool
 > paraloop (_, []) = error "No proof found"
 > paraloop (used, unused@(cls:ros)) = 
->   do S.putStrLn (show (length used) ++ " used; " ++ show (length unused) ++ " unused.")
+>   do Log.putStrLn (show (length used) ++ " used; " ++ show (length unused) ++ " unused.")
 >      let used' = Set.insert cls used
 >          news = List.concat (map (Resolution.resolveClauses cls) used')
 >                 ++ List.concat (map (paraClauses cls) used') in
 >        if elem [] news then return True
 >        else paraloop(used', foldr (Resolution.incorporate cls) ros news) 
 
-> pureParamodulation :: Formula -> IO Bool
+> pureParamodulation :: Log m => Formula -> m Bool
 > pureParamodulation fm = 
 >   paraloop ([], [Equal.mkEq (Var "x") (Var "x")] :
 >             Prop.simpcnf(Skolem.specialize(Skolem.pnf fm)))
 
-> paramodulation :: Formula -> IO [Bool]
+> paramodulation :: Log m => Formula -> m [Bool]
 > paramodulation fm = 
 >   let fm1 = Skolem.askolemize $ Not $ Fol.generalize fm in
 >   mapM (pureParamodulation . F.listConj) (Prop.simpdnf fm1)

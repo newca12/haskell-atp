@@ -59,5 +59,5 @@
 > pp :: Print a => a -> IO ()
 > pp = Print.putStrLn . pPrint
 
-> instance Monad m => Functor m where
->   fmap f x = x >>= return . f
+-- > instance Monad m => Functor m where
+-- >   fmap f x = x >>= return . f

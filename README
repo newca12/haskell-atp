@@ -1,0 +1,26 @@
+
+--------------------------------------------------------------------------------
+ Dependencies
+--------------------------------------------------------------------------------
+
+1) GHC >= 6.10.4
+   Easiset way is to download binary from http://www.haskell.org/ghc/
+   
+2) Cabal >= 1.6.0.3
+   Easiest way is to download cabal-install from
+   http://www.haskell.org/cabal/download.html and download the
+   cabal-install tool.  Running bootstrap.sh will download everything
+   you need.
+
+--------------------------------------------------------------------------------
+ Installation                                                                   
+--------------------------------------------------------------------------------
+
+1) Get the required Haskell libraries:
+   
+ cabal update
+ cabal install HUnit quickcheck-2.1.0.2 hslogger utf8-string
+
+2) make
+
+3) Make sure ~/.cabal/bin is on your path.  The atp executable resides there.

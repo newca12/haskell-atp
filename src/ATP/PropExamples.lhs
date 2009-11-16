@@ -329,4 +329,3 @@ give a tautology precisely if p is prime.
 >       n = bitLength p in
 >   (¬) (multiplier m u v out (n - 1) ∧
 >         congruentTo out p (max n (2 * n - 2)))
-

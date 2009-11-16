@@ -134,7 +134,7 @@ negated polynomials are appropriately transformed. We then find a Gröbner
 basis for the resulting set of polynomials and test whether 1 is in the ideal
 (i.e. reduces to 0).
 
-> trivial :: [Formula] -> IO Bool
+> trivial :: Log m => [Formula] -> m Bool
 > trivial fms = 
 >   let vars0 = Fol.fv fms
 >       (eqs, neqs) = List.partition F.positive fms
@@ -152,7 +152,7 @@ some simplification and prenexing, in case some effectively universal quanti
 fiers are internal. Then we negate, break the formula into DNF and apply
 grobner trivial to each disjunct:
 
-> decide :: Formula -> IO Bool
+> decide :: Log m => Formula -> m Bool
 > decide fm = 
 >   let fm1 = Skolem.specialize $ Skolem.prenex $ Skolem.nnf $ Skolem.simplify fm in
 >   M.all trivial (Prop.simpdnf $ Skolem.nnf $ Not fm1)

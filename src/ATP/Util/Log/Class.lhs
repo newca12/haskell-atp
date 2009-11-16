@@ -9,12 +9,13 @@
 
 * Imports
 
-> import Prelude hiding (log)
+> import ATP.Util.Prelude hiding (log, putStrLn)
+> import qualified ATP.Util.Prelude as Prelude
 > import Control.Monad.Reader (ReaderT)
 > import qualified Control.Monad.State as State
 > import Control.Monad.State (StateT)
 > import qualified ATP.Util.Print as PP
-> import ATP.Util.Print ((<>))
+> import ATP.Util.Print (Doc, (<>))
 > import qualified System.IO as IO
 > import qualified System.Log.Logger as Logger
 > import System.Log.Logger (Priority(..))
@@ -27,6 +28,8 @@ as a monad.  This means we don't have to write (Log m, Monad m) =>
 when we want to define a class restriction.
 
 > class Monad m => Log m where
+>   putStrLn :: String -> m ()
+>   putStrLn' :: Doc -> m ()
 >   logM' :: String -> Priority -> PP.Doc -> m ()
 >   logM :: String -> Priority -> String -> m ()
 >   logM log p = logM' log p . PP.text
@@ -67,6 +70,8 @@ Write a log entry in the IO monad.  If we are in the "stdout" log,
 don't record the priority. 
 
 > instance Log IO where
+>   putStrLn = Prelude.putStrLn
+>   putStrLn' = PP.putStrLn
 >   logM' log prio msg = do Logger.logM log prio (PP.render doc)
 >                           --IO.hFlush IO.stdout
 >     where doc = PP.vcat [ header, PP.text "  " <> msg ]
@@ -74,8 +79,12 @@ don't record the priority.
 >           priop = if log == "stdout" then "" else ": " ++ show prio
 
 > instance Log m => Log (StateT s m) where
+>   putStrLn = State.lift . putStrLn
+>   putStrLn' = State.lift . putStrLn'
 >   logM' log prio msg = State.lift $ logM' log prio msg
 
 > instance Log m => Log (ReaderT r m) where
+>   putStrLn = State.lift . putStrLn
+>   putStrLn' = State.lift . putStrLn'
 >   logM' log prio msg = State.lift $ logM' log prio msg
 
