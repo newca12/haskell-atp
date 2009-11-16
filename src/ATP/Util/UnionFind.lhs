@@ -18,13 +18,17 @@ Union-Find
 > import Prelude 
 > import qualified Data.Map as Map
 > import Data.Map(Map)
+> import qualified ATP.Util.Print as PP
+> import ATP.Util.Print (Print, pPrint)
 
 * Union-Find
 
 > data Pnode a = Nonterminal a
 >              | Terminal a Int
+>   deriving Eq
 
 > data Partition a = Partition (Map a (Pnode a))
+>   deriving Eq
 
 > terminus :: Ord a => Partition a -> a -> Maybe (a, Int)
 > terminus (ptn @ (Partition m)) a = 
@@ -61,3 +65,6 @@ Union-Find
 
 > equated :: Partition a -> [a]
 > equated (Partition f) = Map.keys f
+
+> instance Print a => Print (Partition a) where
+>   pPrint p = PP.listHoriz (map pPrint $ equated p)

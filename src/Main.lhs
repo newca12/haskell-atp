@@ -47,6 +47,7 @@ The front end for the automated theorem proving Haskell port.
 > import qualified ATP.Resolution as Resolution
 > import qualified ATP.Rewrite as Rewrite
 > import qualified ATP.Skolem as Skolem
+> import qualified ATP.Stal as Stal
 > import qualified ATP.Tableaux as Tableaux
 > import qualified ATP.Test.Combining
 > import qualified ATP.Test.Complex
@@ -163,6 +164,7 @@ Get a term from commandline options.
 >                          Nothing -> Exn.throw $ ComExn "Can't determine formula"
 >                          Just f -> f
 >     (Nothing, ["prime", n]) -> PropExamples.prime $ read n
+>     (Nothing, ["adder", n, m]) -> PropExamples.mkAdderTest (read n) (read m)
 >     (Nothing, ["ramsey", s, t, n]) -> PropExamples.ramsey (read s) (read t) (read n)
 >     _ -> Exn.throw $ ComExn "Can't determine formula"
 >   where isFormulaFlag (FormulaFlag f) = Just f
@@ -207,7 +209,7 @@ Get rewriting rules.
 >          , ("Term kung fu", 
 >             [ polytest ])
 >          , ("Propositional decision procedures",
->             [ truthtable, tautology, dp, dpll, bddtaut ])
+>             [ truthtable, tautology, dp, dpll, stalmarck, bddtaut ])
 >          , ("Basic Herbrand methods",
 >             [ gilmore, davisputnam ])
 >          , ("Tableaux",
@@ -445,6 +447,15 @@ Show a test formula
 >                         , PP.text "dpll prime 17"
 >                         , PP.text "dpll ramsey 2 3 5"]
 >         f = run (return . Dp.dplltaut)
+
+> stalmarck :: Command
+> stalmarck = Com "stalmarck" summ usage f
+>   where summ = "Davis-Putnam-Loveland-Logemann procedure (propositional)" 
+>         usage = PP.vcat [ PP.text "stalmarck -f <formula>"
+>                         , PP.text "stalmarck <id>"
+>                         , PP.text "stalmarck prime 17"
+>                         , PP.text "stalmarck ramsey 2 3 5"]
+>         f = run Stal.stalmarck
 
 > bddtaut :: Command
 > bddtaut = Com "bddtaut" summ usage f

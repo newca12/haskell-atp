@@ -92,18 +92,19 @@ library
                    ATP.Util.Tuple
                    ATP.Util.UnionFind
 
+                   ATP.Bdd
                    ATP.Combining
                    ATP.Completion
                    ATP.Complex
                    ATP.Cong
                    ATP.Cooper
-                   ATP.DLO
-                   ATP.DP
                    ATP.Decidable
                    ATP.DefCNF
+                   ATP.Dlo
+                   ATP.Dp
                    ATP.EqElim
                    ATP.Equal
-                   ATP.FOL
+                   ATP.Fol
                    ATP.Formula
                    ATP.FormulaSyn
                    ATP.Geom
@@ -112,6 +113,7 @@ library
                    ATP.Interpolation
                    ATP.Intro
                    ATP.IntroSyn
+                   ATP.MPoly
                    ATP.Meson
                    ATP.Order
                    ATP.Paramodulation
@@ -127,6 +129,16 @@ library
                    ATP.Tableaux
                    ATP.TestFormulas
                    ATP.Unif
+
+                   ATP.Test.Combining
+                   ATP.Test.Complex
+                   ATP.Test.Cooper
+                   ATP.Test.Dlo
+                   ATP.Test.Fo
+                   ATP.Test.Grobner
+                   ATP.Test.Misc
+                   ATP.Test.Real
+                   ATP.Test.Taut
 
 executable atp
 

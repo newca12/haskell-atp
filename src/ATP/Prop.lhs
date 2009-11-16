@@ -41,6 +41,7 @@ propositional variables.
 > import ATP.FormulaSyn 
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
+> import ATP.Util.ListSet ((∪))
 > import qualified ATP.Util.Print as PP
 > import qualified Control.Monad as M
 > import qualified Data.Map as Map
@@ -50,10 +51,13 @@ propositional variables.
 
 * Propositions
 
-> apply :: Map Rel Formula -> Formula -> Formula
-> apply env = F.onatoms (\p -> case Map.lookup p env of 
->                                Just p' -> p'
->                                Nothing -> Atom p)
+> class Apply a where
+>   apply :: Map Rel Formula -> a -> a
+
+> instance Apply Formula where
+>   apply env = F.onatoms (\p -> case Map.lookup p env of 
+>                                  Just p' -> p'
+>                                  Nothing -> Atom p)
 
 Evaluate a formula in a mapping of variables to truth values.
 
@@ -307,7 +311,7 @@ Disjunctive normal form
 > purednf :: Formula -> [[Formula]]
 > purednf fm = case fm of
 >   And p q -> distrib (purednf p) (purednf q)
->   Or p q -> Set.union (purednf p) (purednf q)
+>   Or p q -> purednf p ∪ purednf q
 >   _ -> [[fm]]
 
 > trivial :: [Formula] -> Bool

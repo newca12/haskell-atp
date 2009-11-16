@@ -23,7 +23,7 @@
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Util.ListSet as Set
-> import ATP.Util.ListSet((\\))
+> import ATP.Util.ListSet((\\), (∪))
 > import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((⟾))
 > import qualified Data.List as List
@@ -87,7 +87,7 @@ then iteratively replace them by quantiﬁed variables.
 >             simpinter otms (n+1::Int) c'' 
 >           _ -> __IMPOSSIBLE__ in
 >   do c <- urinterpolate p q 
->      let tts = topterms (Set.union (fp \\ fq) (fq \\ fp)) c
+>      let tts = topterms ((fp \\ fq) ∪ (fq \\ fp)) c
 >          tms = List.sortBy (Lib.decreasing Order.termSize) tts 
 >      return $ simpinter tms 1 c
 

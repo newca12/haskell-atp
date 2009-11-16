@@ -26,6 +26,8 @@
 > import Prelude hiding (putStrLn)
 > import qualified System.IO.UTF8 as S
 > import qualified Data.List as List
+> import qualified Data.Map as Map
+> import Data.Map (Map)
 > import qualified Data.Set as Set
 > import Data.Set (Set)
 > import qualified Text.PrettyPrint.HughesPJ as PP
@@ -178,6 +180,9 @@
 
 > instance Print a => Print (Set a) where
 >   pPrint x = setHoriz $ map pPrint $ Set.toList x
+
+> instance (Print a, Print b) => Print (Map a b) where
+>   pPrint x = setHoriz $ map pPrint $ Map.toList x
 
 This is needed for proper unicode printing.
 

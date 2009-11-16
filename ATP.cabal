@@ -1,1 +1,82 @@
-/Users/sean/save/projects/atp/tmp/ATP.exec.cabal
+
+name:           ATP
+version:        1.0.0
+cabal-version:  >= 1.6.0.3 && < 2
+build-type:     Simple
+license:        GPL
+license-file:   LICENSE
+author:         Sean McLaughlin <seanmcl@gmail.com>
+maintainer:	Sean McLaughlin <seanmcl@gmail.com>
+homepage:       
+bug-reports:    
+category:       Theorem provers
+
+synopsis:       A Haskell port of the code from John Harrison's book 
+                Handbook of Practical Logic and Automated Reasoning.
+
+description:    Haskell theorem proving algorithms.
+
+tested-with:    GHC == 6.10.4
+
+extra-source-files: LICENSE
+                    src/undefined.h
+
+executable atp
+
+  main-is:       Main.lhs
+
+  hs-source-dirs: src
+
+  include-dirs: src
+
+  build-depends:  base >= 4.1.0.0,
+                  haskell98 >= 1.0.1.0,
+                  containers >= 0.2.0.1,
+                  mtl >= 1.1.0.2,
+                  parsec >= 2.1.0.1,
+                  utf8-string >= 0.3.5,
+                  HUnit >= 1.2.2.0,
+                  pretty >= 1.0.1.0,
+                  QuickCheck >= 2.1.0.0,
+                  template-haskell >= 2.3.0.1,
+                  hslogger >= 1.0.7,
+                  syb >= 0.1.0.1
+
+  extensions:    NoImplicitPrelude
+                 MultiParamTypeClasses
+                 ScopedTypeVariables
+                 TypeSynonymInstances
+                 OverlappingInstances
+                 FlexibleInstances
+                 DeriveDataTypeable
+                 TemplateHaskell
+                 QuasiQuotes
+                 FlexibleContexts
+                 UndecidableInstances
+                 CPP
+
+  ghc-options: -Wall 
+               -- These warnings are not turned on by -Wall
+               -fwarn-implicit-prelude 
+               -fwarn-monomorphism-restriction 
+               -fwarn-incomplete-record-updates 
+               -fwarn-tabs 
+               -fwarn-simple-patterns 
+               -fno-ignore-asserts
+               -O
+               -- -v
+               -- Dump Core language
+               -- -ddump-simpl
+               -- Warnings as errors
+               -Werror
+               -- Allow comment lines next to literate lines
+               -optL -q
+               -- Profiling 
+               -prof
+               -auto-all
+               -osuf p_o 
+               -hisuf p_hi
+               -- Remove literate comments with BirdPP
+               -- -pgmL BirdPP
+
+

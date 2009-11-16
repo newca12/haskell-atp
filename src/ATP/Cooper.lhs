@@ -26,6 +26,7 @@
 > import qualified ATP.Qelim as Qelim
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Util.ListSet as Set
+> import ATP.Util.ListSet ((∪))
 > import qualified ATP.Util.Print as PP
 > import qualified Data.List as List
 > import qualified Data.Maybe as Maybe
@@ -333,8 +334,8 @@ the B-set for the formula in question.y In OCaml:
 >   [$form| $n0 < $n1 * $y + $a |] 
 >    | n0 == zero && n1 == one && x == y -> [linearNeg a]
 >   [$form| ¬ $p |] -> bset x p
->   [$form| $p ∧ $q |] -> Set.union (bset x p) (bset x q)
->   [$form| $p ∨ $q |] -> Set.union (bset x p) (bset x q)
+>   [$form| $p ∧ $q |] -> bset x p ∪ bset x q
+>   [$form| $p ∨ $q |] -> bset x p ∪ bset x q
 >   _ -> []
 
 In order to apply the main theorem, we need to be able to form the

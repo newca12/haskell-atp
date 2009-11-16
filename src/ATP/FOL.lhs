@@ -41,7 +41,7 @@ Relations R ::= Var() | Var ( TS ) | Var | T = T | T < T
 > import qualified ATP.Util.Lib as LIb
 > import ATP.Util.Lib((↦))
 > import qualified ATP.Util.ListSet as Set
-> import ATP.Util.ListSet((\\))
+> import ATP.Util.ListSet((\\), (∪))
 > import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
@@ -84,7 +84,7 @@ Relations
 >           [$form| $p ⊃ $q  |] -> combine p q
 >           [$form| $p ⇔ $q |] -> combine p q
 >           [$form| ^a |] -> fv a
->     where combine p q = Set.union (fv p) (fv q)
+>     where combine p q = fv p ∪ fv q
 
 > instance Fv a => Fv [a] where
 >   fv = Set.unions . map fv
@@ -114,7 +114,7 @@ Relations
 >           [$form| $p ⊃ $q  |] -> combine p q
 >           [$form| $p ⇔ $q |] -> combine p q
 >           [$form| ^a |] -> nums a
->     where combine p q = Set.union (nums p) (nums q)
+>     where combine p q = nums p ∪ nums q
 
 > instance Nums a => Nums [a] where
 >   nums xs = Set.unions (map nums xs)

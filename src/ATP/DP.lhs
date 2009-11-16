@@ -22,7 +22,7 @@ The Davis-Putnam and Davis-Putnam-Loveland-Logemann procedures.
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
-> import ATP.Util.ListSet((\\))
+> import ATP.Util.ListSet((\\), (∪))
 
 * Davis-Putnam
 
@@ -83,7 +83,7 @@ clauses.
 >       neg = map F.opp neg'
 >       posOnly = pos \\ neg
 >       negOnly = neg \\ pos
->       pure = Set.union posOnly (map F.opp negOnly) in
+>       pure = posOnly ∪ map F.opp negOnly in
 >   case pure of
 >     [] -> Nothing
 >     _ -> Just (filter (\cl -> null $ Set.intersect cl pure) clauses)
@@ -128,8 +128,8 @@ and perhaps desirable.)
 >       (neg, other) = List.partition (elem p') notpos
 >       pos' = map (filter (/= p)) pos
 >       neg' = map (filter (/= p')) neg
->       res0 = List.allPairs Set.union pos' neg' in
->   Set.union other (filter (not . Prop.trivial) res0)
+>       res0 = List.allPairs (∪) pos' neg' in
+>   other ∪ filter (not . Prop.trivial) res0
 
 Davis-Putnam procedure
 

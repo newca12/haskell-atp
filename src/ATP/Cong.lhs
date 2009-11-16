@@ -20,6 +20,7 @@ Congruence closure.
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
+> import ATP.Util.ListSet ((∪))
 > import qualified ATP.Util.UnionFind as UF
 > import ATP.Util.UnionFind(Partition)
 > import qualified Data.Map as Map
@@ -85,7 +86,7 @@ single congruence step.
 >       tp = Maybe.fromMaybe [] (Map.lookup t' pfn) 
 >       eqv' = UF.equate (s,t) eqv 
 >       st' = UF.canonize eqv' s' 
->       pfn' = Map.insert st' (Set.union sp tp) pfn 
+>       pfn' = Map.insert st' (sp ∪ tp) pfn 
 >   in foldr (\(u,v) (eq, pf) ->
 >                if congruent eq (u,v) then emerge (u,v) (eq, pf)
 >                else (eq, pf))

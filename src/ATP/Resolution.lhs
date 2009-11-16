@@ -29,7 +29,7 @@
 > import qualified ATP.Util.Log as Log
 > import ATP.Util.Log(Log)
 > import qualified ATP.Util.ListSet as Set
-> import ATP.Util.ListSet ((\\))
+> import ATP.Util.ListSet ((\\), (∪))
 > import qualified Data.Map as Map
 > import qualified Data.Maybe as Maybe
 
@@ -83,7 +83,7 @@ and add it into the accumulator:
 >             foldFn (s1, s2) sof = 
 >               case mgu (s1 ++ map F.opp s2) Map.empty of
 >                 Just env' -> 
->                   let cs = Set.union (cl1 \\ s1) (cl2 \\ s2) in
+>                   let cs = (cl1 \\ s1) ∪ (cl2 \\ s2) in
 >                   Set.image (Fol.apply env') cs : sof
 >                 Nothing -> sof 
 

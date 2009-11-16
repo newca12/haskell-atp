@@ -457,7 +457,7 @@ to complicate the printer with associativity.
 > ppForm pr f = case f of 
 >   Bot -> PP.text "⊥"
 >   Top -> PP.text "⊤"
->   Atom m -> PP.paren (pr > 9) $ pPrint m
+>   Atom m -> PP.paren (pr > 12) $ pPrint m
 >   Not p -> paren (pr > 10) (ppPrefixFm 10) "¬" p
 >   And p q -> paren (pr > 8) (ppInfixFm 8 "∧") p q
 >   Or p q -> paren (pr > 6) (ppInfixFm 6 "∨") p q

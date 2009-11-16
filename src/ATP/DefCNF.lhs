@@ -5,6 +5,7 @@ Definitional CNF
 
 > module ATP.DefCnf 
 >   ( maxVarIndex
+>   , maincnf
 >   , defcnf
 >   , defcnf1
 >   , defcnfs

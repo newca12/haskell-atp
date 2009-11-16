@@ -26,7 +26,7 @@ Knuth-Bendix completion.
 > import qualified ATP.Unif as Unif
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
-> import ATP.Util.ListSet((\\))
+> import ATP.Util.ListSet((\\), (∪))
 > import qualified ATP.Util.Print as PP
 > import qualified Data.Map as Map
 > import qualified Data.Maybe as Maybe
@@ -95,7 +95,7 @@ to be done:
 > criticalPairs fma fmb = 
 >   let (fm1, fm2) = renamePair (fma, fmb) in
 >   if fma == fmb then crit1 fm1 fm2
->   else Set.union (crit1 fm1 fm2) (crit1 fm2 fm1)
+>   else crit1 fm1 fm2 ∪ crit1 fm2 fm1
 
 * Completion
 

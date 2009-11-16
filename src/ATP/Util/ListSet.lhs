@@ -9,7 +9,7 @@ Set operations on lists.
 >   , uniq
 >   , union
 >   , intersect
->   , (\\)
+>   , (\\), (∪), (∩)
 >   , image
 >   , insert
 >   , unions
@@ -51,6 +51,9 @@ Remove duplicates in a sorted list
 >               LT -> h1 : union' t1 l2
 >               GT -> h2 : union' l1 t2
 
+> (∪) :: Ord a => [a] -> [a] -> [a]
+> (∪) = union
+
 > intersect :: Ord a => [a] -> [a] -> [a]
 > intersect s1 s2 = intersect' (setify s1) (setify s2)
 >     where intersect' [] _l2 = []
@@ -60,6 +63,9 @@ Remove duplicates in a sorted list
 >               EQ -> h1 : intersect' t1 t2
 >               LT -> intersect' t1 l2
 >               GT -> intersect' l1 t2
+
+> (∩) :: Ord a => [a] -> [a] -> [a]
+> (∩) = intersect
 
 Difference
 
