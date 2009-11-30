@@ -74,15 +74,15 @@ Add (Mul (Const 2) (Var "x")) (Var "y")
 > table = [ [op "*" Mul P.AssocRight] 
 >         , [op "+" Add P.AssocRight]
 >         ] 
->   where op s f assoc = P.Infix (do{ Lex.reservedOp s; return f }) assoc 
+>   where op s f = P.Infix (do{ Lex.reservedOp s; return f })
 
 > antiExpr :: Parser Expr
 > antiExpr = do Lex.symbol "$"
 >               id <- Lex.identifier
->               return $ Var("$" ++ id)
+>               return $ Var("$" : id)
 >        <|> do Lex.symbol "^"
 >               id <- Lex.identifier
->               return $ Var("^" ++ id)
+>               return $ Var("^" : id)
 
 > atomic :: Parser Expr
 > atomic = do n <- Lex.integer
@@ -128,7 +128,7 @@ Quote as a pattern.
 >   case v of 
 >     '$':back -> Just $ TH'.varP back
 >     '^':back -> Just $ TH'.conP "Const" [TH'.varP back]
->     "_" -> Just $ TH.wildP
+>     "_" -> Just TH.wildP
 >     _ -> Just $ TH'.varP v
 > antiExprPat _ = Nothing
 

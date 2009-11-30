@@ -15,7 +15,7 @@ Knuth-Bendix completion.
 
 * Imports
 
-#include "undefined.h" 
+#include "../undefined.h" 
 
 > import ATP.Util.Prelude
 > import qualified ATP.Fol as Fol

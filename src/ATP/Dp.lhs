@@ -13,7 +13,7 @@ The Davis-Putnam and Davis-Putnam-Loveland-Logemann procedures.
 
 * Imports
 
-#include "undefined.h" 
+#include "../undefined.h" 
 
 > import ATP.Util.Prelude 
 > import qualified ATP.DefCnf as Cnf

@@ -171,17 +171,18 @@ control is then passed to mexpands to deal with the multiple subgoals.
 
 > mexpand ::  [Rule] -> [Formula] -> Formula
 >         -> ((Env, Int, Int) -> Maybe a) -> (Env, Int, Int) -> Maybe a
-> mexpand rules ancestors g cont (env,n,k) =
->   if n < 0 then fail "Too deep"
->   else if any (equal env g) ancestors then fail "repetition" else
->   case List.findFirst (\a -> do env' <- Tableaux.unifyLiterals env (g,F.opp a)
->                                 cont (env', n, k)) ancestors of
->     Just e -> Just e
->     Nothing -> List.findFirst findFn rules
->         where findFn r = let (Rule asm c, k') = Prolog.renamer k r in
->                          do env' <- Tableaux.unifyLiterals env (g,c)
->                             mexpands rules (g:ancestors) asm cont 
->                                      (env',n-length asm,k')
+> mexpand rules ancestors g cont (env,n,k) 
+>   | n < 0 = fail "Too deep"
+>   | any (equal env g) ancestors = fail "repetition" 
+>   | otherwise =
+>     case List.findFirst (\a -> do env' <- Tableaux.unifyLiterals env (g,F.opp a)
+>                                  cont (env', n, k)) ancestors of
+>       Just e -> Just e
+>       Nothing -> List.findFirst findFn rules
+>           where findFn r = let (Rule asm c, k') = Prolog.renamer k r in
+>                            do env' <- Tableaux.unifyLiterals env (g,c)
+>                               mexpands rules (g:ancestors) asm cont 
+>                                        (env',n-length asm,k')
 
 In mexpands, if there are too many new subgoals for the current size limit,
 we fail at once, and if there is at most one new subgoal, we deal with it in

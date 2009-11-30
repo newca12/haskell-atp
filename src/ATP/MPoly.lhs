@@ -15,7 +15,7 @@
 
 * Imports
 
-#include "undefined.h" 
+#include "../undefined.h" 
 
 > import ATP.Util.Prelude hiding (const, div)
 > import qualified ATP.Util.Prelude as Prelude

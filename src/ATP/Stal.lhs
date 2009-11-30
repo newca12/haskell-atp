@@ -7,14 +7,13 @@
 
 * Imports
 
-#include "undefined.h" 
+#include "../undefined.h" 
 
 > import ATP.Util.Prelude 
 > import qualified ATP.DefCnf as Cnf
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
 > import qualified ATP.Prop as Prop
---> import qualified ATP.PropExamples as E
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet ((∪), (∩), (\\))

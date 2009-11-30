@@ -20,7 +20,7 @@
 > tests = "Grobner" ~: map mkTest formulas
 >  where 
 >   mkTest (name, f) = name ~: 
->     (Grobner.decide $ Maybe.fromJust $ Forms.lookup name) >>= \b -> f @=? b
+>     Grobner.decide (Maybe.fromJust $ Forms.lookup name) >>= (f @=?)
 
 > formulas :: [(String, Bool)]
 > formulas = 

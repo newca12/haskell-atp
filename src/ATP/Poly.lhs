@@ -33,7 +33,7 @@
 
 * Imports
 
-#include "undefined.h" 
+#include "../undefined.h" 
 
 > import ATP.Util.Prelude hiding (div)
 > import qualified ATP.Cooper as Cooper
@@ -165,7 +165,7 @@ PP.pPrint x
 > isConstant vars p = degree vars p == 0
 
 > phead :: Vars -> Poly -> Poly
-> phead vars p = last $ coefficients vars p
+> phead vars = last . coefficients vars
 
 > behead :: Vars -> Poly -> Poly
 > behead vars t = case t of

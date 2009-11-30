@@ -19,7 +19,7 @@
 
 * Imports
 
-#include "undefined.h" 
+#include "../undefined.h" 
 
 > import ATP.Util.Prelude hiding (div)
 > import qualified ATP.Cooper as Cooper
@@ -37,7 +37,6 @@
 > import Control.Monad.Error (Error, MonadError, catchError)
 > import qualified Data.List as List
 > import qualified Data.Maybe as Maybe
---> import qualified ATP.TestFormulas as TF
 
 * Exception handling
 

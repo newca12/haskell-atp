@@ -33,16 +33,16 @@
 > commas p = P.sepBy p Lex.comma
 
 > tuple :: Parser a -> Parser [a]
-> tuple p = Lex.parens $ commas p
+> tuple = Lex.parens . commas
 
 > list :: Parser a -> Parser [a]
-> list p = Lex.brackets $ commas p
+> list = Lex.brackets . commas
 
 > braces :: Parser a -> Parser [a]
-> braces p = Lex.braces $ commas p
+> braces = Lex.braces . commas 
 
 > brackets :: Parser a -> Parser [a]
-> brackets p = Lex.brackets $ commas p
+> brackets = Lex.brackets . commas 
 
 > instance Parse Bool where
 >   parser = (Lex.reserved "True" >> return True)
@@ -77,7 +77,7 @@
 >           parser' = do a <- parser
 >                        Lex.comma
 >                        b <- parser
->                        return $ (a, b)
+>                        return (a, b)
 
 > instance (Parse a, Parse b, Parse c) => Parse (a, b, c) where
 >   parser = Lex.parens parser'
@@ -87,7 +87,7 @@
 >                        b <- parser
 >                        Lex.comma
 >                        c <- parser
->                        return $ (a, b, c)
+>                        return (a, b, c)
 
 > instance (Parse a, Parse b, Parse c, Parse d) => Parse (a, b, c, d) where
 >   parser = Lex.parens parser'
@@ -99,7 +99,7 @@
 >                        c <- parser
 >                        Lex.comma
 >                        d <- parser
->                        return $ (a, b, c, d)
+>                        return (a, b, c, d)
 
 > instance (Parse a, Parse b, Parse c, Parse d, Parse e) => Parse (a, b, c, d, e) where
 >   parser = Lex.parens parser'
@@ -113,7 +113,7 @@
 >                        d <- parser
 >                        Lex.comma
 >                        e <- parser
->                        return $ (a, b, c, d, e)
+>                        return (a, b, c, d, e)
 
 > instance (Parse a, Parse b, Parse c, Parse d, Parse e, Parse f) => Parse (a, b, c, d, e, f) where
 >   parser = Lex.parens parser'
@@ -129,4 +129,4 @@
 >                        e <- parser
 >                        Lex.comma
 >                        f <- parser
->                        return $ (a, b, c, d, e, f)
+>                        return (a, b, c, d, e, f)

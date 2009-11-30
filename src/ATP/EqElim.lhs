@@ -13,7 +13,7 @@
 
 * Imports
 
-#include "undefined.h" 
+#include "../undefined.h" 
 
 > import ATP.Util.Prelude 
 > import qualified ATP.Equal as Equal
@@ -151,7 +151,7 @@ and then for other formulas (here we only care about literals, and can treat
 quantied formulas without regard to variable capture):
 
 > replace :: Map Term Term -> Formula -> Formula
-> replace rfn = Fol.onformula (replacet rfn)
+> replace = Fol.onformula . replacet
 
 To E-modify a clause, we try to nd a nested non-variable subterm; if we
 fail we are already done, and otherwise we replace that term with a fresh

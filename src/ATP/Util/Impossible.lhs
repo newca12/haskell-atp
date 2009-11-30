@@ -39,7 +39,7 @@ was stolen from Agda.
   this function directly. Instead use the macro in @undefined.h@.
 
 > throwImpossible :: Impossible -> a
-> throwImpossible i = throwDyn i
+> throwImpossible = throwDyn
 
 | Catch an \"impossible\" error, if possible.
 

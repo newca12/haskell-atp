@@ -146,7 +146,7 @@
 >     pPrintPrec l p (Right x) = paren (p > appPrec) $ PP.text "Right" <+> pPrintPrec l (appPrec+1) x
 > 
 > instance (Print a) => Print [a] where
->     pPrintPrec l _ xs = pPrintList l xs
+>     pPrintPrec l _ = pPrintList l
 > 
 > instance (Print a, Print b) => Print (a, b) where
 >     pPrintPrec l _ (a, b) =
@@ -179,10 +179,10 @@
 >         PP.parens $ PP.fsep $ PP.punctuate PP.comma [pPrint0 l a, pPrint0 l b, pPrint0 l c, pPrint0 l d, pPrint0 l e, pPrint0 l f, pPrint0 l g, pPrint0 l h]
 
 > instance Print a => Print (Set a) where
->   pPrint x = setHoriz $ map pPrint $ Set.toList x
+>   pPrint = setHoriz . map pPrint . Set.toList
 
 > instance (Print a, Print b) => Print (Map a b) where
->   pPrint x = setHoriz $ map pPrint $ Map.toList x
+>   pPrint = setHoriz . map pPrint . Map.toList
 
 This is needed for proper unicode printing.
 

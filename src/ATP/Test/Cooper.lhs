@@ -19,7 +19,7 @@
 
 > tests :: Test
 > tests = "Cooper" ~: map mkTest formulas
->   where mkTest (name, f) = name ~: do
+>   where mkTest (name, f) = name ~: 
 >           f @=? Cooper.integerQelim (Maybe.fromJust (Forms.lookup name)) 
 
 > formulas :: [(String, Formula)]

@@ -99,5 +99,5 @@ Update the logging priority for a given logger.  Note that we
 set both the global and the file log prioriteies.
 
 > setLevel :: String -> Priority -> IO ()
-> setLevel log prio = Log.updateGlobalLogger log (Log.setLevel prio)
+> setLevel log = Log.updateGlobalLogger log . Log.setLevel
 

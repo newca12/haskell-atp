@@ -18,7 +18,7 @@ The Nelson-Oppen method.
 
 * Imports
 
-#include "undefined.h"
+#include "../undefined.h"
 
 > import ATP.Util.Prelude 
 > import qualified ATP.Cong as Cong

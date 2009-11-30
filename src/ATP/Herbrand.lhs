@@ -165,7 +165,7 @@ The outer wrapper is unchanged except that the formula is put into CNF
 rather than DNF:
 
 > dpMfn :: Clauses -> (Formula -> Formula) -> Clauses -> Clauses
-> dpMfn cjs0 ifn cjs = Set.union (map (map ifn) cjs0) cjs
+> dpMfn cjs0 ifn = Set.union (map (map ifn) cjs0)
 
 > dpLoop :: Log m => Clauses -> [Term] -> [FuncA] -> Vars 
 >           -> Int -> Clauses -> [[Term]] -> [[Term]] -> m [[Term]] 

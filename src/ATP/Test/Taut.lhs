@@ -54,6 +54,5 @@
 >     p == Dp.dptaut f && p == Bdd.taut f 
 
 > qtests :: IO ()
-> qtests = do 
->   Q.quickCheck prop_tauts_same
+> qtests = Q.quickCheck prop_tauts_same
 

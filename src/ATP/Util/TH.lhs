@@ -20,10 +20,10 @@ Template Haskell utils.
 * Utils
 
 > appE :: String -> T.ExpQ -> T.ExpQ
-> appE f x = T.appE (T.varE (T.mkName f)) x
+> appE = T.appE . T.varE . T.mkName
 
 > conE :: String -> [T.ExpQ] -> T.ExpQ
-> conE c es = foldl1 T.appE $ (T.conE $ T.mkName c) : es
+> conE c es = foldl1 T.appE $ T.conE (T.mkName c) : es
 
 > conP :: String -> [T.PatQ] -> T.PatQ
 > conP = T.conP . T.mkName

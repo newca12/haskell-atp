@@ -54,7 +54,7 @@ used next time.
 > renamer k (Rule asm c) = 
 >   let fvs = Fol.fv $ F.listConj $ c:asm
 >       n = length fvs
->       vvs = map (\m -> Var ("_" ++ show m)) [k .. k+n-1]
+>       vvs = map (\m -> Var ("_" : show m)) [k .. k+n-1]
 >       inst :: Formula -> Formula 
 >       inst = Fol.apply $ Map.fromList (zip fvs vvs) in
 >   (Rule (map inst asm) (inst c), k+n)

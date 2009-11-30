@@ -1,0 +1,4 @@
+
+ignore "" = Compat
+ignore "Use camelCase" = ""
+ignore "" = ATP.FormulaSyn

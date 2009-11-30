@@ -7,7 +7,7 @@
 
 * Imports
 
-#include "undefined.h" 
+#include "../undefined.h" 
 
 > import ATP.Util.Prelude hiding (const, div)
 > import qualified ATP.Util.Prelude as Prelude
@@ -138,7 +138,7 @@ basis for the resulting set of polynomials and test whether 1 is in the ideal
 > trivial fms = 
 >   let vars0 = Fol.fv fms
 >       (eqs, neqs) = List.partition F.positive fms
->       rvs = [ Fol.variant ("_" ++ show n) vars0 | n <- [1..length neqs] ]
+>       rvs = [ Fol.variant ("_" : show n) vars0 | n <- [1..length neqs] ]
 >       vars = vars0 ++ rvs
 >       poleqs = map (P.polyatom vars) eqs
 >       polneqs = map (P.polyatom vars . F.opp) neqs

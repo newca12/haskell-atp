@@ -20,7 +20,7 @@
 > tests :: Test
 > tests = "Real" ~: map mkTest formulas
 >   where mkTest (name, f) = name ~: 
->           f @=? (Real.qelim $ Maybe.fromJust $ Forms.lookup name)
+>           f @=? Real.qelim (Maybe.fromJust $ Forms.lookup name)
 
 > formulas :: [(String, Formula)]
 > formulas = 

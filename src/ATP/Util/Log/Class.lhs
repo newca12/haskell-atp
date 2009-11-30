@@ -73,7 +73,7 @@ don't record the priority.
 >   putStrLn = Prelude.putStrLn
 >   putStrLn' = PP.putStrLn
 >   logM' log prio msg = do Logger.logM log prio (PP.render doc)
->                           --IO.hFlush IO.stdout
+>                           -- IO.hFlush IO.stdout
 >     where doc = PP.vcat [ header, PP.text "  " <> msg ]
 >           header = PP.brackets $ PP.text (log ++ priop)
 >           priop = if log == "stdout" then "" else ": " ++ show prio
@@ -81,10 +81,10 @@ don't record the priority.
 > instance Log m => Log (StateT s m) where
 >   putStrLn = State.lift . putStrLn
 >   putStrLn' = State.lift . putStrLn'
->   logM' log prio msg = State.lift $ logM' log prio msg
+>   logM' = State.lift . logM'
 
 > instance Log m => Log (ReaderT r m) where
 >   putStrLn = State.lift . putStrLn
 >   putStrLn' = State.lift . putStrLn'
->   logM' log prio msg = State.lift $ logM' log prio msg
+>   logM' = State.lift . logM'
 

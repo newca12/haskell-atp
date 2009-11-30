@@ -88,7 +88,7 @@ with GeneralizedNewtypeDeriving
 >   if res then return (Just x) else findM p xs
 
 > ignore :: Monad m => m a -> m ()
-> ignore x = x >> return ()
+> ignore = >> return ()
 
 > ifM :: Monad m => m Bool -> m a -> m a -> m a
 > ifM g x y = do b <- g

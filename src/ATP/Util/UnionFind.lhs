@@ -67,4 +67,4 @@ Union-Find
 > equated (Partition f) = Map.keys f
 
 > instance Print a => Print (Partition a) where
->   pPrint p = PP.listHoriz (map pPrint $ equated p)
+>   pPrint = PP.listHoriz . map pPrint . equated

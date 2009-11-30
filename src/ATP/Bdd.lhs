@@ -126,31 +126,33 @@ down. Note that at the end, we update the computed table with the new
 information.
 
 > and :: Int -> Int -> BddState Index
-> and m1 m2 =
->   if m1 == -1 || m2 == -1 then return (-1)
->   else if m1 == 1 then return m2 else if m2 == 1 then return m1 else
->   do (bdd, comp) <- State.get
->      case (Map.lookup (m1, m2) comp, Map.lookup (m2, m1) comp) of
->        (Just n, _) -> return n
->        (_, Just n) -> return n
->        _ -> do 
->          (p1, l1, r1) <- expandNode m1
->          (p2, l2, r2) <- expandNode m2
->          let (p, lpair, rpair) 
->                | p1 == p2 = (p1, (l1, l2), (r1, r2))
->                | order bdd p1 p2 = (p1, (l1, m2), (r1, m2))
->                | otherwise = (p2, (m1, l2), (m1, r2))
->          lnew <- uncurry and lpair
->          rnew <- uncurry and rpair
->          ind <- mkNode (p, lnew, rnew)
->          State.modify (\(bdd', comp') -> (bdd', Map.insert (m1, m2) ind comp'))
->          return ind
+> and m1 m2
+>   | m1 == -1 || m2 == -1 = return (-1)
+>   | m1 == 1 = return m2 
+>   | m2 == 1 = return m1 
+>   | otherwise =
+>     do (bdd, comp) <- State.get
+>        case (Map.lookup (m1, m2) comp, Map.lookup (m2, m1) comp) of
+>          (Just n, _) -> return n
+>          (_, Just n) -> return n
+>          _ -> do 
+>            (p1, l1, r1) <- expandNode m1
+>            (p2, l2, r2) <- expandNode m2
+>            let (p, lpair, rpair) 
+>                  | p1 == p2 = (p1, (l1, l2), (r1, r2))
+>                  | order bdd p1 p2 = (p1, (l1, m2), (r1, m2))
+>                  | otherwise = (p2, (m1, l2), (m1, r2))
+>            lnew <- uncurry and lpair
+>            rnew <- uncurry and rpair
+>            ind <- mkNode (p, lnew, rnew)
+>            State.modify (\(bdd', comp') -> (bdd', Map.insert (m1, m2) ind comp'))
+>            return ind
 
 > or :: Int -> Int -> BddState Index
 > or m1 m2 = fmap negate $ and (-m1) (-m2)
 
 > imp :: Int -> Int -> BddState Index
-> imp m1 m2 = or (-m1) m2
+> imp m1 = or (-m1)
 
 > iff :: Int -> Int -> BddState Index
 > iff m1 m2 = do
@@ -210,9 +212,7 @@ bddtaut (mk_adder_test 4 2);;
 > prop_taut_correct = Q.label "ATP.Bdd: taut_correct" $
 >   Q.forAll (Prop.forms 5) $ \f -> 
 >     Dp.dplltaut f == taut f
--->     Prop.tautology f == taut f
 
 > tests :: IO ()
-> tests = do 
->   Q.quickCheck prop_taut_correct
+> tests = Q.quickCheck prop_taut_correct
 

@@ -23,7 +23,7 @@
 
 * Imports
 
-#include "undefined.h" 
+#include "../undefined.h" 
 
 > import ATP.Util.Prelude 
 > import qualified ATP.Dp as Dp
@@ -191,6 +191,6 @@
 >       (monadic, other) = List.partition (\(_, ar) -> ar == 1) preds in
 >   if funcs /= [] || List.any (\(_, ar) -> ar > 1) other 
 >   then error "Not in the monadic subset" else
->   let n = 2 `Lib.pow` (length monadic) in
+>   let n = 2 `Lib.pow` length monadic in
 >   decideFinite n fm
 
