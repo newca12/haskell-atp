@@ -1,6 +1,10 @@
 
 The Nelson-Oppen method.
 
+* Pragmas
+
+> {-# LANGUAGE CPP #-} 
+
 * Signature
 
 > module ATP.Combining
@@ -18,7 +22,9 @@ The Nelson-Oppen method.
 
 * Imports
 
-#include "../undefined.h"
+-- #include "../save/projects/atp/src/undefined.h"
+#include "undefined.h"
+-- #include "/Users/sean/save/projects/atp/src/undefined.h"
 
 > import ATP.Util.Prelude 
 > import qualified ATP.Cong as Cong

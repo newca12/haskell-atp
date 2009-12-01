@@ -118,7 +118,7 @@ allInjectiveMaps [1,2,3] [4,5,6] = [[(1,4), (2,5), (3,6)], [(1,5),(2,4),(3,6)], 
 
 > distinctPairs :: [a] -> [(a,a)]
 > distinctPairs (x:xs) = 
->   foldr (\y -> (x,y) :) (distinctPairs xs) xs
+>   foldr (\y l -> (x,y) : l) (distinctPairs xs) xs
 > distinctPairs [] = []
 
 ** findFirst

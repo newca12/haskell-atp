@@ -175,8 +175,8 @@ control is then passed to mexpands to deal with the multiple subgoals.
 >   | n < 0 = fail "Too deep"
 >   | any (equal env g) ancestors = fail "repetition" 
 >   | otherwise =
->     case List.findFirst (\a -> do env' <- Tableaux.unifyLiterals env (g,F.opp a)
->                                  cont (env', n, k)) ancestors of
+>     case List.findFirst (\a -> do env' <- Tableaux.unifyLiterals env (g, F.opp a)
+>                                   cont (env', n, k)) ancestors of
 >       Just e -> Just e
 >       Nothing -> List.findFirst findFn rules
 >           where findFn r = let (Rule asm c, k') = Prolog.renamer k r in

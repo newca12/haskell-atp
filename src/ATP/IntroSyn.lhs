@@ -79,10 +79,10 @@ Add (Mul (Const 2) (Var "x")) (Var "y")
 > antiExpr :: Parser Expr
 > antiExpr = do Lex.symbol "$"
 >               id <- Lex.identifier
->               return $ Var("$" : id)
+>               return $ Var('$' : id)
 >        <|> do Lex.symbol "^"
 >               id <- Lex.identifier
->               return $ Var("^" : id)
+>               return $ Var('^' : id)
 
 > atomic :: Parser Expr
 > atomic = do n <- Lex.integer

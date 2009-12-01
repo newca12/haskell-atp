@@ -2,7 +2,7 @@
 default : dist
 
 configure : ATP.cabal ATP.cabal.lib
-	runhaskell Setup.lhs configure --user --enable-library-profiling
+	runhaskell Setup.lhs configure --user --extra-include-dirs=src/ATP 
 
 build : 
 	runhaskell Setup.lhs build
@@ -12,8 +12,29 @@ install :
 
 dist : configure build install 
 
-sdist : configure 
+sdist : configure
 	cabal sdist
+
+.PHONY : doc
+
+doc : 
+	runhaskell Setup.lhs haddock --executables \
+	                             --hyperlink-source \
+                                     --haddock-option="--use-unicode" \
+                                     --haddock-option="-h" \
+                                     --hoogle \
+	                             --hscolour-css=util/hscolour.css \
+
+clean :
+	runhaskell Setup.lhs clean 
+	rm -rf dist atp.prof atp.log
+	find . \( -name "*~" -or -name "*.o" -or -name "*.hi" \) -exec rm -f {} \;
+
+# ------------------------------------------------------------------------------
+#  hlint                                                                        
+# ------------------------------------------------------------------------------
+
+# Having some trouble with hlint due to TH patterns, in particular in Geom.lhs
 
 MODULES=ATP.Util.Debug ATP.Util.Impossible ATP.Util.Lex ATP.Util.Lib ATP.Util.List \
 	ATP.Util.ListSet ATP.Util.Log ATP.Util.Log.Class ATP.Util.Misc ATP.Util.Monad \
@@ -26,25 +47,7 @@ MODULES=ATP.Util.Debug ATP.Util.Impossible ATP.Util.Lex ATP.Util.Lib ATP.Util.Li
 	ATP.Test.Dlo ATP.Test.Fo ATP.Test.Grobner ATP.Test.Real ATP.Test.Taut \
 	ATP.Meson ATP.Order ATP.Paramodulation ATP.Poly ATP.Prolog ATP.Prop ATP.PropExamples \
 	ATP.Grobner ATP.Herbrand ATP.Interpolation ATP.Intro ATP.MPoly ATP.IntroSyn \
-        ATP.Geom 
+        # ATP.Geom # hlint dies on ATP.Geom from TH patterns
 
 hlint :
 	hlint -h .hlint $(foreach module, $(MODULES), src/$(subst .,/,$(module)).lhs)
-
-
-
-.PHONY : doc
-
-doc : 
-	runhaskell Setup.lhs haddock --hyperlink-source \
-                                     --haddock-option="--use-unicode" \
-                                     --haddock-option="-h" \
-                                     --executables \
-                                     --internal \
-                                     --hoogle \
-                                     --hyperlink-source \
-
-clean :
-	runhaskell Setup.lhs clean 
-	rm -rf doc atp.prof atp.log
-	find . \( -name "*~" -or -name "*.o" -or -name "*.hi" \) -exec rm -f {} \;

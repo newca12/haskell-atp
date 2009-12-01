@@ -29,52 +29,39 @@
 :set -XCPP
 :set -XNoImplicitPrelude
 
-:set -i/usr1/seanmcl/save/projects/atp/src
-:set -i/Users/sean/save/projects/atp/src
+-- :set -i/usr1/seanmcl/save/projects/atp/src
+-- :set -I/usr1/seanmcl/save/projects/atp/src
+
+-- :set -i/Users/sean/save/projects/atp/src
+-- :set -I/Users/sean/save/projects/atp/src
+
+-- -optL passes option to literate preprocessor
+-- -q allows comments next to code lines
+
 :set -optL -q
 
+-- This is needed to set breakpoints
+:set -fbyte-code
+
+:set stop list
+
+-- Be verbose
 -- :set -v
 
--- :set -fobject-code
+-- For backtraces
 :set -fbreak-on-exception
-
--- :set args "cvc" "⊤"
--- :set -lcvc3 -lcvch
 
 -- -----------------------------------------------------------------------------
 --  Options                                                                      
 -- -----------------------------------------------------------------------------
 
 :set +t
+
+-- It seems that the prompt must say "Prelude>" for emacs loading to work correctly.  
 -- :set prompt "> "
 :set prompt "Prelude> "
 
--- -----------------------------------------------------------------------------
---  Functions                                                                   
--- -----------------------------------------------------------------------------
-
--- :{
--- let date _ = do { t <- Time.getClockTime 
---                 ; print t
---                 ; return "" }
--- :}
-
--- :def date date
-
--- -----------------------------------------------------------------------------
---  Test                                                                        
--- -----------------------------------------------------------------------------
-
--- :def sm (\_ -> return ":stepmodule")
-
--- :def imodule (\_ -> return ":module ATP.Util.Print") 
-
--- -----------------------------------------------------------------------------
---  File loading                                                                
--- -----------------------------------------------------------------------------
-
--- :load ATP.Util.Print
--- :module +ATP.Util.Print
+:def sm (\_ -> return ":stepmodule")
 
 -- -----------------------------------------------------------------------------
 --  Tmp                                                                         

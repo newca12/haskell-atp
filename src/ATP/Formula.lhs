@@ -13,7 +13,7 @@
 
 * Imports
 
-#include "../undefined.h" 
+#include "../undefined.h"
 
 > import ATP.Util.Prelude hiding ((-))
 > import ATP.FormulaSyn

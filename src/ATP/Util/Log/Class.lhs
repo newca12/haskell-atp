@@ -81,10 +81,10 @@ don't record the priority.
 > instance Log m => Log (StateT s m) where
 >   putStrLn = State.lift . putStrLn
 >   putStrLn' = State.lift . putStrLn'
->   logM' = State.lift . logM'
+>   logM' log prio = State.lift . logM' log prio
 
 > instance Log m => Log (ReaderT r m) where
 >   putStrLn = State.lift . putStrLn
 >   putStrLn' = State.lift . putStrLn'
->   logM' = State.lift . logM'
+>   logM' log prio = State.lift . logM' log prio
 
