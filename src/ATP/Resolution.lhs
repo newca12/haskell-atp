@@ -15,7 +15,7 @@
 
 * Imports
 
-> import Prelude 
+> import ATP.Util.Prelude 
 > import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
@@ -23,7 +23,6 @@
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Tableaux as Tableaux
 > import qualified ATP.Unif as Unif
-> import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((↦))
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.Log as Log

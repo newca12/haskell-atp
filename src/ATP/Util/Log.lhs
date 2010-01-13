@@ -22,7 +22,6 @@ Logging utilities.
 > import qualified IO 
 > import qualified System.Log.Handler.Simple as S
 > import qualified System.Log.Logger as Log
-> import System.Log.Logger (Priority(..))
 > import qualified System.IO.UTF8 as S
 
 * Implementation

@@ -11,7 +11,6 @@
 > import qualified ATP.Grobner as Grobner
 > import qualified ATP.TestFormulas as Forms
 > import qualified Data.Maybe as Maybe
-> import qualified Test.HUnit as Test
 > import Test.HUnit(Test(..), (~:), (@=?))
 
 * Tests

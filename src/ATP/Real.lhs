@@ -22,7 +22,6 @@
 > import qualified ATP.Util.Lib as Lib
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.Print as PP
-> import qualified Control.Monad.Error as Error
 > import Control.Monad.Error (catchError)
 
 * Real

@@ -25,7 +25,6 @@
 
 > import Prelude hiding (putStrLn)
 > import qualified System.IO.UTF8 as S
-> import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map (Map)
 > import qualified Data.Set as Set

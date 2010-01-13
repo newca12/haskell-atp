@@ -9,6 +9,5 @@
 
 * Imports
 
-> import Prelude hiding (print, putStr, putStrLn) 
 > import ATP.Util.Print.Print 
 > import Text.PrettyPrint.HughesPJ

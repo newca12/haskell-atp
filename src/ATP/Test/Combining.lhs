@@ -11,7 +11,6 @@
 > import qualified ATP.Combining as C
 > import qualified ATP.TestFormulas as Forms
 > import qualified Data.Maybe as Maybe
-> import qualified Test.HUnit as Test
 > import Test.HUnit(Test(..), (~:), assert)
 
 * Tests

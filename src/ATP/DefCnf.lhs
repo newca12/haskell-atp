@@ -21,8 +21,6 @@ Definitional CNF
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Util.ListSet as Set
 > import qualified ATP.Util.Misc as Misc
-> import qualified Data.Char as Char
-> import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
 > import qualified Test.QuickCheck as Q

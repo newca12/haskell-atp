@@ -1,7 +1,7 @@
 
 default : dist
 
-configure : ATP.cabal ATP.cabal.lib
+configure : ATP.cabal 
 	runhaskell Setup.lhs configure --user --extra-include-dirs=src/ATP 
 
 build : 

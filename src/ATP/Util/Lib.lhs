@@ -22,8 +22,6 @@ standard library.  Most mirror functions in Harrison's lib.ml
 
 > import Prelude
 > import qualified Control.Exception as Exn
-> import qualified Data.Char as Char
-> import qualified Data.List as List
 > import qualified Data.Map as Map
 > import Data.Map(Map)
 > import qualified System.CPUTime as Time
@@ -37,7 +35,7 @@ standard library.  Most mirror functions in Harrison's lib.ml
 >   v <- a
 >   end <- Time.getCPUTime
 >   let diff :: Double = (fromIntegral (end - start)) / (1E12) 
->   Printf.printf "Computation time: %0.4f sec\n" diff
+>   _ <- Printf.printf "Computation time: %0.4f sec\n" diff
 >   return v
 
 > time :: (a -> b) -> a -> IO b
@@ -46,7 +44,7 @@ standard library.  Most mirror functions in Harrison's lib.ml
 >   y <- Exn.evaluate $ f x
 >   end <- Time.getCPUTime
 >   let diff :: Double = (fromIntegral (end - start)) / (1E12)
->   Printf.printf "Computation time: %0.4f sec\n" diff
+>   _ <- Printf.printf "Computation time: %0.4f sec\n" diff
 >   return y
 
 -- > fib 0 = 0

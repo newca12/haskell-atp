@@ -13,9 +13,7 @@
 
 > import Prelude 
 > import qualified ATP.Util.Lex as Lex
-> import qualified ATP.Util.Parse as P
 > import ATP.Util.Parse (parser)
-> import qualified Data.Char as Char
 > import qualified Ratio
 
 * Util

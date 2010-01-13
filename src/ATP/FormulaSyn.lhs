@@ -24,17 +24,15 @@
 > import qualified ATP.Util.TH as TH'
 > import qualified ATP.Util.Lex as Lex
 > import qualified ATP.Util.Parse as P
-> import ATP.Util.Parse (Parse, parse, parser, Parser, (<|>), (<?>))
+> import ATP.Util.Parse (Parse, parse, parser, Parser, (<|>), (<?>))            
 > import qualified ATP.Util.Print as PP
-> import ATP.Util.Print (Print(pPrint), (<+>), (<>))
+> import ATP.Util.Print (Print)
 > import qualified Data.Generics as G
 > import Data.Generics (Data, Typeable)
 > import qualified Data.Map as Map
 > import Data.Map (Map)
-> import qualified Data.Maybe as Maybe
 > import qualified Data.List as List
 > import qualified Language.Haskell.TH as TH
-> import Language.Haskell.TH(ExpQ, PatQ)
 > import qualified Language.Haskell.TH.Quote as Q
 > import Language.Haskell.TH.Quote (QuasiQuoter(..))
 > import qualified Ratio
@@ -170,10 +168,10 @@ clause for antiquotes.
 > decodeRel (R s _) = if isQuote s then Just s else Nothing
 
 > var :: Parser Var
-> var = do Lex.symbol "$"
+> var = do _ <- Lex.symbol "$"
 >          x <- Lex.identifier
 >          return $ ("$" ++ x)
->   <|> do Lex.symbol "^"
+>   <|> do _ <- Lex.symbol "^"
 >          x <- Lex.identifier
 >          return $ ("^" ++ x)
 >   <|> Lex.identifier
@@ -258,23 +256,23 @@ clause for antiquotes.
 >                    return $ Not $ f
 >             <|> do Lex.reserved "forall" <|> Lex.reserved "∀"
 >                    xs <- P.many1 var
->                    Lex.symbol "."
+>                    Lex.dot
 >                    b <- formula 
 >                    return $ foldr All b xs
 >             <|> do Lex.reserved "exists" <|> Lex.reserved "∃"
 >                    xs <- P.many1 var
->                    Lex.symbol "."
+>                    Lex.dot
 >                    b <- formula 
 >                    return $ foldr Ex b xs
 >             <|> do v <- parseRel
 >                    return $ Atom v
->             <|> do Lex.symbol "$"
+>             <|> do _ <- Lex.symbol "$"
 >                    x <- Lex.identifier
 >                    return $ Atom $ encodeRel ("$" ++ x)
->             <|> do Lex.symbol "^"
+>             <|> do _ <- Lex.symbol "^"
 >                    x <- Lex.identifier
 >                    return $ Atom $ encodeRel ("^" ++ x)
->             <|> do Lex.symbol "_"
+>             <|> do _ <- Lex.symbol "_"
 >                    return $ Atom $ encodeRel "$_"
 >             <|> Lex.parens formula
 >             <?> "atomic formula"

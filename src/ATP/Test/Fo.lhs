@@ -13,7 +13,6 @@
 > import qualified ATP.Meson as Meson
 > import qualified ATP.Resolution as Resolution
 > import qualified ATP.Tableaux as Tableaux
-> import qualified Test.HUnit as Test
 > import Test.HUnit(Test(..), (~:))
 
 * HUnit

@@ -22,7 +22,6 @@
 > import qualified ATP.Unif as Unif
 > import qualified ATP.Util.Lex as Lex
 > import qualified ATP.Util.List as List
-> import qualified ATP.Util.Log as Log
 > import ATP.Util.Log(Log)
 > import qualified ATP.Util.Parse as P
 > import ATP.Util.Parse (Parse, Parser, parser)
@@ -158,7 +157,7 @@ left-to-right. Thus we can modify the interpreter:
 >      fs <- P.option [] $ do
 >             Lex.reservedOp ":-"
 >             P.commas parser
->      Lex.symbol "."
+>      Lex.dot
 >      return $ Rule fs f
 
 * Printing

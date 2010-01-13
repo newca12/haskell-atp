@@ -25,13 +25,10 @@
 > import qualified ATP.Order as Order
 > import qualified ATP.Qelim as Qelim
 > import qualified ATP.Skolem as Skolem
-> import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet ((∪))
 > import qualified ATP.Util.Print as PP
 > import qualified Data.List as List
-> import qualified Data.Maybe as Maybe
 > import qualified Ratio
-> import Ratio ((%))
 
 * Numerals
 

@@ -43,11 +43,10 @@ The Nelson-Oppen method.
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
 > import qualified ATP.Util.Print as PP
-> import ATP.Util.Print(Print, pPrint)
+> import ATP.Util.Print(Print)
 > import qualified Control.Monad.Reader as Reader
 > import Control.Monad.Reader (Reader)
 > import qualified Data.Maybe as Maybe
-> import qualified Ratio
 
 * Nelson-Oppen
 

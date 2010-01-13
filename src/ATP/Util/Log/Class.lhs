@@ -15,8 +15,8 @@
 > import qualified Control.Monad.State as State
 > import Control.Monad.State (StateT)
 > import qualified ATP.Util.Print as PP
-> import ATP.Util.Print (Doc, (<>))
-> import qualified System.IO as IO
+> import ATP.Util.Print (Doc)
+-- > import qualified System.IO as IO
 > import qualified System.Log.Logger as Logger
 > import System.Log.Logger (Priority(..))
 

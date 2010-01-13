@@ -25,7 +25,6 @@
 > import qualified ATP.Equal as Equal
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Qelim as Qelim
-> import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib ((⟾))
 > import qualified ATP.Util.List as List
 > import ATP.Util.ListSet ((\\))

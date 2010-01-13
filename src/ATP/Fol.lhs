@@ -38,7 +38,6 @@ Relations R ::= Var() | Var ( TS ) | Var | T = T | T < T
 > import ATP.Util.Prelude 
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
-> import qualified ATP.Util.Lib as LIb
 > import ATP.Util.Lib((↦))
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\), (∪))

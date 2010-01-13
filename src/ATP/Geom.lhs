@@ -26,7 +26,6 @@
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as LSet
 > import ATP.Util.ListSet ((\\))
-> import qualified ATP.Util.Monad as M
 > import qualified Data.Map as Map
 > import qualified Data.Set as Set
 

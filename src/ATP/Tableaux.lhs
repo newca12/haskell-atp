@@ -19,13 +19,12 @@
 > import qualified ATP.Prop as Prop
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Unif as Unif
-> import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((⟾))
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
 > import qualified ATP.Util.Log as Log
 > import ATP.Util.Log(Log)
-> import qualified Data.List as List
+> import qualified ATP.Util.Monad as M
 > import qualified Data.Map as Map
 
 * Tableaux
@@ -164,7 +163,7 @@ refutations.
 
 > tabrefute :: Log m => [Formula] -> m Int
 > tabrefute fms =
->   let tabFn n = do tableau (fms, [], n) Just (Map.empty, 0) 
+>   let tabFn n = do M.ignore $ tableau (fms, [], n) Just (Map.empty, 0) 
 >                    return n in
 >   deepen tabFn 0
 

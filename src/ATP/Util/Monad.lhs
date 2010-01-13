@@ -16,7 +16,6 @@ with GeneralizedNewtypeDeriving
 >   , partition
 >   , zipWith
 >   , findM
->   , ignore
 >   , ifM
 >   , ifM'
 >   , maybeM
@@ -24,6 +23,7 @@ with GeneralizedNewtypeDeriving
 >   , Has(..)
 >   , lift2
 >   , foldrM
+>   , ignore
 >   ) 
 > where
 

@@ -43,7 +43,6 @@ so the module can be imported unqualified.
 > import ATP.Util.Parse (Parse, Parser, (<|>), (<?>))
 > import qualified ATP.Util.Print as PP
 > import ATP.Util.Print(Print, (<+>))
-> import qualified Data.Char as Char
 > import qualified Data.Generics as G
 > import Data.Generics(Typeable, Data)
 > import qualified Language.Haskell.TH as TH
@@ -77,10 +76,10 @@ Add (Mul (Const 2) (Var "x")) (Var "y")
 >   where op s f = P.Infix (do{ Lex.reservedOp s; return f })
 
 > antiExpr :: Parser Expr
-> antiExpr = do Lex.symbol "$"
+> antiExpr = do _ <- Lex.symbol "$"
 >               id <- Lex.identifier
 >               return $ Var('$' : id)
->        <|> do Lex.symbol "^"
+>        <|> do _ <- Lex.symbol "^"
 >               id <- Lex.identifier
 >               return $ Var('^' : id)
 

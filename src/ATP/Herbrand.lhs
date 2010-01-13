@@ -25,7 +25,6 @@ Relation between first-order and propositonal logic; Herbrand theorem.
 > import ATP.Util.Log (Log)
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
-> import qualified Data.List as List
 > import qualified Data.Map as Map
 
 * Herbrand

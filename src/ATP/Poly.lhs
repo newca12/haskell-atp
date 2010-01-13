@@ -41,7 +41,6 @@
 > import qualified ATP.Order as Order
 > import qualified ATP.Util.Lib as Lib
 > import qualified ATP.Util.Print as PP
-> import qualified Data.List as List
 > import qualified Ratio
 
 * Rationals

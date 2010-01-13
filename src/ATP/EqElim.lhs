@@ -27,11 +27,10 @@
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
-> import qualified ATP.Util.Log as Log
 > import ATP.Util.Log (Log)
+> import qualified ATP.Util.Monad as M
 > import qualified Data.Map as Map
 > import Data.Map(Map)
-> import qualified Data.Maybe as Maybe
 
 * Equality elimination
 
@@ -189,7 +188,7 @@ give bmeson:
 > bpuremeson fm = 
 >   let cls = brand(Prop.simpcnf (Skolem.specialize (Skolem.pnf fm)))
 >       rules = List.concat (map Meson.contrapositives cls) in
->   Tableaux.deepen (\n -> do Meson.mexpand rules [] Bot Just (Map.empty, n, 0)
+>   Tableaux.deepen (\n -> do M.ignore $ Meson.mexpand rules [] Bot Just (Map.empty, n, 0)
 >                             return n) 0
 
 > bmeson :: Log m => Formula -> m [Int]

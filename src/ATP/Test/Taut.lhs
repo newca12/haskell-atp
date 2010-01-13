@@ -12,7 +12,6 @@
 > import qualified ATP.Bdd as Bdd
 > import qualified ATP.Dp as Dp
 > import qualified ATP.Prop as Prop
-> import qualified Test.HUnit as Test
 > import Test.HUnit(Test(..), (~:), assert)
 > import qualified Test.QuickCheck as Q
 > import Test.QuickCheck (Property)

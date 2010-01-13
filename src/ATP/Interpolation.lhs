@@ -26,7 +26,6 @@
 > import ATP.Util.ListSet((\\), (∪))
 > import qualified ATP.Util.Lib as Lib
 > import ATP.Util.Lib((⟾))
-> import qualified ATP.Util.Log as Log
 > import ATP.Util.Log (Log)
 > import qualified Data.List as List
 > import qualified Data.Map as Map

@@ -32,9 +32,9 @@
 > import qualified ATP.Skolem as Skolem
 > import ATP.Util.ListSet ((\\))
 > import qualified ATP.Util.Print as PP
-> import ATP.Util.Print (Print, pPrint)
+> import ATP.Util.Print (Print)
 > import qualified Control.Monad.Error as Error
-> import Control.Monad.Error (Error, MonadError, catchError)
+> import Control.Monad.Error (MonadError, catchError)
 > import qualified Data.List as List
 > import qualified Data.Maybe as Maybe
 

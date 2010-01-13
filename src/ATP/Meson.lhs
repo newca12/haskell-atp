@@ -23,12 +23,10 @@ MESON: Model Elimination Subgoal OrieNted
 > import qualified ATP.Skolem as Skolem
 > import qualified ATP.Tableaux as Tableaux
 > import qualified ATP.Util.List as List
-> import qualified ATP.Util.ListSet as Set
 > import ATP.Util.ListSet((\\))
-> import qualified ATP.Util.Log as Log
 > import ATP.Util.Log(Log)
+> import qualified ATP.Util.Monad as M
 > import qualified Data.Map as Map
-> import qualified Data.Maybe as Maybe
 
 * MESON
 
@@ -88,7 +86,7 @@ translated form often becomes significantly more complicated.
 > pureBasicMeson fm = 
 >   let cls = Prop.simpcnf $ Skolem.specialize $ Skolem.pnf fm 
 >       rules = concat (map contrapositives cls) in
->   Tableaux.deepen (\n -> do basicMexpand rules [] Bot Just (Map.empty, n, 0) 
+>   Tableaux.deepen (\n -> do M.ignore $ basicMexpand rules [] Bot Just (Map.empty, n, 0) 
 >                             return n) 0
 
 The overall function starts with the usual generalization, negation and
@@ -212,7 +210,7 @@ running the continuation twice.
 > pureMeson fm = 
 >   let cls = Prop.simpcnf $ Skolem.specialize $ Skolem.pnf fm 
 >       rules = concat (map contrapositives cls) in
->   Tableaux.deepen (\n -> do mexpand rules [] Bot Just (Map.empty, n, 0) 
+>   Tableaux.deepen (\n -> do M.ignore $ mexpand rules [] Bot Just (Map.empty, n, 0) 
 >                             return n) 0
 
 > meson :: Log m => Formula -> m [Int]

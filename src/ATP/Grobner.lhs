@@ -10,7 +10,6 @@
 #include "../undefined.h" 
 
 > import ATP.Util.Prelude hiding (const, div)
-> import qualified ATP.Util.Prelude as Prelude
 > import ATP.Complex (Err, failwith, tryFind)
 > import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F

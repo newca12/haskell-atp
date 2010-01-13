@@ -30,6 +30,7 @@
 * Imports
 
 > import Prelude 
+> import qualified ATP.Util.Monad as M
 > import qualified Text.ParserCombinators.Parsec as P
 > import Text.ParserCombinators.Parsec (Parser)
 > import qualified Text.ParserCombinators.Parsec.Char as C
@@ -65,10 +66,10 @@ Use the Haskell lexer for identifier conventions.
 > whiteSpace :: Parser ()
 > whiteSpace = T.whiteSpace lexer
 
-> comma, colon, dot :: Parser String
-> comma = T.comma lexer
-> colon = T.colon lexer
-> dot = T.dot lexer
+> comma, colon, dot :: Parser ()
+> comma = M.ignore $ T.comma lexer
+> colon = M.ignore $ T.colon lexer
+> dot = M.ignore $ T.dot lexer
 
 > parens, brackets, braces :: Parser a -> Parser a
 > parens = T.parens lexer
