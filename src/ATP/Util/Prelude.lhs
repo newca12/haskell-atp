@@ -49,7 +49,7 @@
 > import ATP.Util.Print ((<>), (<+>), Doc, pPrint, Print)
 > import Data.Maybe (fromJust)
 > import Debug.Trace (trace)
-> import System.IO.UTF8 (print, putStr, putStrLn)
+> import System.IO (print, putStr, putStrLn)
 
 * Util
 

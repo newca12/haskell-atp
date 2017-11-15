@@ -5,8 +5,8 @@ Here we bring the Haskell implementation into line with the OCaml
 implementation by giving the original OCaml names to the Haskell
 counterparts and exporting all functions.  For interactive play, the
 user should be able to type the same commands, with the difference
-that formulas are parsed as [$form| p ∧ q |] rather than <<p /\ q>>
-and terms as [$term| x + y |] rather than <<| x + y |>>.  Since
+that formulas are parsed as [form| p ∧ q |] rather than <<p /\ q>>
+and terms as [term| x + y |] rather than <<| x + y |>>.  Since
 
 Harrison does not always use unique names (e.g. dnf in prop.ml appears
 twice), we assume the last occurrance of the name is the one the user

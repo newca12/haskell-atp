@@ -124,7 +124,7 @@
 
 > allPossibleSyllogisms' :: [Formula]
 > allPossibleSyllogisms' =
->  let p = [$form| (∃ x. P(x)) ∧ (∃ x. M(x)) ∧ (∃ x. S(x)) |] in
+>  let p = [form| (∃ x. P(x)) ∧ (∃ x. M(x)) ∧ (∃ x. S(x)) |] in
 >  map (Imp p) allPossibleSyllogisms
 
 > allValidSyllogisms' :: [Formula]

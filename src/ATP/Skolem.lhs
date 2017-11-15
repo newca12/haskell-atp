@@ -26,13 +26,13 @@
 
 > simplify :: Formula -> Formula
 > simplify fm = case fm of 
->   [$form| ¬ $p |] -> simplify1 $ (¬) $ simplify p
->   [$form| $p ∧ $q |] -> simplify1 $ simplify p ∧ simplify q
->   [$form| $p ∨ $q |] -> simplify1 $ simplify p ∨ simplify q
->   [$form| $p ⊃ $q |] -> simplify1 $ simplify p ⊃ simplify q
->   [$form| $p ⇔ $q |] -> simplify1 $ simplify p ⇔ simplify q
->   [$form| ∀ $x. $p |] -> simplify1 $ (¥) x (simplify p)
->   [$form| ∃ $x. $p |] -> simplify1 $ (∃) x (simplify p)
+>   [form| ¬ $p |] -> simplify1 $ (¬) $ simplify p
+>   [form| $p ∧ $q |] -> simplify1 $ simplify p ∧ simplify q
+>   [form| $p ∨ $q |] -> simplify1 $ simplify p ∨ simplify q
+>   [form| $p ⊃ $q |] -> simplify1 $ simplify p ⊃ simplify q
+>   [form| $p ⇔ $q |] -> simplify1 $ simplify p ⇔ simplify q
+>   [form| ∀ $x. $p |] -> simplify1 $ (¥) x (simplify p)
+>   [form| ∃ $x. $p |] -> simplify1 $ (∃) x (simplify p)
 >   _ -> fm
 
 > simplify1 :: Formula -> Formula
@@ -45,34 +45,34 @@
 
 > nnf :: Formula -> Formula
 > nnf fm = case fm of 
->   [$form| $p ∧ $q |] -> nnf p ∧ nnf q
->   [$form| $p ∨ $q |] -> nnf p ∨ nnf q
->   [$form| $p ⊃ $q |] -> np' ∨ nnf q
+>   [form| $p ∧ $q |] -> nnf p ∧ nnf q
+>   [form| $p ∨ $q |] -> nnf p ∨ nnf q
+>   [form| $p ⊃ $q |] -> np' ∨ nnf q
 >     where np' = nnf $ (¬) p
->   [$form| $p ⇔ $q |] -> p' ∧ q' ∨ np' ∧ nq'
+>   [form| $p ⇔ $q |] -> p' ∧ q' ∨ np' ∧ nq'
 >     where p' = nnf $ p
 >           np' = nnf $ (¬) p
 >           q' = nnf q
 >           nq' = nnf $ (¬) q
->   [$form| ¬ ¬ $p |] -> nnf p
->   [$form| ¬ ($p ∧ $q) |] -> np' ∨ nq'
+>   [form| ¬ ¬ $p |] -> nnf p
+>   [form| ¬ ($p ∧ $q) |] -> np' ∨ nq'
 >     where np' = nnf $ (¬) p
 >           nq' = nnf $ (¬) q
->   [$form| ¬ ($p ∨ $q) |] -> np' ∧ nq'
+>   [form| ¬ ($p ∨ $q) |] -> np' ∧ nq'
 >     where np' = nnf $ (¬) p
 >           nq' = nnf $ (¬) q
->   [$form| ¬ ($p ⊃ $q) |] -> p' ∧ nq'
+>   [form| ¬ ($p ⊃ $q) |] -> p' ∧ nq'
 >     where p' = nnf p
 >           nq' = nnf $ (¬) q
->   [$form| ¬ ($p ⇔ $q) |] -> p' ∧ nq' ∨ np' ∧ q'
+>   [form| ¬ ($p ⇔ $q) |] -> p' ∧ nq' ∨ np' ∧ q'
 >     where p' = nnf $ p
 >           np' = nnf $ (¬) p
 >           q' = nnf q
 >           nq' = nnf $ (¬) q
->   [$form| ∀ $x. $p |] -> (¥) x (nnf p)
->   [$form| ∃ $x. $p |] -> (∃) x (nnf p)
->   [$form| ¬ (∀ $x. $p) |] -> (∃) x (nnf $ (¬) p)
->   [$form| ¬ (∃ $x. $p) |] -> (¥) x (nnf $ (¬) p)
+>   [form| ∀ $x. $p |] -> (¥) x (nnf p)
+>   [form| ∃ $x. $p |] -> (∃) x (nnf p)
+>   [form| ¬ (∀ $x. $p) |] -> (∃) x (nnf $ (¬) p)
+>   [form| ¬ (∃ $x. $p) |] -> (¥) x (nnf $ (¬) p)
 >   _ -> fm
 
 nnf $ parse "(∀ x. P(x)) ⊃ ((∃ y. Q(y)) ⇔ ∃ z. P(z) ∧ Q(z))"
@@ -91,16 +91,16 @@ nnf $ parse "(∀ x. P(x)) ⊃ ((∃ y. Q(y)) ⇔ ∃ z. P(z) ∧ Q(z))"
 
 > pullquants :: Formula -> Formula
 > pullquants fm = case fm of
->   [$form| (∀ $x. $p) ∧ (∀ $y. $q) |] -> pullq (True,True) fm (¥) (∧) x y p q
->   [$form| (∃ $x. $p) ∨ (∃ $y. $q) |] -> pullq (True,True) fm (∃) (∨) x y p q
->   [$form| (∀ $x. $p) ∧ $q |] -> pullq (True,False) fm (¥) (∧) x x p q
->   [$form| $p ∧ (∀ $y. $q) |] -> pullq (False,True) fm (¥) (∧) y y p q
->   [$form| (∀ $x. $p) ∨ $q |] -> pullq (True,False) fm (¥) (∨) x x p q
->   [$form| $p ∨ (∀ $y. $q) |] -> pullq (False,True) fm (¥) (∨) y y p q
->   [$form| (∃ $x. $p) ∧ $q |] -> pullq (True,False) fm (∃) (∧) x x p q
->   [$form| $p ∧ (∃ $y. $q) |] -> pullq (False,True) fm (∃) (∧) y y p q
->   [$form| (∃ $x. $p) ∨ $q |] -> pullq (True,False) fm (∃) (∨) x x p q
->   [$form| $p ∨ (∃ $y. $q) |] -> pullq (False,True) fm (∃) (∨) y y p q
+>   [form| (∀ $x. $p) ∧ (∀ $y. $q) |] -> pullq (True,True) fm (¥) (∧) x y p q
+>   [form| (∃ $x. $p) ∨ (∃ $y. $q) |] -> pullq (True,True) fm (∃) (∨) x y p q
+>   [form| (∀ $x. $p) ∧ $q |] -> pullq (True,False) fm (¥) (∧) x x p q
+>   [form| $p ∧ (∀ $y. $q) |] -> pullq (False,True) fm (¥) (∧) y y p q
+>   [form| (∀ $x. $p) ∨ $q |] -> pullq (True,False) fm (¥) (∨) x x p q
+>   [form| $p ∨ (∀ $y. $q) |] -> pullq (False,True) fm (¥) (∨) y y p q
+>   [form| (∃ $x. $p) ∧ $q |] -> pullq (True,False) fm (∃) (∧) x x p q
+>   [form| $p ∧ (∃ $y. $q) |] -> pullq (False,True) fm (∃) (∧) y y p q
+>   [form| (∃ $x. $p) ∨ $q |] -> pullq (True,False) fm (∃) (∨) x x p q
+>   [form| $p ∨ (∃ $y. $q) |] -> pullq (False,True) fm (∃) (∨) y y p q
 >   _ -> fm
 
 > pullq :: (Bool, Bool) -> Formula 
@@ -113,7 +113,7 @@ nnf $ parse "(∀ x. P(x)) ⊃ ((∃ y. Q(y)) ⇔ ∃ z. P(z) ∧ Q(z))"
 >       q' = if r then Fol.apply (y ⟾ Var z) q else q in
 >   quant z (pullquants(op p' q'))
 
-print $ pullquants [$form| (∀ y. Q(y)) ∧ (∀ x. P(y)) |]
+print $ pullquants [form| (∀ y. Q(y)) ∧ (∀ x. P(y)) |]
 
 * Skolemization
 
@@ -147,7 +147,7 @@ print $ pullquants [$form| (∀ y. Q(y)) ∧ (∀ x. P(y)) |]
 >   (cons p' q', fns'')
 
 :m +ATP.Util.Parse 
-print $ skolemize [$form| ∃ y. x < y ⊃ ∀ u. ∃ v. x * u < y * v |]
-print $ skolemize [$form| ∀ x. P(x) ⊃ (∃ y z. Q(y) ∨ ~(∃ z. P(z) ∧ Q(z))) |]
+print $ skolemize [form| ∃ y. x < y ⊃ ∀ u. ∃ v. x * u < y * v |]
+print $ skolemize [form| ∀ x. P(x) ⊃ (∃ y z. Q(y) ∨ ~(∃ z. P(z) ∧ Q(z))) |]
 
 

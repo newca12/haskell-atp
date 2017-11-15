@@ -14,7 +14,7 @@
 >   , term
 >   , form
 >     -- (%) needs to be exported for Rational templates to work.
->   , (%)
+>   , (Data.Ratio.%)
 >   )
 > where
 
@@ -35,8 +35,7 @@
 > import qualified Language.Haskell.TH as TH
 > import qualified Language.Haskell.TH.Quote as Q
 > import Language.Haskell.TH.Quote (QuasiQuoter(..))
-> import qualified Ratio
-> import Ratio ((%))
+> import qualified Data.Ratio
 
 * Syntax
 
@@ -282,7 +281,7 @@ clause for antiquotes.
 ** Terms
 
 > term :: QuasiQuoter
-> term = QuasiQuoter quoteExpT quotePatT
+> term = QuasiQuoter quoteExpT quotePatT undefined undefined
 
 > quoteExpT :: String -> TH.ExpQ 
 > quoteExpT = quoteTE . parse
@@ -299,8 +298,8 @@ clause for antiquotes.
 > quoteTE' t = case t of 
 >   Var x -> if isQuote x then Just $ antiTE x else Nothing
 >   Num k -> 
->     let n = Ratio.numerator k
->         d = Ratio.denominator k 
+>     let n = Data.Ratio.numerator k
+>         d = Data.Ratio.denominator k
 >     in Just $ TH'.conE "Num" [TH.appE (TH'.appE "%" (TH.litE $ TH.IntegerL n)) (TH.litE $ TH.IntegerL d)]
 >   _ -> Nothing
 
@@ -331,7 +330,7 @@ clause for antiquotes.
 ** Formulas
 
 > form :: QuasiQuoter
-> form = QuasiQuoter quoteExpF quotePatF
+> form = QuasiQuoter quoteExpF quotePatF undefined undefined
 
 > quoteExpF :: String -> TH.ExpQ 
 > quoteExpF = quoteFE . parse

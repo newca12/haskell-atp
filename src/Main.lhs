@@ -77,11 +77,11 @@ The front end for the automated theorem proving Haskell port.
 > import Data.Generics (Data, Typeable)
 > import qualified Data.List as List
 > import qualified Data.Maybe as Maybe
-> import qualified System
+> import qualified System.Environment
 > import qualified System.Console.GetOpt as Opt
 > import System.Console.GetOpt (OptDescr(..), ArgDescr(..))
 > import qualified System.Exit as Exit
-> import qualified System.IO.UTF8 as S
+> import qualified System.IO as S
 > import qualified Test.HUnit as Test
 > import Test.HUnit(Test(..), (~:))
 > import qualified Test.QuickCheck.Test as QC
@@ -666,7 +666,7 @@ Show a test formula
 * Top
 
 > main :: IO ()
-> main = System.getArgs >>= doit
+> main = System.Environment.getArgs >>= doit
 
 > doit :: Args -> IO ()
 > doit args = Lib.timeIO $ do 

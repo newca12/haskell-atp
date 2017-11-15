@@ -17,16 +17,15 @@ Logging utilities.
 * Imports
 
 > import Prelude hiding (log)
-> import qualified Directory
+> import qualified System.Directory
 > import ATP.Util.Log.Class
-> import qualified IO 
 > import qualified System.Log.Handler.Simple as S
 > import qualified System.Log.Logger as Log
-> import qualified System.IO.UTF8 as S
+> import qualified System.IO as S
 
 * Implementation
 
-> type Handler = S.GenericHandler IO.Handle 
+> type Handler = S.GenericHandler S.Handle
 
 Parse a priority.
 
@@ -78,7 +77,7 @@ get through the logger.
 >      update $ Log.setHandlers ([] :: [Handler])
 >      -- Create the terminal handler.  
 >      let termprio = if term then prio else defaultPrio
->      tout <- S.streamHandler IO.stdout termprio
+>      tout <- S.streamHandler S.stdout termprio
 >      update $ Log.addHandler tout
 >      -- Set the logger priority
 >      update $ Log.setLevel prio
@@ -86,8 +85,8 @@ get through the logger.
 >      if file 
 >        then do
 >          -- Remove existing log file
->          logExists <- Directory.doesFileExist logFileName
->          if logExists then Directory.removeFile logFileName else return ()
+>          logExists <- System.Directory.doesFileExist logFileName
+>          if logExists then System.Directory.removeFile logFileName else return ()
 >          -- Open new log file
 >          handler <- S.fileHandler logFileName DEBUG
 >          -- Add our handler

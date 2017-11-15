@@ -28,7 +28,7 @@
 > import ATP.Util.ListSet ((∪))
 > import qualified ATP.Util.Print as PP
 > import qualified Data.List as List
-> import qualified Ratio
+> import qualified Data.Ratio
 
 * Numerals
 
@@ -46,15 +46,15 @@ and Haskell unlimited-precision numbers, and test whether a term is indeed
 an integer constant.
 
 > makeInteger :: Integer -> Term
-> makeInteger n = Num $ n Ratio.% 1
+> makeInteger n = Num $ n Data.Ratio.% 1
 
 > isInteger :: Term -> Bool
-> isInteger (Num n) = Ratio.denominator n == 1
+> isInteger (Num n) = Data.Ratio.denominator n == 1
 > isInteger _ = False
 
 > destInteger :: Term -> Integer
 > destInteger (Num n) = 
->   if Ratio.denominator n == 1 then Ratio.numerator n
+>   if Data.Ratio.denominator n == 1 then Data.Ratio.numerator n
 >   else error "non-integral rational"
 > destInteger t = error' $ PP.text "illegal integer:" <+> pPrint t
 
@@ -89,7 +89,7 @@ as a simple recursion:
 > linearCmul 0 _ = zero
 > linearCmul n tm = 
 >   case tm of 
->     [$term| $c * $x + $r |] -> integer1 ((*) n) c * x + linearCmul n r
+>     [term| $c * $x + $r |] -> integer1 ((*) n) c * x + linearCmul n r
 >     k -> integer1 ((*) n) k
 
 For addition, we need to merge together the sequences of variables, maintaining
@@ -108,7 +108,7 @@ both terms are constants they are just added as numerals.
 > linearAdd :: Vars -> Term -> Term -> Term
 > linearAdd vars tm1 tm2 =
 >   case (tm1, tm2) of 
->     ([$term| $c1 * ^x1 + $r1 |], [$term| $c2 * ^x2 + $r2|]) -> 
+>     ([term| $c1 * ^x1 + $r1 |], [term| $c2 * ^x2 + $r2|]) ->
 >        if x1 == x2 then
 >          let c = integer2 (+) c1 c2 in
 >          if c == zero then linearAdd vars r1 r2
@@ -117,8 +117,8 @@ both terms are constants they are just added as numerals.
 >          c1 * Var x1 + linearAdd vars r1 tm2
 >        else
 >          c2 * Var x2 + linearAdd vars tm1 r2
->     ([$term| $c1 * ^x1 + $r1 |], _) -> c1 * Var x1 + linearAdd vars r1 tm2
->     (_, [$term| $c2 * ^x2 + $r2 |]) -> c2 * Var x2 + linearAdd vars tm1 r2
+>     ([term| $c1 * ^x1 + $r1 |], _) -> c1 * Var x1 + linearAdd vars r1 tm2
+>     (_, [term| $c2 * ^x2 + $r2 |]) -> c2 * Var x2 + linearAdd vars tm1 r2
 >     _ -> integer2 (+) tm1 tm2
 
 Using these basic functions, it's easy to define negation and subtraction
@@ -149,11 +149,11 @@ from x into their canonical form 1 · x + 0:
 > lint :: Vars -> Term -> Term
 > lint vars tm =
 >   case tm of
->    [$term| ^_ |] -> one * tm + zero
->    [$term| - $t |] -> linearNeg (lint vars t)
->    [$term| $s + $t |] -> linearAdd vars (lint vars s) (lint vars t)
->    [$term| $s - $t |] -> linearSub vars (lint vars s) (lint vars t)
->    [$term| $s * $t |] -> linearMul (lint vars s) (lint vars t)
+>    [term| ^_ |] -> one * tm + zero
+>    [term| - $t |] -> linearNeg (lint vars t)
+>    [term| $s + $t |] -> linearAdd vars (lint vars s) (lint vars t)
+>    [term| $s - $t |] -> linearSub vars (lint vars s) (lint vars t)
+>    [term| $s * $t |] -> linearMul (lint vars s) (lint vars t)
 >    _ -> if isInteger tm then tm else error $ "lint: unknown term: " ++ show tm
 
 We next extend this linearization to atomic formulas; this will eventually
@@ -178,11 +178,11 @@ input formula.
 > linform vars fm =
 >  case fm of
 >    Atom(R "divides" [c, t]) -> Atom(R "divides" [integer1 abs c, lint vars t])
->    [$form| $s = $t |] -> mkatom vars "=" (t - s)
->    [$form| $s < $t |] -> mkatom vars "<" (t - s)
->    [$form| $s > $t |] -> mkatom vars "<" (s - t)
->    [$form| $s ≤ $t |] -> mkatom vars "<" (t + one - s)
->    [$form| $s ≥ $t |] -> mkatom vars "<" (s + one - t)
+>    [form| $s = $t |] -> mkatom vars "=" (t - s)
+>    [form| $s < $t |] -> mkatom vars "<" (t - s)
+>    [form| $s > $t |] -> mkatom vars "<" (s - t)
+>    [form| $s ≤ $t |] -> mkatom vars "<" (t + one - s)
+>    [form| $s ≥ $t |] -> mkatom vars "<" (s + one - t)
 >    _ -> fm 
 
 In the main body of the procedure, we'll now be able to assume that
@@ -194,7 +194,7 @@ can just use :(0 < t) , 0 < 1 􀀀 t:
 
 > posineq :: Formula -> Formula 
 > posineq fm = case fm of
->   [$form| ¬ ($n0 < $t) |] | n0 == zero -> zero ≺ linearSub [] one t
+>   [form| ¬ ($n0 < $t) |] | n0 == zero -> zero ≺ linearSub [] one t
 >   _ -> fm
 
 Presburger's original algorithm is fairly straightforward, and follows the classic
@@ -229,7 +229,7 @@ coefficients of x, returning 1 if there are no instances of x:
 
 > formlcm :: Term -> Formula -> Integer
 > formlcm x f = case f of
->   Atom(R _ [_, [$term| $c * $y + _ |]]) 
+>   Atom(R _ [_, [term| $c * $y + _ |]])
 >    | x == y -> abs $ destInteger c
 >   Not p -> formlcm x p
 >   And p q -> lcm (formlcm x p) (formlcm x q)
@@ -250,7 +250,7 @@ Actually, as part of this transformation we force the coefficients of x from
 > adjustcoeff :: Term -> Integer -> Formula -> Formula 
 > adjustcoeff x l fm = 
 >  case fm of
->    Atom (R p [d, [$term| $c * $y + $z |]]) | y == x ->
+>    Atom (R p [d, [term| $c * $y + $z |]]) | y == x ->
 >      let m = l `div` (destInteger c)
 >          n = if p == "<" then abs m else m
 >          xtm = fromInteger (m `div` n) * x in
@@ -285,15 +285,15 @@ we have already used the canonical form conversions:
 > minusinf :: Term -> Formula -> Formula 
 > minusinf x fm =
 >  case fm of
->    [$form| $n0 = $n1 * $y + _ |] 
+>    [form| $n0 = $n1 * $y + _ |]
 >     | n0 == zero && n1 == one && x == y -> (⊥)
->    [$form| $n0 < $n1 * $y + _ |] 
+>    [form| $n0 < $n1 * $y + _ |]
 >     | n0 == zero && n1 == one && x == y -> (⊥)
->    [$form| $n0 < _ * $y + _ |] 
+>    [form| $n0 < _ * $y + _ |]
 >     | n0 == zero && x == y -> (⊤)
->    [$form| ¬ $p |] -> (¬) $ minusinf x p
->    [$form| $p ∧ $q |] -> minusinf x p ∧ minusinf x q
->    [$form| $p ∨ $q |] -> minusinf x p ∨ minusinf x q
+>    [form| ¬ $p |] -> (¬) $ minusinf x p
+>    [form| $p ∧ $q |] -> minusinf x p ∧ minusinf x q
+>    [form| $p ∨ $q |] -> minusinf x p ∨ minusinf x q
 >    _ -> fm
 
 The next key point is that all divisibility terms d j ±x+a are unchanged
@@ -304,7 +304,7 @@ common multiple D of all d's occurring in formulas of the form d j c · x + a
 > divlcm :: Term -> Formula -> Integer
 > divlcm x fm =
 >  case fm of
->    Atom (R "divides" [d, [$term| _ * $y + _ |]]) 
+>    Atom (R "divides" [d, [term| _ * $y + _ |]])
 >     | x == y -> destInteger d
 >    Not p -> divlcm x p
 >    And p q -> lcm (divlcm x p) (divlcm x q)
@@ -324,15 +324,15 @@ the B-set for the formula in question.y In OCaml:
 
 > bset :: Term -> Formula -> [Term]
 > bset x fm = case fm of 
->   [$form| ¬ ($n0 = $n1 * $y + $a) |] 
+>   [form| ¬ ($n0 = $n1 * $y + $a) |]
 >    | n0 == zero && n1 == one && x == y -> [linearNeg a]
->   [$form| $n0 = $n1 * $y + $a |] 
+>   [form| $n0 = $n1 * $y + $a |]
 >    | n0 == zero && n1 == one && x == y -> [linearNeg $ linearAdd [] a one]
->   [$form| $n0 < $n1 * $y + $a |] 
+>   [form| $n0 < $n1 * $y + $a |]
 >    | n0 == zero && n1 == one && x == y -> [linearNeg a]
->   [$form| ¬ $p |] -> bset x p
->   [$form| $p ∧ $q |] -> bset x p ∪ bset x q
->   [$form| $p ∨ $q |] -> bset x p ∪ bset x q
+>   [form| ¬ $p |] -> bset x p
+>   [form| $p ∧ $q |] -> bset x p ∪ bset x q
+>   [form| $p ∨ $q |] -> bset x p ∪ bset x q
 >   _ -> []
 
 In order to apply the main theorem, we need to be able to form the
@@ -343,7 +343,7 @@ term t (assumed not to involve x), restoring canonicality:
 > linrep :: Vars -> Term -> Term -> Formula -> Formula 
 > linrep vars x t fm =
 >  case fm of
->    Atom(R p [d, [$term| $c * $y + $a |]]) | x == y ->
+>    Atom(R p [d, [term| $c * $y + $a |]]) | x == y ->
 >      let ct = linearCmul (destInteger c) t in
 >      Atom $ R p [d, linearAdd vars ct a]
 >    Not p -> (¬) $ linrep vars x t p

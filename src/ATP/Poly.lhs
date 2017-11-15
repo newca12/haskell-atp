@@ -41,7 +41,7 @@
 > import qualified ATP.Order as Order
 > import qualified ATP.Util.Lib as Lib
 > import qualified ATP.Util.Print as PP
-> import qualified Ratio
+> import qualified Data.Ratio
 
 * Rationals
 
@@ -140,7 +140,7 @@ Divide by a constant.
 >   Fn "*" [s, t] -> mul vars (polynate vars s) (polynate vars t)
 >   Fn "/" [s, t] -> div vars (polynate vars s) (polynate vars t)
 >   Fn "^" [p, Num n] -> 
->     if Ratio.denominator n == 1 then pow vars (polynate vars p) (fromIntegral $ Ratio.numerator n)
+>     if Data.Ratio.denominator n == 1 then pow vars (polynate vars p) (fromIntegral $ Data.Ratio.numerator n)
 >     else error $ "not an integer power: " ++ show n
 >   _ -> if Cooper.isInteger tm then tm else error "lint: unknown term"
 
@@ -148,7 +148,7 @@ Divide by a constant.
 > atom vars (Atom (R a [s, t])) = Atom(R a [polynate vars (Fn "-" [s, t]), zero])
 > atom _ a = error' $ PP.text "polyatom: not an atom" <+> PP.pPrint a
 
-let x = atom ["w", "x", "y", "z"] [$form| ((w + x)^4 + (w + y)^4 + (w + z)^4 + (x + y)^4 + (x + z)^4 + (y + z)^4 + (w - x)^4 + (w - y)^4 + (w - z)^4 + (x - y)^4 + (x - z)^4 + (y - z)^4) / 6 = (w^2 + x^2 + y^2 + z^2)^2 |]
+let x = atom ["w", "x", "y", "z"] [form| ((w + x)^4 + (w + y)^4 + (w + z)^4 + (x + y)^4 + (x + z)^4 + (y + z)^4 + (w - x)^4 + (w - y)^4 + (w - z)^4 + (x - y)^4 + (x - z)^4 + (y - z)^4) / 6 = (w^2 + x^2 + y^2 + z^2)^2 |]
 PP.pPrint x
 
 > coefficients :: Vars -> Poly -> [Poly]

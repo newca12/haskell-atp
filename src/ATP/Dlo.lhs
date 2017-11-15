@@ -34,8 +34,8 @@
 * Dense linear orders
 
 > lfn :: Formula -> Formula 
-> lfn [$form| ¬ ($s < $t) |] = [$form| $s = $t ∨ $t < $s |]
-> lfn [$form| ¬ ($s = $t) |] = [$form| $s < $t ∨ $t < $s |]
+> lfn [form| ¬ ($s < $t) |] = [form| $s = $t ∨ $t < $s |]
+> lfn [form| ¬ ($s = $t) |] = [form| $s < $t ∨ $t < $s |]
 > lfn fm = fm
 
 > dloBasic :: Formula -> Formula 
@@ -62,13 +62,13 @@ the atomic formulas.
 
 > afn :: Vars -> Formula -> Formula 
 > afn xs f = case f of 
->   [$form| $s ≤ $t |] -> afn xs [$form| ¬ ($t < $s) |]
->   [$form| $s ≥ $t |] -> afn xs [$form| ¬ ($s < $t) |]
->   [$form| $s > $t |] -> afn xs [$form| $t ≺ $s |]
->   [$form| $n < $m |] -> case (n, m) of 
+>   [form| $s ≤ $t |] -> afn xs [form| ¬ ($t < $s) |]
+>   [form| $s ≥ $t |] -> afn xs [form| ¬ ($s < $t) |]
+>   [form| $s > $t |] -> afn xs [form| $t ≺ $s |]
+>   [form| $n < $m |] -> case (n, m) of
 >     (Num n', Num m') -> if n' < m' then (⊤) else (⊥)
 >     _ -> f
->   [$form| ¬ ($n < $m) |] -> case (n, m) of 
+>   [form| ¬ ($n < $m) |] -> case (n, m) of
 >     (Num n', Num m') -> if n' > m' then (⊤) else (⊥)
 >     _ -> f
 >   _ -> f
@@ -96,11 +96,11 @@ the atomic formulas.
 >        "=" -> if s' == t' then Top else Bot 
 >        "<" -> if s' < t' then Top else Bot 
 >        _ -> f
-> reduce [$form| $p ∧ $q |] = reduce p ∧ reduce q
-> reduce [$form| $p ⊃ $q |] = reduce p ⊃ reduce q
-> reduce [$form| $p ⇔ $q |] = reduce p ⇔ reduce q
-> reduce [$form| $p ∨ $q |] = reduce p ∨ reduce q
-> reduce [$form| ¬ $p |] = (¬) (reduce p)
+> reduce [form| $p ∧ $q |] = reduce p ∧ reduce q
+> reduce [form| $p ⊃ $q |] = reduce p ⊃ reduce q
+> reduce [form| $p ⇔ $q |] = reduce p ⇔ reduce q
+> reduce [form| $p ∨ $q |] = reduce p ∨ reduce q
+> reduce [form| ¬ $p |] = (¬) (reduce p)
 > reduce f = f
 
 > valid :: Formula -> Bool

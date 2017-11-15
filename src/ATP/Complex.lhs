@@ -173,11 +173,11 @@
 
 * Tests
 
-let polytest tm = System.IO.UTF8.putStrLn $ PP.prettyShow $ P.polynate (ATP.Fol.fv tm) tm
+let polytest tm = System.IO.putStrLn $ PP.prettyShow $ P.polynate (ATP.Fol.fv tm) tm
 
 :{
 let lagrange_4 = polytest
- [$term| (((x1^2) + (x2^2) + (x3^2) + (x4^2)) *
+ [term| (((x1^2) + (x2^2) + (x3^2) + (x4^2)) *
          ((y1^2) + (y2^2) + (y3^2) + (y4^2))) -
     ((((((x1*y1) - (x2*y2)) - (x3*y3)) - (x4*y4))^2)  +
      (((((x1*y2) + (x2*y1)) + (x3*y4)) - (x4*y3))^2)  +
@@ -187,7 +187,7 @@ let lagrange_4 = polytest
 
 :{
 let lagrange_8 = polytest
- [$term|((p1^2 + q1^2 + r1^2 + s1^2 + t1^2 + u1^2 + v1^2 + w1^2) *
+ [term|((p1^2 + q1^2 + r1^2 + s1^2 + t1^2 + u1^2 + v1^2 + w1^2) *
      (p2^2 + q2^2 + r2^2 + s2^2 + t2^2 + u2^2 + v2^2 + w2^2)) -
      ((p1 * p2 - q1 * q2 - r1 * r2 - s1 * s2 - t1 * t2 - u1 * u2 - v1 * v2 - w1* w2)^2 +
       (p1 * q2 + q1 * p2 + r1 * s2 - s1 * r2 + t1 * u2 - u1 * t2 - v1 * w2 + w1* v2)^2 +
@@ -201,7 +201,7 @@ let lagrange_8 = polytest
 
 :{
 let liouville = polytest
- [$term| 6 * (x1^2 + x2^2 + x3^2 + x4^2)^2 -
+ [term| 6 * (x1^2 + x2^2 + x3^2 + x4^2)^2 -
     (((x1 + x2)^4 + (x1 + x3)^4 + (x1 + x4)^4 +
       (x2 + x3)^4 + (x2 + x4)^4 + (x3 + x4)^4) +
      ((x1 - x2)^4 + (x1 - x3)^4 + (x1 - x4)^4 +
@@ -210,7 +210,7 @@ let liouville = polytest
 
 :{
 let fleck = polytest
- [$term| 60 * (x1^2 + x2^2 + x3^2 + x4^2)^3 -
+ [term| 60 * (x1^2 + x2^2 + x3^2 + x4^2)^3 -
     (((x1 + x2 + x3)^6 + (x1 + x2 - x3)^6 +
       (x1 - x2 + x3)^6 + (x1 - x2 - x3)^6 +
       (x1 + x2 + x4)^6 + (x1 + x2 - x4)^6 +
@@ -230,7 +230,7 @@ let fleck = polytest
 
 :{
 let hurwitz = polytest
- [$term| 5040 * (x1^2 + x2^2 + x3^2 + x4^2)^4 -
+ [term| 5040 * (x1^2 + x2^2 + x3^2 + x4^2)^4 -
     (6 * ((x1 + x2 + x3 + x4)^8 +
           (x1 + x2 + x3 - x4)^8 +
           (x1 + x2 - x3 + x4)^8 +
@@ -298,7 +298,7 @@ let hurwitz = polytest
 
 :{
 let schur = polytest
- [$term| 22680 * (x1^2 + x2^2 + x3^2 + x4^2)^5 -
+ [term| 22680 * (x1^2 + x2^2 + x3^2 + x4^2)^5 -
     (9 * ((2 * x1)^10 +
           (2 * x2)^10 +
           (2 * x3)^10 +

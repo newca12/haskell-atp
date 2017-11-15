@@ -40,23 +40,23 @@ Allow interactive use of Grobner without unused import warning
 > coordinations = 
 >   [ -- Points 1, 2 and 3 lie on a common line 
 >     ( "collinear" 
->     , [$form| (x_1 - x_2) * (y_2 - y_3) = (y_1 - y_2) * (x_2 - x_3) |] )
+>     , [form| (x_1 - x_2) * (y_2 - y_3) = (y_1 - y_2) * (x_2 - x_3) |] )
 >     -- Lines (1,2) and (3,4) are parallel
 >   , ( "parallel"
->     , [$form| (x_1 - x_2) * (y_3 - y_4) = (y_1 - y_2) * (x_3 - x_4) |] )
+>     , [form| (x_1 - x_2) * (y_3 - y_4) = (y_1 - y_2) * (x_3 - x_4) |] )
 >     -- Lines (1,2) and (3,4) are perpendicular 
 >   , ( "perpendicular"
->     , [$form| (x_1 - x_2) * (x_3 - x_4) + (y_1 - y_2) * (y_3 - y_4) = 0 |] )
+>     , [form| (x_1 - x_2) * (x_3 - x_4) + (y_1 - y_2) * (y_3 - y_4) = 0 |] )
 >     -- Lines (1,2) and (3,4) have the same length 
 >   , ( "lengths_eq"
->     , [$form| (x_1 - x_2)^2 + (y_1 - y_2)^2 = (x_3 - x_4)^2 + (y_3 - y_4)^2 |] )
+>     , [form| (x_1 - x_2)^2 + (y_1 - y_2)^2 = (x_3 - x_4)^2 + (y_3 - y_4)^2 |] )
 >   , ( "is_midpoint" -- Point 1 is the midpoint of line (2,3) 
->     , [$form| 2 * x_1 = x_2 + x_3 ∧ 2 * y_1 = y_2 + y_3 |] )
+>     , [form| 2 * x_1 = x_2 + x_3 ∧ 2 * y_1 = y_2 + y_3 |] )
 >   , ("is_intersection" -- Lines (2,3) and (4,5) meet at point 1 
->     , [$form| (x_1 - x_2) * (y_2 - y_3) = (y_1 - y_2) * (x_2 - x_3) ∧ 
+>     , [form| (x_1 - x_2) * (y_2 - y_3) = (y_1 - y_2) * (x_2 - x_3) ∧
 >          (x_1 - x_4) * (y_4 - y_5) = (y_1 - y_4) * (x_4 - x_5) |] )
 >   , ("=" -- Points 1 and 2 are the same
->     , [$form| (x_1 = x_2) /\ (y_1 = y_2) |] )
+>     , [form| (x_1 = x_2) /\ (y_1 = y_2) |] )
 >   ]
 
 To translate a quantifier-free formula we just use these templates as a
@@ -74,7 +74,7 @@ quantifiers over coordinates.)
 >       θ = Map.fromList $ zip (xs ++ ys) (xtms ++ ytms)
 >   in Fol.apply θ (fromJust $ lookup a coordinations)
 
-pp $ coordinate [$form| collinear(a,b,c) ==> collinear(b,a,c) |]
+pp $ coordinate [form| collinear(a,b,c) ==> collinear(b,a,c) |]
 
 We can optimize the translation process somewhat by exploiting the
 invariance of geometric properties under certain kinds of spatial
@@ -98,13 +98,13 @@ if a universal formula holds over C it also holds over R.) Under a spatial
 translation x ↦ x + X, y ↦ y + Y :
 
 > invariantUnderTranslation :: (String, Formula) -> Formula
-> invariantUnderTranslation = invariant ([$term| x + x' |], [$term| y + y' |])
+> invariantUnderTranslation = invariant ([term| x + x' |], [term| y + y' |])
 
 M.all (Grobner.decide . invariantUnderTranslation) coordinations
 
 > invariantUnderRotation :: (String, Formula) -> Formula
 > invariantUnderRotation fm = 
->   [$form| s^2 + c^2 = 1 |] ⊃ (invariant ([$term| c * x - s * y |], [$term| s * x + c * y |]) fm)
+>   [form| s^2 + c^2 = 1 |] ⊃ (invariant ([term| c * x - s * y |], [term| s * x + c * y |]) fm)
 
 M.all (Grobner.decide . invariantUnderRotation) coordinations
 
@@ -123,7 +123,7 @@ transformation.
 
 > invariantUnderScaling :: (String, Formula) -> Formula
 > invariantUnderScaling fm = 
->   [$form| ¬ A = 0 |] ⊃ (invariant ([$term| A * x |], [$term| A * y |]) fm)
+>   [form| ¬ A = 0 |] ⊃ (invariant ([term| A * x |], [term| A * y |]) fm)
 
 Because all our geometric properties are invariant under scaling:
 
@@ -143,11 +143,11 @@ Thus, the special choice of coordinates based on invariance under scaling
 and shearing seems best left to the user setting up the problem.
 
 > invariantUnderShearing :: (String, Formula) -> Formula
-> invariantUnderShearing = invariant ([$term| x + b * y |], [$term| y |])
+> invariantUnderShearing = invariant ([term| x + b * y |], [term| y |])
 
 :{
 (Grobner.decide . originate) 
-  [$form| is_midpoint(m,a,c) ∧ perpendicular(a,c,m,b) ⊃ lengths_eq(a,b,b,c) |]
+  [form| is_midpoint(m,a,c) ∧ perpendicular(a,c,m,b) ⊃ lengths_eq(a,b,b,c) |]
 :}
 
 > pprove :: Vars -> [Term] -> Term -> [Formula] -> [Formula]
@@ -155,7 +155,7 @@ and shearing seems best left to the user setting up the problem.
 >  | p == zero = degens
 >  | otherwise = case triang of
 >    [] -> p ≡ zero : degens
->    q@[$term| $_ + ^x * _ |] : qs 
+>    q@[term| $_ + ^x * _ |] : qs
 >     | x /= head vars -> 
 >       if elem (head vars) (Fol.fv p) 
 >       then foldr (pprove vars triang) degens (P.coefficients vars p) 

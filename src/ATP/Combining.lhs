@@ -92,7 +92,7 @@ sugar rather than an expansion of the language.
 > intLang :: Lang
 > intLang = Lang "intLant" fdesc ndesc pdesc elim
 >   where fdesc = flip elem funcs
--->         ndesc n = Ratio.denominator n == 1
+-->         ndesc n = Data.Ratio.denominator n == 1
 >         ndesc = const True
 >         pdesc = flip elem preds
 >         elim fm = intqelim (Fol.generalize fm) == Top

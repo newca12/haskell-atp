@@ -126,7 +126,7 @@ each canonical equivalence:
 >       raw = map (\p -> (p, consequences p fm eqs)) eqs
 >   in filter (not . null . snd) raw
 
-pp $ triggers [$form| p <=> (q /\ r) |]
+pp $ triggers [form| p <=> (q /\ r) |]
 
 We could apply this to the actual triplets in the formula (indeed, it is
 applicable to any formula fm), but it's more efficient to precompute it for
@@ -137,17 +137,17 @@ if some of p, q and r are replaced by negative literals.
 
 > trigger :: Formula -> Triggers
 > trigger fm = case fm of
->   [$form| $x ⇔ $y ∧ $z |] -> instTrigger (x, y, z) trigAnd
->   [$form| $x ⇔ $y ∨ $z |] -> instTrigger (x, y, z) trigOr
->   [$form| $x ⇔ $y ⊃ $z |] -> instTrigger (x, y, z) trigImp
->   [$form| $x ⇔ ($y ⇔ $z) |] -> instTrigger (x, y, z) trigIff
+>   [form| $x ⇔ $y ∧ $z |] -> instTrigger (x, y, z) trigAnd
+>   [form| $x ⇔ $y ∨ $z |] -> instTrigger (x, y, z) trigOr
+>   [form| $x ⇔ $y ⊃ $z |] -> instTrigger (x, y, z) trigImp
+>   [form| $x ⇔ ($y ⇔ $z) |] -> instTrigger (x, y, z) trigIff
 >   _ -> __IMPOSSIBLE__ 
 >  where 
->   trigAnd = triggers [$form| p ⇔ q ∧ r |]
->   trigOr = triggers [$form| p ⇔ q ∨ r |]
->   trigImp = triggers [$form| p ⇔ q ⊃ r |]
->   trigIff = triggers [$form| p ⇔ (q ⇔ r) |]
->   ddnegate [$form| ¬ ¬ $p |] = p
+>   trigAnd = triggers [form| p ⇔ q ∧ r |]
+>   trigOr = triggers [form| p ⇔ q ∨ r |]
+>   trigImp = triggers [form| p ⇔ q ⊃ r |]
+>   trigIff = triggers [form| p ⇔ (q ⇔ r) |]
+>   ddnegate [form| ¬ ¬ $p |] = p
 >   ddnegate f = f
 >   instfn (x, y, z) = 
 >     let subfn = Map.fromList [ (R "p" [], x), (R "q" [], y), (R "r" [], z) ] 

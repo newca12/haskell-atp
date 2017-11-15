@@ -104,7 +104,7 @@ The quasiquoter for Exprs.  It is the only export besides the syntax
 for Exprs.
 
 > expr :: QuasiQuoter
-> expr = QuasiQuoter quoteExprExp quoteExprPat
+> expr = QuasiQuoter quoteExprExp quoteExprPat undefined undefined
 
 > quoteExprExp s = Q.dataToExpQ (const Nothing `G.extQ` antiExprExp) (parse s)
 

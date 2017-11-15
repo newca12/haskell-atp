@@ -16,7 +16,7 @@
 >   , splits
 >   , classify
 >   , partition'
->   , uncons
+>   , uncons_
 >   , foldr2
 >   , insertAt
 >   , all2
@@ -231,13 +231,13 @@ Map with element index as argument
 >   where parts = partitions xs
 >         f p = ([x]:p) : insertAll x p
 
-** uncons
+** uncons_
 
 | List destructor
 
-> uncons :: [a] -> (a, [a])
-> uncons [] = error "Impossible" 
-> uncons (h:t) = (h, t)
+> uncons_ :: [a] -> (a, [a])
+> uncons_ [] = error "Impossible"
+> uncons_ (h:t) = (h, t)
 
 ** select
 

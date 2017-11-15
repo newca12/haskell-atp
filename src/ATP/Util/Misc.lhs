@@ -14,7 +14,7 @@
 > import Prelude 
 > import qualified ATP.Util.Lex as Lex
 > import ATP.Util.Parse (parser)
-> import qualified Ratio
+> import qualified Data.Ratio
 
 * Util
 
@@ -28,14 +28,14 @@
 > getInteger i = case getRational i of
 >   Nothing -> Nothing
 >   Just r -> 
->     if Ratio.denominator r == 1 
->     then Just $ Ratio.numerator r 
+>     if Data.Ratio.denominator r == 1
+>     then Just $ Data.Ratio.numerator r
 >     else Nothing
 
 > getInt :: String -> Maybe Int
 > getInt i = case getRational i of
 >   Nothing -> Nothing
 >   Just r -> 
->     if Ratio.denominator r == 1 
->     then Just $ fromInteger $ Ratio.numerator r 
+>     if Data.Ratio.denominator r == 1
+>     then Just $ fromInteger $ Data.Ratio.numerator r
 >     else Nothing

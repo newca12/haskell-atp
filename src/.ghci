@@ -79,4 +79,4 @@
 -- :break matrix
 -- :break basicQelim
 
--- qelim [$form| ∃ x. x^2 = 0 |]
+-- qelim [form| ∃ x. x^2 = 0 |]

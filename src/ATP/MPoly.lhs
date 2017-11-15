@@ -24,7 +24,7 @@
 > import qualified ATP.Order as Order
 > import qualified ATP.Util.Monad as M
 > import qualified Data.List as List
-> import qualified Ratio
+> import qualified Data.Ratio
 
 * Monomials
 
@@ -176,13 +176,13 @@ by the usual process of recursion:
 > polynate :: Vars -> Term -> Poly
 > polynate vars tm = case tm of
 >   Var x -> var vars x
->   [$term| - $t |] -> - (polynate vars t)
->   [$term| $s + $t |] -> polynate vars s + polynate vars t
->   [$term| $s - $t |] -> polynate vars s - polynate vars t
->   [$term| $s * $t |] -> polynate vars s * polynate vars t
->   [$term| $s / $t |] -> polynate vars s / polynate vars t
->   [$term| $s ^ $n |] -> case n of
->      Num n' | Ratio.denominator n' == 1 -> pow vars (polynate vars s) (fromInteger $ Ratio.numerator n')
+>   [term| - $t |] -> - (polynate vars t)
+>   [term| $s + $t |] -> polynate vars s + polynate vars t
+>   [term| $s - $t |] -> polynate vars s - polynate vars t
+>   [term| $s * $t |] -> polynate vars s * polynate vars t
+>   [term| $s / $t |] -> polynate vars s / polynate vars t
+>   [term| $s ^ $n |] -> case n of
+>      Num n' | Data.Ratio.denominator n' == 1 -> pow vars (polynate vars s) (fromInteger $ Data.Ratio.numerator n')
 >      _ -> __IMPOSSIBLE__ 
 >   Num r -> const vars r
 >   _ -> __IMPOSSIBLE__ 
@@ -192,7 +192,7 @@ think of as s - t = 0, into a corresponding polynomial:
 
 > polyatom :: Vars -> Formula -> Poly
 > polyatom vars fm = case fm of
->   Atom (R "=" [s, t]) -> polynate vars [$term| $s - $t |]
+>   Atom (R "=" [s, t]) -> polynate vars [term| $s - $t |]
 >   _ -> error "polyatom: not an equation"
 
 In later discussions, we will write `norm' to abbreviate mpolynate vars

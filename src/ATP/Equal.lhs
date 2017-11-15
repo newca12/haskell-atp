@@ -66,8 +66,8 @@
 
 > equivalenceAxioms :: [Formula]
 > equivalenceAxioms = 
->   [ [$form| ∀ x. x = x |]
->   , [$form| ∀ x y z. x = y ∧ x = z ⊃ y = z |]
+>   [ [form| ∀ x. x = x |]
+>   , [form| ∀ x y z. x = y ∧ x = z ⊃ y = z |]
 >   ]
 
 > equalitize :: Formula -> Formula

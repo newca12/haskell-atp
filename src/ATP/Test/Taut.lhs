@@ -20,16 +20,16 @@
 
 > forms :: [(String, Formula, Bool)]
 > forms = 
->   [ ("p1", [$form| p ⊃ p |], True)
->   , ("p2", [$form| p ∧ q ⊃ q ∧ p |], True)
->   , ("p3", [$form| ⊥ |], False)
->   , ("p4", [$form| ⊤ |], True)
->   , ("p5", [$form| p ⇔ p |], True)
->   , ("p6", [$form| ¬ ¬ ((⊤ ⊃ p2) ⊃ (⊤ ⇔ p4)) ∨ (⊤ ⇔ ⊥ ∨ p8) |], False)
->   , ("p7", [$form| ((⊤ ∨ (⊤ ⇔ ⊥)) ∧ (p5 ∨ ⊤ ⊃ ⊥ ⊃ p0)) ∧ ((⊤ ⇔ ⊥) ∧ (p10 ⇔ ⊥) ⊃ ¬(p10 ∨ ⊤)) |], True)
->   , ("p8", [$form| (⊤ ⊃ ⊥) ⊃ ⊥ |], True)
->   , ("p9", [$form| (⊤ ⇔ ⊥) ⊃ ⊥ |], True)
->   , ("p10", [$form| (((⊤ ⇔ ⊤) ⊃ ¬⊥) ⊃ ¬(⊤ ∨ ⊥ ∧ ⊤)) ∨ ((⊥ ⊃ p5 ⇔ ¬(p7)) ⊃ ((⊥ ⇔ ⊤) ⇔ ⊥ ⇔ ⊤)) ∨ (⊤ ∨ ⊥ ⊃ (⊥ ⊃ ⊥ ⇔ p5 ∨ ⊥)) |], True)
+>   [ ("p1", [form| p ⊃ p |], True)
+>   , ("p2", [form| p ∧ q ⊃ q ∧ p |], True)
+>   , ("p3", [form| ⊥ |], False)
+>   , ("p4", [form| ⊤ |], True)
+>   , ("p5", [form| p ⇔ p |], True)
+>   , ("p6", [form| ¬ ¬ ((⊤ ⊃ p2) ⊃ (⊤ ⇔ p4)) ∨ (⊤ ⇔ ⊥ ∨ p8) |], False)
+>   , ("p7", [form| ((⊤ ∨ (⊤ ⇔ ⊥)) ∧ (p5 ∨ ⊤ ⊃ ⊥ ⊃ p0)) ∧ ((⊤ ⇔ ⊥) ∧ (p10 ⇔ ⊥) ⊃ ¬(p10 ∨ ⊤)) |], True)
+>   , ("p8", [form| (⊤ ⊃ ⊥) ⊃ ⊥ |], True)
+>   , ("p9", [form| (⊤ ⇔ ⊥) ⊃ ⊥ |], True)
+>   , ("p10", [form| (((⊤ ⇔ ⊤) ⊃ ¬⊥) ⊃ ¬(⊤ ∨ ⊥ ∧ ⊤)) ∨ ((⊥ ⊃ p5 ⇔ ¬(p7)) ⊃ ((⊥ ⇔ ⊤) ⇔ ⊥ ⇔ ⊤)) ∨ (⊤ ∨ ⊥ ⊃ (⊥ ⊃ ⊥ ⇔ p5 ∨ ⊥)) |], True)
 >   ]
 
 > mkTest :: String -> (Formula -> Bool) -> Test

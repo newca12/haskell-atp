@@ -24,14 +24,14 @@ Set operations on lists.
 * Imports
 
 > import Prelude hiding (subtract)
-> import qualified List
+> import qualified Data.List
 
 * Sets as lists
 
 > type ListSet a = [a]
 
 > setify :: Ord a => [a] -> [a]
-> setify = uniq . List.sortBy compare 
+> setify = uniq . Data.List.sortBy compare
 
 Remove duplicates in a sorted list
 
@@ -106,7 +106,7 @@ Image of a function
 >                                        | otherwise = subset l1' t2
 
 > unions :: Ord a => [[a]] -> [a]
-> unions = setify . List.concat 
+> unions = setify . Data.List.concat
 
 Power set
 

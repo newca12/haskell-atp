@@ -63,14 +63,14 @@ Evaluate a formula in a mapping of variables to truth values.
 
 > eval :: Formula -> (Rel -> Bool) -> Bool
 > eval fm v = case fm of
->   [$form| ⊤ |] -> True
->   [$form| ⊥ |] -> False
->   [$form| ^a |] -> v a
->   [$form| ¬ $p |] -> not (eval p v)
->   [$form| $p ∧ $q |] -> eval p v && eval q v
->   [$form| $p ∨ $q |] -> eval p v || eval q v
->   [$form| $p ⊃ $q |] -> not (eval p v) || (eval q v)
->   [$form| $p ⇔ $q |] -> eval p v == eval q v
+>   [form| ⊤ |] -> True
+>   [form| ⊥ |] -> False
+>   [form| ^a |] -> v a
+>   [form| ¬ $p |] -> not (eval p v)
+>   [form| $p ∧ $q |] -> eval p v && eval q v
+>   [form| $p ∨ $q |] -> eval p v || eval q v
+>   [form| $p ⊃ $q |] -> not (eval p v) || (eval q v)
+>   [form| $p ⇔ $q |] -> eval p v == eval q v
 >   _ -> error "quantifier in prop eval"
 
 Return all atoms in a formula.
@@ -134,14 +134,14 @@ Duality
 
 > dual :: Formula -> Formula 
 > dual fm = case fm of
->   [$form| ⊥ |] -> (⊤)
->   [$form| ⊤ |] -> (⊥)
->   [$form| ^_ |] -> fm
->   [$form| ¬ $p |] -> (¬) $ dual p
->   [$form| $p ∧ $q |] -> p' ∨ q'
+>   [form| ⊥ |] -> (⊤)
+>   [form| ⊤ |] -> (⊥)
+>   [form| ^_ |] -> fm
+>   [form| ¬ $p |] -> (¬) $ dual p
+>   [form| $p ∧ $q |] -> p' ∨ q'
 >     where p' = dual p
 >           q' = dual q
->   [$form| $p ∨ $q |] -> p' ∧ q'
+>   [form| $p ∨ $q |] -> p' ∧ q'
 >     where p' = dual p
 >           q' = dual q
 >   _ -> error "Formula involves connectives ⊃ and ⇔"
@@ -150,18 +150,18 @@ Simplification
 
 > simplify :: Formula -> Formula
 > simplify fm = case fm of
->   [$form| ¬ $p |] -> simplify1 $ (¬) p'
+>   [form| ¬ $p |] -> simplify1 $ (¬) p'
 >     where p' = simplify p
->   [$form| $p ∧ $q |] -> simplify1 $ p' ∧ q'
->     where p' = simplify p
->           q' = simplify q
->   [$form| $p ∨ $q |] -> simplify1 $ p' ∨ q' 
+>   [form| $p ∧ $q |] -> simplify1 $ p' ∧ q'
 >     where p' = simplify p
 >           q' = simplify q
->   [$form| $p ⊃ $q |] -> simplify1 $ p' ⊃ q'
+>   [form| $p ∨ $q |] -> simplify1 $ p' ∨ q'
 >     where p' = simplify p
 >           q' = simplify q
->   [$form| $p ⇔ $q |] -> simplify1 $ p' ⇔ q' 
+>   [form| $p ⊃ $q |] -> simplify1 $ p' ⊃ q'
+>     where p' = simplify p
+>           q' = simplify q
+>   [form| $p ⇔ $q |] -> simplify1 $ p' ⇔ q'
 >     where p' = simplify p
 >           q' = simplify q
 >   _ -> fm
@@ -170,26 +170,26 @@ The order of the following clauses makes a big difference.
 
 > simplify1 :: Formula -> Formula
 > simplify1 fm = case fm of
->   [$form| ¬ ⊥ |] -> (⊤)
->   [$form| ¬ ⊤ |] -> (⊥)
->   [$form| ¬ ¬ $p |] -> p
->   [$form| ⊥ ∧ _ |] -> (⊥)
->   [$form| _ ∧ ⊥ |] -> (⊥)
->   [$form| ⊤ ∧ $q |] -> q
->   [$form| $p ∧ ⊤ |] -> p
->   [$form| ⊥ ∨ $q |] -> q
->   [$form| $p ∨ ⊥ |] -> p
->   [$form| ⊤ ∨ _ |] -> (⊤)
->   [$form| _ ∨ ⊤ |] -> (⊤)
->   [$form| ⊥ ⊃ _ |] -> (⊤)
->   [$form| _ ⊃ ⊤ |] ->  (⊤)
->   [$form| ⊤ ⊃ $q |] -> q
->   [$form| $p ⊃ ⊥ |] -> (¬) p
->   [$form| ⊤ ⇔ $q |] -> q
->   [$form| $p ⇔ ⊤ |] -> p
->   [$form| ⊥ ⇔ ⊥ |] -> (⊤)
->   [$form| ⊥ ⇔ $q |] -> (¬) q
->   [$form| $p ⇔ ⊥ |] -> (¬) p
+>   [form| ¬ ⊥ |] -> (⊤)
+>   [form| ¬ ⊤ |] -> (⊥)
+>   [form| ¬ ¬ $p |] -> p
+>   [form| ⊥ ∧ _ |] -> (⊥)
+>   [form| _ ∧ ⊥ |] -> (⊥)
+>   [form| ⊤ ∧ $q |] -> q
+>   [form| $p ∧ ⊤ |] -> p
+>   [form| ⊥ ∨ $q |] -> q
+>   [form| $p ∨ ⊥ |] -> p
+>   [form| ⊤ ∨ _ |] -> (⊤)
+>   [form| _ ∨ ⊤ |] -> (⊤)
+>   [form| ⊥ ⊃ _ |] -> (⊤)
+>   [form| _ ⊃ ⊤ |] ->  (⊤)
+>   [form| ⊤ ⊃ $q |] -> q
+>   [form| $p ⊃ ⊥ |] -> (¬) p
+>   [form| ⊤ ⇔ $q |] -> q
+>   [form| $p ⇔ ⊤ |] -> p
+>   [form| ⊥ ⇔ ⊥ |] -> (⊤)
+>   [form| ⊥ ⇔ $q |] -> (¬) q
+>   [form| $p ⇔ ⊥ |] -> (¬) p
 >   _ -> fm
 
 Negation normal form
@@ -199,31 +199,31 @@ Negation normal form
 
 > nnf' :: Formula -> Formula
 > nnf' fm = case fm of 
->   [$form| $p ∧ $q |] -> p' ∧ q'
+>   [form| $p ∧ $q |] -> p' ∧ q'
 >     where p' = nnf' p 
 >           q' = nnf' q
->   [$form| $p ∨ $q |] -> p' ∨ q'
+>   [form| $p ∨ $q |] -> p' ∨ q'
 >     where p' = nnf' p 
 >           q' = nnf' q
->   [$form| $p ⊃ $q |] -> np' ∨ q'
+>   [form| $p ⊃ $q |] -> np' ∨ q'
 >     where np' = nnf' $ (¬) p
 >           q' = nnf' q
->   [$form| $p ⇔ $q |] -> p' ∧ q' ∨ p'' ∧ q''
+>   [form| $p ⇔ $q |] -> p' ∧ q' ∨ p'' ∧ q''
 >     where p' = nnf' p
 >           q' = nnf' q
 >           p'' = nnf' $ (¬) p
 >           q'' = nnf' $ (¬) q
->   [$form| ¬ ¬ $p |] -> nnf' p
->   [$form| ¬ ($p ∧ $q) |] -> p' ∨ q'
+>   [form| ¬ ¬ $p |] -> nnf' p
+>   [form| ¬ ($p ∧ $q) |] -> p' ∨ q'
 >     where p' = nnf' $ (¬) p
 >           q' = nnf' $ (¬) q 
->   [$form| ¬ ($p ∨ $q) |] -> p' ∧ q'
+>   [form| ¬ ($p ∨ $q) |] -> p' ∧ q'
 >     where p' = nnf' $ (¬) p
 >           q' = nnf' $ (¬) q
->   [$form| ¬ ($p ⊃ $q) |] -> p' ∧ q'
+>   [form| ¬ ($p ⊃ $q) |] -> p' ∧ q'
 >     where p' = nnf' p
 >           q' = nnf' $ (¬) q
->   [$form| ¬ ($p ⇔ $q) |] -> p' ∧ q'' ∨ p'' ∧ q' 
+>   [form| ¬ ($p ⇔ $q) |] -> p' ∧ q'' ∨ p'' ∧ q'
 >     where p' = nnf' p
 >           q' = nnf' q
 >           p'' = nnf' $ (¬) p
@@ -235,29 +235,29 @@ Negation normal form
 
 > nenf' :: Formula -> Formula
 > nenf' fm = case fm of 
->   [$form| ¬¬$p |] -> nenf' p
->   [$form| ¬($p ∧ $q) |] -> [$form| $p' ∨ $q' |] 
->     where p' = nenf' [$form| ¬ $p |]
->           q' = nenf' [$form| ¬ $q |]
->   [$form| ¬($p ∨ $q) |] -> [$form| $p' ∧ $q' |] 
->     where p' = nenf' [$form| ¬ $p |]
->           q' = nenf' [$form| ¬ $q |]
->   [$form| ¬($p ⊃ $q) |] -> [$form| $p' ∧ $q' |] 
+>   [form| ¬¬$p |] -> nenf' p
+>   [form| ¬($p ∧ $q) |] -> [form| $p' ∨ $q' |]
+>     where p' = nenf' [form| ¬ $p |]
+>           q' = nenf' [form| ¬ $q |]
+>   [form| ¬($p ∨ $q) |] -> [form| $p' ∧ $q' |]
+>     where p' = nenf' [form| ¬ $p |]
+>           q' = nenf' [form| ¬ $q |]
+>   [form| ¬($p ⊃ $q) |] -> [form| $p' ∧ $q' |]
 >     where p' = nenf' p
->           q' = nenf' [$form| ¬ $q |]
->   [$form| ¬($p ⇔ $q) |] -> [$form| $p' ⇔ $q' |] 
+>           q' = nenf' [form| ¬ $q |]
+>   [form| ¬($p ⇔ $q) |] -> [form| $p' ⇔ $q' |]
 >     where p' = nenf' p
->           q' = nenf' [$form| ¬ $q |]
->   [$form| $p ∧ $q |] -> [$form| $p' ∧ $q' |] 
->     where p' = nenf' p
->           q' = nenf' q
->   [$form| $p ∨ $q |] -> [$form| $p' ∨ $q' |] 
+>           q' = nenf' [form| ¬ $q |]
+>   [form| $p ∧ $q |] -> [form| $p' ∧ $q' |]
 >     where p' = nenf' p
 >           q' = nenf' q
->   [$form| $p ⊃ $q |] -> [$form| $p' ∨ $q' |] 
->     where p' = nenf' [$form| ¬ $p |]
+>   [form| $p ∨ $q |] -> [form| $p' ∨ $q' |]
+>     where p' = nenf' p
 >           q' = nenf' q
->   [$form| $p ⇔ $q |] -> [$form| $p' ⇔ $q' |] 
+>   [form| $p ⊃ $q |] -> [form| $p' ∨ $q' |]
+>     where p' = nenf' [form| ¬ $p |]
+>           q' = nenf' q
+>   [form| $p ⇔ $q |] -> [form| $p' ⇔ $q' |]
 >     where p' = nenf' p
 >           q' = nenf' q
 >   _ -> fm
@@ -266,19 +266,19 @@ Positive and negative occurrances of atoms
 
 > occurrences :: Rel -> Formula -> (Bool, Bool)
 > occurrences x fm = case fm of
->   [$form| ^y |] -> (x == y, False)
->   [$form| ¬ $p |] -> (neg, pos)
+>   [form| ^y |] -> (x == y, False)
+>   [form| ¬ $p |] -> (neg, pos)
 >     where (pos, neg) = occurrences x p 
->   [$form| $p ∧ $q |] -> (pos1 || pos2, neg1 || neg2)
+>   [form| $p ∧ $q |] -> (pos1 || pos2, neg1 || neg2)
 >     where (pos1, neg1) = occurrences x p
 >           (pos2, neg2) = occurrences x q 
->   [$form| $p ∨ $q |] -> (pos1 || pos2, neg1 || neg2)
+>   [form| $p ∨ $q |] -> (pos1 || pos2, neg1 || neg2)
 >     where (pos1, neg1) = occurrences x p
 >           (pos2, neg2) = occurrences x q 
->   [$form| $p ⊃ $q |] -> (neg1 || pos2, pos1 || neg2)
+>   [form| $p ⊃ $q |] -> (neg1 || pos2, pos1 || neg2)
 >     where (pos1, neg1) = occurrences x p
 >           (pos2, neg2) = occurrences x q 
->   [$form| $p ⇔ $q |] -> if pos1 || pos2 || neg1 || neg2 
+>   [form| $p ⇔ $q |] -> if pos1 || pos2 || neg1 || neg2
 >                           then (True, True) else (False, False)
 >     where (pos1, neg1) = occurrences x p
 >           (pos2, neg2) = occurrences x q 
@@ -334,9 +334,9 @@ Conjunctive normal form
 > purecnf :: Formula -> [[Formula]]
 > purecnf = map (map F.opp) . (purednf . nnf . Not)
 
-nnf [$form| p ⇔ (q ⇔ r) |]
-cnf [$form| p ⇔ (q ⇔ r) |]
-dnf [$form| p ⇔ (q ⇔ r) |]
+nnf [form| p ⇔ (q ⇔ r) |]
+cnf [form| p ⇔ (q ⇔ r) |]
+dnf [form| p ⇔ (q ⇔ r) |]
 
 * Tests
 
