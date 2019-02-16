@@ -32,7 +32,7 @@
 
 * Imports
 
-> import Prelude hiding (print, putStr, putStrLn)
+> import Prelude hiding (print, putStr, putStrLn, (<>))
 > import ATP.Util.Impossible
 > import Control.Applicative ((<$>))
 > import Control.Arrow (first, second)

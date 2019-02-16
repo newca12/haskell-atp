@@ -12,7 +12,7 @@
   
 * Imports
                       
-> import Prelude 
+> import Prelude hiding ((<>))
 > import qualified ATP.Fol as Fol
 > import qualified ATP.Formula as F
 > import ATP.FormulaSyn
