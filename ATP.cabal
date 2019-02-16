@@ -56,6 +56,8 @@ library
                  CPP
                  TemplateHaskellQuotes
 
+  cpp-options: -Wno-unicode-homoglyph
+
   ghc-options: -Wall 
                -- These warnings are not turned on by -Wall
                -fwarn-implicit-prelude 
@@ -159,6 +161,8 @@ executable atp
                  TemplateHaskell
                  QuasiQuotes
                  CPP
+
+  cpp-options: -Wno-unicode-homoglyph
 
   ghc-options: -fno-ignore-asserts
                -- Allow comment lines next to literate lines

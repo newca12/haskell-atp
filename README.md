@@ -5,8 +5,7 @@
 Port of the Objective Caml code supporting John Harrison's logic [textbook](http://www.cambridge.org/catalogue/catalogue.asp?isbn=9780521899574) Handbook of Practical Logic and Automated Reasoning to Haskell.
 
 The original code written by [Sean McLaughlin](https://github.com/seanmcl) need GHC 6.10.4  
-This repo contains sligth modifications and instructions to fit GHC 8.x
-
+This repo contains sligth modifications and instructions to fit GHC upto 8.2.2
 
 ### Installlation ###
 1. Install the [Haskell platform](http://hackage.haskell.org/platform/). This will give you [GHC](http://www.haskell.org/ghc/) and the [cabal-install](http://hackage.haskell.org/trac/hackage/wiki/CabalInstall) build tool.
@@ -17,7 +16,7 @@ This repo contains sligth modifications and instructions to fit GHC 8.x
    
 4. Get the required Haskell libraries:
 
-       cabal install directory hslogger utf8-string
+       cabal install directory hslogger utf8-string HUnit QuickCheck parsec syb
 
 5. Build an executable
 
