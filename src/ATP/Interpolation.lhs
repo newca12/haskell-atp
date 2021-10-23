@@ -9,7 +9,7 @@
 
 * Imports
 
-#include "../undefined.h" 
+
 
 > import ATP.Util.Prelude
 > import qualified ATP.DefCnf as Cnf
@@ -86,7 +86,7 @@ then iteratively replace them by quantiﬁed variables.
 >                 c'' = if elem (f, length args) fp 
 >                       then (∃) v c' else (¥) v c' in
 >             simpinter otms (n+1::Int) c'' 
->           _ -> __IMPOSSIBLE__ in
+>           _ -> (throwImpossible (Impossible __FILE__ __LINE__))in
 >   do c <- urinterpolate p q 
 >      let tts = topterms ((fp \\ fq) ∪ (fq \\ fp)) c
 >          tms = List.sortBy (Lib.decreasing Order.termSize) tts 

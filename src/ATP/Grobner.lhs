@@ -7,8 +7,6 @@
 
 * Imports
 
-#include "../undefined.h" 
-
 > import ATP.Util.Prelude hiding (const, div)
 > import ATP.Complex (Err, failwith, tryFind)
 > import qualified ATP.Fol as Fol

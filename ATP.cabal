@@ -1,7 +1,7 @@
 
 name:           ATP
 version:        1.0.0
-cabal-version:  >= 1.6.0.3 && < 2
+cabal-version:  >= 1.6.0.3
 build-type:     Simple
 license:        GPL
 license-file:   LICENSE
@@ -19,9 +19,8 @@ description:    A Haskell port of the code from John Harrison's book
 tested-with:    GHC == 6.10.4
 
 extra-source-files: LICENSE
-                    README
+                    README.md
                     Makefile
-                    src/undefined.h
                     ATP.cabal
                     notes/haskell.tex
 

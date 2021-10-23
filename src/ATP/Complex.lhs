@@ -19,7 +19,7 @@
 
 * Imports
 
-#include "../undefined.h" 
+
 
 > import ATP.Util.Prelude hiding (div)
 > import qualified ATP.Cooper as Cooper
@@ -164,7 +164,7 @@
 > basicQelim vars (Ex x p) =
 >   let (eqs, neqs) = List.partition (not . F.negative) (F.conjuncts p) in
 >   cqelim (x : vars) (map Equal.lhs eqs, map (Equal.lhs . F.opp) neqs) initSgns
-> basicQelim _ _ = __IMPOSSIBLE__ 
+> basicQelim _ _ = (throwImpossible (Impossible __FILE__ __LINE__))
 
 > qelim :: Formula -> Formula
 > qelim = 

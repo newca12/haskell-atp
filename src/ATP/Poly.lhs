@@ -33,7 +33,7 @@
 
 * Imports
 
-#include "../undefined.h" 
+
 
 > import ATP.Util.Prelude hiding (div)
 > import qualified ATP.Cooper as Cooper
@@ -51,7 +51,7 @@
 
 > destRational :: Term -> Rational
 > destRational (Num r) = r
-> destRational _ = __IMPOSSIBLE__ 
+> destRational _ = (throwImpossible (Impossible __FILE__ __LINE__))
 
 > rational1 :: (Rational -> Rational) -> Term -> Term
 > rational1 fn = Num . fn . destRational
@@ -92,7 +92,7 @@ We need explicit casts between Integer and Rational.
 > polyLadd :: Vars -> Poly -> Poly -> Poly
 > polyLadd vars pol1 (Fn "+" [d, Fn "*" [Var y, q]]) =
 >   Fn "+" [add vars pol1 d, Fn "*" [Var y, q]]
-> polyLadd _ _ _ = __IMPOSSIBLE__ 
+> polyLadd _ _ _ = (throwImpossible (Impossible __FILE__ __LINE__))
 
 > neg :: Poly -> Poly
 > neg (Fn "+" [c, Fn "*" [Var x, p]]) = 
@@ -182,7 +182,7 @@ PP.pPrint x
 > headconst p = case p of
 >   Fn "+" [_, Fn "*" [Var _, q]] -> headconst q
 >   Num r -> r
->   _ -> __IMPOSSIBLE__ 
+>   _ -> (throwImpossible (Impossible __FILE__ __LINE__))
 
 > monic :: Term -> (Term, Bool)
 > monic p = 

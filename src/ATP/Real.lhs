@@ -7,8 +7,6 @@
 
 * Imports
 
-#include "../undefined.h" 
-
 > import ATP.Util.Prelude
 > import qualified ATP.Complex as C
 > import ATP.Complex (Sign(..), Ctx, swap, Err, failwith)
@@ -47,7 +45,7 @@ A Matrix gives the signs for a list of polynomials.
 >       (_, Nothing) -> error "testform2"
 >       (Just sgn, Just sgns) -> 
 >         elem sgn sgns
->   evalfn _ = __IMPOSSIBLE__ 
+>   evalfn _ = (throwImpossible (Impossible __FILE__ __LINE__))
 
 > inferpsign :: (Row, Row) -> Row
 > inferpsign (pd, qd) = case List.elemIndex Zero pd of
@@ -173,7 +171,7 @@ In OCaml, inferisign can raise the "inferisign: inconsisitent" exception.
 >   in case caseSplit (x:vars) [] pols cont C.initSgns of
 >        Left s -> error s
 >        Right res -> res
-> basicQelim _ _ = __IMPOSSIBLE__ 
+> basicQelim _ _ = (throwImpossible (Impossible __FILE__ __LINE__))
 
 > qelim :: Formula -> Formula
 > qelim = 

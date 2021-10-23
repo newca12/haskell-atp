@@ -13,7 +13,7 @@
 
 * Imports
 
-#include "../undefined.h" 
+
 
 > import ATP.Util.Prelude 
 > import ATP.Equal (lhs)
@@ -67,7 +67,7 @@ quantifiers over coordinates.)
 > coordinate :: Formula -> Formula
 > coordinate = F.onatoms $ \(R a args) -> 
 >   let getVars (Var v) = (Var $ v ++ "_x", Var $ v ++ "_y")
->       getVars _ = __IMPOSSIBLE__ 
+>       getVars _ = (throwImpossible (Impossible __FILE__ __LINE__))
 >       (xtms, ytms) = unzip (map getVars args)
 >       xs = ["x_" ++ show n | n <- [1 .. length args]]
 >       ys = ["y_" ++ show n | n <- [1 .. length args]]
@@ -165,7 +165,7 @@ and shearing seems best left to the user setting up the problem.
 >       if k == 0 then pprove vars qs p' degens else
 >       let degens' = (¬) (P.phead vars q ≡ zero) : degens in
 >       foldr (pprove vars qs) degens' (P.coefficients vars p') 
->    _ -> __IMPOSSIBLE__ 
+>    _ -> (throwImpossible (Impossible __FILE__ __LINE__))
 
 Any set of polynomials can be transformed into a triangular set of polynomials
 that are all zero whenever all the initial polynomials are. If the

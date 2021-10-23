@@ -7,7 +7,7 @@
 
 * Imports
 
-#include "../undefined.h" 
+
 
 > import ATP.Util.Prelude 
 > import qualified ATP.DefCnf as Cnf
@@ -48,7 +48,7 @@ CNF transformation of the triplets:
 
 > name :: Rel -> String
 > name (R f []) = f
-> name _ = __IMPOSSIBLE__ 
+> name _ = (throwImpossible (Impossible __FILE__ __LINE__))
 
 > triplicate :: Formula -> (Formula, [Formula])
 > triplicate fm = 
@@ -141,7 +141,7 @@ if some of p, q and r are replaced by negative literals.
 >   [form| $x ⇔ $y ∨ $z |] -> instTrigger (x, y, z) trigOr
 >   [form| $x ⇔ $y ⊃ $z |] -> instTrigger (x, y, z) trigImp
 >   [form| $x ⇔ ($y ⇔ $z) |] -> instTrigger (x, y, z) trigIff
->   _ -> __IMPOSSIBLE__ 
+>   _ -> (throwImpossible (Impossible __FILE__ __LINE__))
 >  where 
 >   trigAnd = triggers [form| p ⇔ q ∧ r |]
 >   trigOr = triggers [form| p ⇔ q ∨ r |]
@@ -273,8 +273,8 @@ new equalities resulting.
 >   x:xs -> 
 >     let b1 = UF.canonize eq1 x
 >         b2 = UF.canonize eq2 x
->         s1 = maybe __IMPOSSIBLE__ id (Map.lookup b1 rev1)
->         s2 = maybe __IMPOSSIBLE__ id (Map.lookup b2 rev2)
+>         s1 = maybe (throwImpossible (Impossible __FILE__ __LINE__)) id (Map.lookup b1 rev1)
+>         s2 = maybe (throwImpossible (Impossible __FILE__ __LINE__)) id (Map.lookup b2 rev2)
 >         s = s1 ∩ s2
 >     in inter (xs \\ s) erf1 erf2 rev1 rev2 (equateset s erf)
 

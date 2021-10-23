@@ -7,7 +7,7 @@
 
 * Imports
 
-#include "../undefined.h" 
+
 
 > import ATP.Util.Prelude
 > import qualified ATP.Completion as Completion
@@ -32,7 +32,7 @@
 >     Atom (R f args) -> Completion.listcases (Completion.overlaps lr)
 >                        (\i -> rfn i . Atom . R f) args []
 >     Not p -> overlap1 lr p (\i -> rfn i . Not)
->     _ -> __IMPOSSIBLE__ 
+>     _ -> (throwImpossible (Impossible __FILE__ __LINE__))
 
 > overlapc :: (Term, Term) -> Clause -> (Env -> Clause -> a) 
 >             -> [a] -> [a]

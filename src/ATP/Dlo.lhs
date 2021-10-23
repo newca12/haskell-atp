@@ -15,8 +15,6 @@
 
 * Imports
 
-#include "../undefined.h" 
-
 > import ATP.Util.Prelude
 > import qualified ATP.Dp as Dp
 > import ATP.FormulaSyn
@@ -43,9 +41,9 @@
 >   let x' = Var x 
 >       cjs = F.conjuncts p \\ [ x' ≡ x' ] 
 >       left (Atom (R "<" [l, _])) = l
->       left _ = __IMPOSSIBLE__ 
+>       left _ = (throwImpossible (Impossible __FILE__ __LINE__))
 >       right (Atom (R "<" [_, r])) = r
->       right _ = __IMPOSSIBLE__ 
+>       right _ = (throwImpossible (Impossible __FILE__ __LINE__))
 >   in case List.find Equal.isEq cjs of
 >     Just eqn -> let (s, t) = Equal.destEq eqn
 >                     y = if s == x' then t else s in
@@ -80,7 +78,7 @@ the atomic formulas.
 
 > destNumeral :: Term -> Rational
 > destNumeral (Fn ns []) = P.parse ns
-> destNumeral _ = __IMPOSSIBLE__ 
+> destNumeral _ = (throwImpossible (Impossible __FILE__ __LINE__))
 
 > isNumeral :: Term -> Bool
 > isNumeral (Fn ns []) 

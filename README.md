@@ -1,29 +1,28 @@
 # haskell-atp
 
 
-### About ###
+## About ##
 Port of the Objective Caml code supporting John Harrison's logic [textbook](http://www.cambridge.org/catalogue/catalogue.asp?isbn=9780521899574) Handbook of Practical Logic and Automated Reasoning to Haskell.
 
 The original code written by [Sean McLaughlin](https://github.com/seanmcl) need GHC 6.10.4  
-This repo contains sligth modifications and instructions to fit GHC upto 8.6.3
+This repo contains sligth modifications and instructions to fit GHC upto 8.10.7
 
-### Installlation ###
-1. Install the [Haskell platform](http://hackage.haskell.org/platform/). This will give you [GHC](http://www.haskell.org/ghc/) and the [cabal-install](http://hackage.haskell.org/trac/hackage/wiki/CabalInstall) build tool.
-2. [GNU Make](http://www.gnu.org/software/make/) is also required.
-3.  Update your package database:
+## Build and use the atp binary ##
+1. Install GHC and cabal-install via [GHCup](https://www.haskell.org/ghcup)
+2.  Update your package database:
 
         cabal update
    
-4. Get the required Haskell libraries:
+3. Get the required Haskell libraries:
 
-       cabal install directory hslogger utf8-string HUnit QuickCheck parsec syb
+       cabal install --lib directory hslogger utf8-string HUnit QuickCheck parsec syb
 
-5. Build an executable
+4. Build an executable
 
-       make
+       cabal install
 
-6. Make sure ~/.cabal/bin is on your path.  The atp executable resides there.
-7. Try it !
+5. Make sure ~/.cabal/bin is on your path. The atp executable resides there.
+6. Try it !
 ```
 user@dev:$ atp bmeson eq1
 Welcome to Haskell ATP!
@@ -31,6 +30,19 @@ Welcome to Haskell ATP!
 (∀ x. 1 * x = x) ∧ (∀ x. i(x) * x = 1) ⊃
   (∀ x. x * i(x) = 1)
 [19]
-Computation time: 27.7014 sec
+Computation time: 8.9304 sec
 ```
 
+## You can also use ghci ##
+```
+cd src
+ghci
+Prelude> :set -package mtl
+Prelude> :l Main.lhs
+Prelude> :main resolution -f "(exists y. forall x. P(x, y)) ==> forall x. exists y. P(x, y)"
+Welcome to Haskell ATP!
+(∃ y. ∀ x. P(x, y)) ⊃ (∀ x. ∃ y. P(x, y))
+()
+Computation time: 0.0016 sec
+it :: ()
+```

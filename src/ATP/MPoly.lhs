@@ -15,7 +15,7 @@
 
 * Imports
 
-#include "../undefined.h" 
+
 
 > import ATP.Util.Prelude hiding (const, div)
 > import qualified ATP.Util.Prelude as Prelude
@@ -183,9 +183,9 @@ by the usual process of recursion:
 >   [term| $s / $t |] -> polynate vars s / polynate vars t
 >   [term| $s ^ $n |] -> case n of
 >      Num n' | Data.Ratio.denominator n' == 1 -> pow vars (polynate vars s) (fromInteger $ Data.Ratio.numerator n')
->      _ -> __IMPOSSIBLE__ 
+>      _ -> (throwImpossible (Impossible __FILE__ __LINE__))
 >   Num r -> const vars r
->   _ -> __IMPOSSIBLE__ 
+>   _ -> (throwImpossible (Impossible __FILE__ __LINE__))
 
 Then we can convert any suitable equational formula s = t, which we
 think of as s - t = 0, into a corresponding polynomial:

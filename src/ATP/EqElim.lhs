@@ -13,7 +13,7 @@
 
 * Imports
 
-#include "../undefined.h" 
+
 
 > import ATP.Util.Prelude 
 > import qualified ATP.Equal as Equal
@@ -132,7 +132,7 @@ subterm:
 > findNvSubterm (Not p) = findNvSubterm p
 > findNvSubterm (Atom (R "=" st)) = List.findFirst findNestNonvar st
 > findNvSubterm (Atom (R _ args)) = List.find (not . Fol.isVar) args
-> findNvSubterm _ = __IMPOSSIBLE__ 
+> findNvSubterm _ = (throwImpossible (Impossible __FILE__ __LINE__))
 
 Having found such a non-variable subterm, we want to replace it with a
 new variable. We don't have a general function to replace subterms (tsubst

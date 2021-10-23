@@ -2,13 +2,13 @@
 default : dist
 
 configure : ATP.cabal 
-	runhaskell Setup.lhs configure --user --extra-include-dirs=src/ATP 
+	caba configure
 
 build : 
-	runhaskell Setup.lhs build
+	cabal build
 
 install : 
-	runhaskell Setup.lhs install
+	cabal install
 
 dist : configure build install 
 
@@ -18,15 +18,10 @@ sdist : configure
 .PHONY : doc
 
 doc : 
-	runhaskell Setup.lhs haddock --executables \
-	                             --hyperlink-source \
-                                     --haddock-option="--use-unicode" \
-                                     --haddock-option="-h" \
-                                     --hoogle \
-	                             --hscolour-css=util/hscolour.css \
+	cabal haddock
 
 clean :
-	runhaskell Setup.lhs clean 
+	cabal clean
 	rm -rf dist atp.prof atp.log
 	find . \( -name "*~" -or -name "*.o" -or -name "*.hi" \) -exec rm -f {} \;
 

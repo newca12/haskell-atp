@@ -15,7 +15,7 @@ Knuth-Bendix completion.
 
 * Imports
 
-#include "../undefined.h" 
+
 
 > import ATP.Util.Prelude
 > import qualified ATP.Fol as Fol
@@ -86,7 +86,7 @@ setting up the initial rfn:
 > crit1 :: Formula -> Formula -> [Formula]
 > crit1 (Atom (R "=" [l1, r1])) (Atom (R "=" [l2, r2])) = 
 >   overlaps (l1, r1) l2 (\i t -> Fol.apply i (Equal.mkEq t r2))
-> crit1 _ _ = __IMPOSSIBLE__ 
+> crit1 _ _ = (throwImpossible (Impossible __FILE__ __LINE__))
 
 For the overall function, we need to rename the variables in the initial
 formula then nd all overlaps of the rst on the second and vice versa,
@@ -166,7 +166,7 @@ the case where s0 and t0 are identical.
 >   if ord s' t' then Just (s', t') 
 >   else if ord t' s' then Just (t', s')
 >   else Nothing 
-> normalizeAndOrient _ _ _ = __IMPOSSIBLE__ 
+> normalizeAndOrient _ _ _ = (throwImpossible (Impossible __FILE__ __LINE__))
 
 The central completion procedure maintains a set of equations eqs and a
 set of pending critical pairs crits, and successively examines critical pairs,

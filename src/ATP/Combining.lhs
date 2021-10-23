@@ -22,9 +22,6 @@ The Nelson-Oppen method.
 
 * Imports
 
--- #include "../save/projects/atp/src/undefined.h"
-#include "undefined.h"
--- #include "/Users/sean/save/projects/atp/src/undefined.h"
 
 > import ATP.Util.Prelude 
 > import qualified ATP.Cong as Cong
@@ -200,7 +197,7 @@ of predicates.
 >   Atom (R p args) -> 
 >     let lang = case chooseLang langs fm of 
 >           Just l -> l 
->           Nothing -> __IMPOSSIBLE__ 
+>           Nothing -> (throwImpossible (Impossible __FILE__ __LINE__))
 >     in listify (homot lang) args (\a -> cont (Atom (R p a))) defs
 >   _ -> error "homol: not a literal"
 
@@ -266,7 +263,7 @@ languages:
 >   Just eq -> 
 >     let (x, t) = case destDef eq of 
 >           Just xt -> xt 
->           Nothing -> __IMPOSSIBLE__ 
+>           Nothing -> (throwImpossible (Impossible __FILE__ __LINE__))
 >     in redeqs (map (Fol.apply (x ⟾ t)) (eqs \\ [eq]))
 >   Nothing -> eqs
 
@@ -348,7 +345,7 @@ languages:
 -- > nelop langs fm = Exn.assert False True
 
 -- > nelop :: [Lang] -> Formula -> Bool
--- > nelop langs fm = __IMPOSSIBLE__
+-- > nelop langs fm = (throwImpossible (Impossible __FILE__ __LINE__))
 
 > nelopInt :: Formula -> Bool
 > nelopInt = nelop (addDefault [intLang])

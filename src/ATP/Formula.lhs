@@ -13,8 +13,6 @@
 
 * Imports
 
-#include "../undefined.h"
-
 > import ATP.Util.Prelude hiding ((-))
 > import ATP.FormulaSyn
 > import qualified Data.List as List
@@ -74,7 +72,7 @@ Collect atoms
 
 > destAnd :: Formula -> (Formula, Formula)
 > destAnd (And a b) = (a, b)
-> destAnd _ = __IMPOSSIBLE__ 
+> destAnd _ = (throwImpossible (Impossible __FILE__ __LINE__))
 
 Make a big conjunction(disjunction resp.) from a list
 listConj [a,b,c] --> a & b & c 

@@ -17,7 +17,7 @@
 
 * Imports
 
-#include "../undefined.h" 
+
 
 > import ATP.Util.Prelude
 > import qualified ATP.Formula as F
@@ -402,7 +402,7 @@ calls will fail and the atom will be returned unchanged by the error trap.
 >         if op (destInteger s) (destInteger t) then (⊤) else (⊥)
 >       else Atom at
 >     Nothing -> Atom at
->   atfn _ = __IMPOSSIBLE__ 
+>   atfn _ = (throwImpossible (Impossible __FILE__ __LINE__))
 
 The overall quantifier elimination procedure is built in the usual way,
 inserting evalc into the intermediate normalization steps and at the end.
