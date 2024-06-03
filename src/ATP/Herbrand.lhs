@@ -37,7 +37,7 @@ Get the constants for Herbrand base, adding nullary one if necessary.
 
 > herbfuns :: Formula -> ([FuncA], [FuncA])
 > herbfuns fm = 
->     let syms @ (cns, fns) = List.partition ((== 0) . snd) (Fol.functions fm) in
+>     let syms@(cns, fns) = List.partition ((== 0) . snd) (Fol.functions fm) in
 >     if null cns then ([("c", 0)], fns) else syms
 
 The function groundterms enumerates all ground terms involving n functions.

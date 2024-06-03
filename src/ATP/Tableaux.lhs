@@ -143,7 +143,7 @@ refutations.
 >     [] -> Nothing
 >     And p q : unexp -> tableau (p:q:unexp, lits, n) cont (env, k)
 >     Or p q : unexp -> tableau (p:unexp, lits, n) (tableau (q:unexp, lits, n) cont) (env, k)
->     fm @ (All x p) : unexp -> 
+>     fm@(All x p) : unexp -> 
 >            let y = Var("_" ++ show k) 
 >                p' = Fol.apply (x ⟾ y)  p in
 >                     tableau (p':unexp ++ [fm], lits, n-1) cont (env, k+1)

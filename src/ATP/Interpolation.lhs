@@ -60,7 +60,7 @@ terms:
 > toptermt :: [(Pred, Int)] -> Term -> [Term]
 > toptermt _ (Var _) = []
 > toptermt _ (Num _) = []
-> toptermt fns (tm @ (Fn f args)) = if elem (f, length args) fns then [tm]
+> toptermt fns (tm@(Fn f args)) = if elem (f, length args) fns then [tm]
 >                            else Set.unions (map (toptermt fns) args)
 
 and then for formulas: 
@@ -80,7 +80,7 @@ then iteratively replace them by quantiﬁed variables.
 >       simpinter tms n c = 
 >         case tms of
 >           [] -> c
->           (tm @ (Fn f args) : otms) -> 
+>           (tm@(Fn f args) : otms) -> 
 >             let v = "v_" ++ show n
 >                 c' = EqElim.replace (tm ⟾ Var v) c
 >                 c'' = if elem (f, length args) fp 

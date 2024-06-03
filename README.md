@@ -5,10 +5,10 @@
 Port of the Objective Caml code supporting John Harrison's logic [textbook](http://www.cambridge.org/catalogue/catalogue.asp?isbn=9780521899574) Handbook of Practical Logic and Automated Reasoning to Haskell.
 
 The original code written by [Sean McLaughlin](https://github.com/seanmcl) need GHC 6.10.4  
-This repo contains sligth modifications and instructions to fit GHC upto 8.10.7
+This repo contains sligth modifications and instructions to fit GHC upto 9.6.5
 
 ## Build and use the atp binary ##
-1. Install GHC and cabal-install via [GHCup](https://www.haskell.org/ghcup)
+1. Install GHC and cabal-install via [GHCup](https://www.haskell.org/ghcup) or via [stack](https://docs.haskellstack.org/en/stable) + `stack install cabal-install`
 2.  Update your package database:
 
         cabal update
@@ -35,14 +35,11 @@ Computation time: 8.9304 sec
 
 ## You can also use ghci ##
 ```
-cd src
-ghci
-Prelude> :set -package mtl
-Prelude> :l Main.lhs
-Prelude> :main resolution -f "(exists y. forall x. P(x, y)) ==> forall x. exists y. P(x, y)"
+cabal repl
+ghci> :l src/Main.lhs
+ghci> :main resolution -f "(exists y. forall x. P(x, y)) ==> forall x. exists y. P(x, y)"
 Welcome to Haskell ATP!
 (∃ y. ∀ x. P(x, y)) ⊃ (∀ x. ∃ y. P(x, y))
 ()
-Computation time: 0.0016 sec
-it :: ()
+Computation time: 0.0013 sec
 ```

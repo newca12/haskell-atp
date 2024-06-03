@@ -31,7 +31,7 @@ Union-Find
 >   deriving Eq
 
 > terminus :: Ord a => Partition a -> a -> Maybe (a, Int)
-> terminus (ptn @ (Partition m)) a = 
+> terminus (ptn@(Partition m)) a = 
 >   case Map.lookup a m of
 >     Nothing -> Nothing
 >     Just (Nonterminal b) -> terminus ptn b
@@ -50,7 +50,7 @@ Union-Find
 > equivalent eqv a b = canonize eqv a == canonize eqv b
 
 > equate :: Ord a => (a, a) -> Partition a -> Partition a
-> equate (a, b) (ptn @ (Partition f)) =
+> equate (a, b) (ptn@(Partition f)) =
 >   let (a', na) = tryterminus ptn a
 >       (b', nb) = tryterminus ptn b 
 >       m = if a' == b' then f 

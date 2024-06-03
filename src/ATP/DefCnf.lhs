@@ -49,7 +49,7 @@ a general function defstep that does the main work.
 > type Trip = (Formula, Map Formula (Formula, Formula), Int)
 
 > maincnf :: Trip -> Trip
-> maincnf (trip @ (fm, _, _)) = case fm of
+> maincnf (trip@(fm, _, _)) = case fm of
 >    And p q -> defstep And (p, q) trip
 >    Or p q -> defstep Or (p, q) trip
 >    Iff p q -> defstep Iff (p, q) trip
@@ -147,7 +147,7 @@ This is used first to define a function that recursively descends through
 disjunctions performing the definitional transformation of the disjuncts:
 
 > orcnf :: Trip -> Trip
-> orcnf (trip @ (fm, _, _)) = case fm of
+> orcnf (trip@(fm, _, _)) = case fm of
 >    Or p q -> subcnf orcnf Or (p,q) trip
 >    _ -> maincnf trip
 
@@ -155,7 +155,7 @@ and in turn a function that recursively descends through conjunctions calling
 orcnf on the conjuncts:
 
 > andcnf :: Trip -> Trip
-> andcnf (trip @ (fm, _, _)) = case fm of
+> andcnf (trip@(fm, _, _)) = case fm of
 >    And p q -> subcnf andcnf And (p,q) trip
 >    _ -> orcnf trip
 

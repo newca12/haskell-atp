@@ -92,7 +92,7 @@ Image of a function
 >     where
 >       subset' [] _ = True
 >       subset' _ [] = False
->       subset' (l1' @ (h1:t1)) (h2:t2) | h1 == h2 = subset' t1 t2
+>       subset' (l1'@(h1:t1)) (h2:t2) | h1 == h2 = subset' t1 t2
 >                                       | h1 < h2 = False
 >                                       | otherwise = subset' l1' t2
 
@@ -101,7 +101,7 @@ Image of a function
 >     where
 >       psubset' _l1 [] = False
 >       psubset' [] _l2 = True
->       psubset' (l1' @ (h1:t1)) (h2:t2) | h1 == h2 = psubset' t1 t2
+>       psubset' (l1'@(h1:t1)) (h2:t2) | h1 == h2 = psubset' t1 t2
 >                                        | h1 < h2 = False
 >                                        | otherwise = subset l1' t2
 

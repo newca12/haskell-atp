@@ -20,7 +20,7 @@
 > import qualified ATP.Util.Lib as Lib
 > import qualified ATP.Util.List as List
 > import qualified ATP.Util.Print as PP
-> import Control.Monad.Error (catchError)
+> import Control.Monad.Except (catchError)
 
 * Real
 

@@ -160,6 +160,7 @@ executable atp
                  TemplateHaskell
                  QuasiQuotes
                  CPP
+                 TypeApplications
 
   cpp-options: -Wno-unicode-homoglyph
 

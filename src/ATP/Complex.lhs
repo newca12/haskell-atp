@@ -33,8 +33,8 @@
 > import ATP.Util.ListSet ((\\))
 > import qualified ATP.Util.Print as PP
 > import ATP.Util.Print (Print)
-> import qualified Control.Monad.Error as Error
-> import Control.Monad.Error (MonadError, catchError)
+> import qualified Control.Monad.Except as Error
+> import Control.Monad.Except (MonadError, catchError)
 > import qualified Data.List as List
 > import qualified Data.Maybe as Maybe
 
@@ -43,7 +43,7 @@
 > type Err = Either String
 
 > failwith :: String -> Err a
-> failwith = Error.throwError . Error.strMsg
+> failwith = Error.throwError
 
 > can :: Err a -> Bool
 > can (Left _) = False
