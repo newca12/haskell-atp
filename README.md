@@ -1,10 +1,10 @@
 # Haskell ATP — Automated Theorem Proving
 
 A Haskell port of the OCaml code from John Harrison's
-[*Handbook of Practical Logic and Automated Reasoning*](http://www.cambridge.org/catalogue/catalogue.asp?isbn=9780521899574).
+[*Handbook of Practical Logic and Automated Reasoning*](http://www.cambridge.org/9780521899574).
 
 Originally written by [Sean McLaughlin](https://github.com/seanmcl).
-Updated to build with modern GHC (9.x) and Cabal (2.x).
+Updated to build with modern GHC (9.6.7) and Cabal (3.14).
 
 ## Implemented Algorithms
 
