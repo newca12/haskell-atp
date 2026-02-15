@@ -1,6 +1,7 @@
 
 * Signature
 
+> {-# OPTIONS_GHC -Wno-orphans #-}
 > module ATP.MPoly
 >   ( Monom
 >   , mdiv

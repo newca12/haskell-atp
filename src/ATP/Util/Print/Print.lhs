@@ -185,8 +185,8 @@
 
 This is needed for proper unicode printing.
 
-> instance Print [String] where
->   pPrint = listHoriz . map PP.text 
+> instance {-# OVERLAPPING #-} Print [String] where
+>   pPrint = listHoriz . map PP.text
 
 > class GenPrint s a where
 >   pPrintEnv :: s -> a -> Doc

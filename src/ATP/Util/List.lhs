@@ -3,6 +3,7 @@
 
 * Signature
 
+> {-# OPTIONS_GHC -Wno-compat-unqualified-imports #-}
 > module ATP.Util.List 
 >   ( module Data.List
 >   , allInjectiveMaps

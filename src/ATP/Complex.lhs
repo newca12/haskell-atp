@@ -34,7 +34,7 @@
 > import qualified ATP.Util.Print as PP
 > import ATP.Util.Print (Print)
 > import qualified Control.Monad.Except as Error
-> import Control.Monad.Except (MonadError, catchError)
+> import Control.Monad.Except (catchError)
 > import qualified Data.List as List
 > import qualified Data.Maybe as Maybe
 

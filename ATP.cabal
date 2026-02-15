@@ -1,169 +1,214 @@
-
+cabal-version:  2.4
 name:           ATP
 version:        1.0.0
-cabal-version:  >= 1.6.0.3
 build-type:     Simple
-license:        GPL
+license:        GPL-3.0-only
 license-file:   LICENSE
 author:         Sean McLaughlin <seanmcl@gmail.com>
-maintainer:	Sean McLaughlin <seanmcl@gmail.com>
-homepage:       
-bug-reports:    
+maintainer:     Olivier ROLAND <newca12@users.noreply.github.com>
 category:       Theorem provers
-
 synopsis:       Haskell theorem proving algorithms.
+description:
+  A Haskell port of the code from John Harrison's book
+  /Handbook of Practical Logic and Automated Reasoning/.
 
-description:    A Haskell port of the code from John Harrison's book 
-                Handbook of Practical Logic and Automated Reasoning.
+tested-with:    GHC == 9.6.7
 
-tested-with:    GHC == 6.10.4
+extra-source-files:
+  LICENSE
+  README.md
+  notes/haskell.tex
 
-extra-source-files: LICENSE
-                    README.md
-                    Makefile
-                    ATP.cabal
-                    notes/haskell.tex
+source-repository head
+  type:     git
+  location: https://github.com/seanmcl/haskell-atp.git
+
+-- Shared build settings
+common shared
+  default-language: Haskell2010
+  default-extensions:
+    NoImplicitPrelude
+    MultiParamTypeClasses
+    ScopedTypeVariables
+    TypeSynonymInstances
+    FlexibleInstances
+    DeriveDataTypeable
+    TemplateHaskell
+    QuasiQuotes
+    CPP
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Wno-overlapping-patterns
+    -fno-ignore-asserts
+    -optL -q
+  build-depends:
+    base           >= 4.14  && < 5,
+    containers     >= 0.6   && < 0.8,
+    mtl            >= 2.2   && < 2.4,
+    parsec         >= 3.1   && < 3.2,
+    utf8-string    >= 1.0   && < 1.1,
+    HUnit          >= 1.6   && < 1.7,
+    pretty         >= 1.1   && < 1.2,
+    QuickCheck     >= 2.14  && < 2.16,
+    template-haskell >= 2.16 && < 2.22,
+    hslogger       >= 1.3   && < 1.4,
+    syb            >= 0.7   && < 0.8,
+    directory      >= 1.3   && < 1.4
 
 library
-
+  import:         shared
   hs-source-dirs: src
 
-  include-dirs: src
+  exposed-modules:
+    ATP.Bdd
+    ATP.Combining
+    ATP.Completion
+    ATP.Complex
+    ATP.Cong
+    ATP.Cooper
+    ATP.Decidable
+    ATP.DefCnf
+    ATP.Dlo
+    ATP.Dp
+    ATP.EqElim
+    ATP.Equal
+    ATP.Fol
+    ATP.Formula
+    ATP.FormulaSyn
+    ATP.Geom
+    ATP.Grobner
+    ATP.Herbrand
+    ATP.Interpolation
+    ATP.Intro
+    ATP.IntroSyn
+    ATP.MPoly
+    ATP.Meson
+    ATP.Order
+    ATP.Paramodulation
+    ATP.Poly
+    ATP.Prolog
+    ATP.Prop
+    ATP.PropExamples
+    ATP.Qelim
+    ATP.Real
+    ATP.Resolution
+    ATP.Rewrite
+    ATP.Skolem
+    ATP.Stal
+    ATP.Tableaux
+    ATP.TestFormulas
+    ATP.Unif
+    ATP.Test.Combining
+    ATP.Test.Complex
+    ATP.Test.Cooper
+    ATP.Test.Dlo
+    ATP.Test.Fo
+    ATP.Test.Grobner
+    ATP.Test.Real
+    ATP.Test.Taut
+    ATP.Util.Debug
+    ATP.Util.Impossible
+    ATP.Util.Lex
+    ATP.Util.Lib
+    ATP.Util.List
+    ATP.Util.ListSet
+    ATP.Util.Log
+    ATP.Util.Log.Class
+    ATP.Util.Misc
+    ATP.Util.Monad
+    ATP.Util.Parse
+    ATP.Util.Parse.Parse
+    ATP.Util.Prelude
+    ATP.Util.Print
+    ATP.Util.Print.Print
+    ATP.Util.TH
+    ATP.Util.Tuple
+    ATP.Util.UnionFind
 
-  build-depends:  base >= 4.1.0.0,
-                  containers >= 0.2.0.1,
-                  mtl >= 1.1.0.2,
-                  parsec >= 2.0,
-                  utf8-string >= 0.3.5,
-                  HUnit >= 1.2.2.0,
-                  pretty >= 1.0.1.0,
-                  QuickCheck >= 2.1,
-                  template-haskell >= 2.3.0.1,
-                  hslogger >= 1.0.7,
-                  syb >= 0.1.0.1,
-                  directory >= 1.3.1.5
+  other-modules:
+    Compat
 
-  extensions:    NoImplicitPrelude
-                 MultiParamTypeClasses
-                 ScopedTypeVariables
-                 TypeSynonymInstances
-                 OverlappingInstances
-                 FlexibleInstances
-                 DeriveDataTypeable
-                 TemplateHaskell
-                 QuasiQuotes
-                 CPP
-                 TemplateHaskellQuotes
-
-  cpp-options: -Wno-unicode-homoglyph
-
-  ghc-options: -Wall 
-               -- These warnings are not turned on by -Wall
-               -fwarn-implicit-prelude 
-               -fwarn-monomorphism-restriction 
-               -fwarn-incomplete-record-updates 
-               -fwarn-tabs 
-               -fno-ignore-asserts
-               -- -v
-               -- Dump Core language
-               -- -ddump-simpl
-               -- Warnings as errors
-               -- -Werror
-               -- Allow comment lines next to literate lines
-               -optL -q
-               -- Profiling 
-               -- -prof
-               -- -auto-all
-
-  exposed-modules: ATP.Util.Debug
-                   ATP.Util.Impossible
-                   ATP.Util.Lex
-                   ATP.Util.Lib
-                   ATP.Util.List
-                   ATP.Util.ListSet
-                   ATP.Util.Log
-                   ATP.Util.Log.Class
-                   ATP.Util.Misc
-                   ATP.Util.Monad
-                   ATP.Util.Parse
-                   ATP.Util.Parse.Parse
-                   ATP.Util.Prelude
-                   ATP.Util.Print
-                   ATP.Util.Print.Print
-                   ATP.Util.TH
-                   ATP.Util.Tuple
-                   ATP.Util.UnionFind
-                   ATP.Bdd
-                   ATP.Combining
-                   ATP.Completion
-                   ATP.Complex
-                   ATP.Cong
-                   ATP.Cooper
-                   ATP.Decidable
-                   ATP.DefCnf
-                   ATP.Dlo
-                   ATP.Dp
-                   ATP.EqElim
-                   ATP.Equal
-                   ATP.Fol
-                   ATP.Formula
-                   ATP.FormulaSyn
-                   ATP.Geom
-                   ATP.Grobner
-                   ATP.Herbrand
-                   ATP.Interpolation
-                   ATP.Intro
-                   ATP.IntroSyn
-                   ATP.MPoly
-                   ATP.Meson
-                   ATP.Order
-                   ATP.Paramodulation
-                   ATP.Poly
-                   ATP.Prolog
-                   ATP.Prop
-                   ATP.PropExamples
-                   ATP.Qelim
-                   ATP.Real
-                   ATP.Resolution
-                   ATP.Rewrite
-                   ATP.Skolem
-                   ATP.Stal
-                   ATP.Tableaux
-                   ATP.TestFormulas
-                   ATP.Unif
-                   ATP.Test.Combining
-                   ATP.Test.Complex
-                   ATP.Test.Cooper
-                   ATP.Test.Dlo
-                   ATP.Test.Fo
-                   ATP.Test.Grobner
-                   ATP.Test.Real
-                   ATP.Test.Taut
-
-  other-modules : Compat
-                  
 executable atp
-
-  main-is:       Main.lhs
-
+  import:         shared
   hs-source-dirs: src
+  main-is:        Main.lhs
+  ghc-options:    -threaded -rtsopts
+  build-depends:  ATP
+  other-modules:
+    Compat
+    ATP.Bdd
+    ATP.Combining
+    ATP.Completion
+    ATP.Complex
+    ATP.Cong
+    ATP.Cooper
+    ATP.Decidable
+    ATP.DefCnf
+    ATP.Dlo
+    ATP.Dp
+    ATP.EqElim
+    ATP.Equal
+    ATP.Fol
+    ATP.Formula
+    ATP.FormulaSyn
+    ATP.Geom
+    ATP.Grobner
+    ATP.Herbrand
+    ATP.Interpolation
+    ATP.Intro
+    ATP.IntroSyn
+    ATP.MPoly
+    ATP.Meson
+    ATP.Order
+    ATP.Paramodulation
+    ATP.Poly
+    ATP.Prolog
+    ATP.Prop
+    ATP.PropExamples
+    ATP.Qelim
+    ATP.Real
+    ATP.Resolution
+    ATP.Rewrite
+    ATP.Skolem
+    ATP.Stal
+    ATP.Tableaux
+    ATP.TestFormulas
+    ATP.Unif
+    ATP.Test.Combining
+    ATP.Test.Complex
+    ATP.Test.Cooper
+    ATP.Test.Dlo
+    ATP.Test.Fo
+    ATP.Test.Grobner
+    ATP.Test.Real
+    ATP.Test.Taut
+    ATP.Util.Debug
+    ATP.Util.Impossible
+    ATP.Util.Lex
+    ATP.Util.Lib
+    ATP.Util.List
+    ATP.Util.ListSet
+    ATP.Util.Log
+    ATP.Util.Log.Class
+    ATP.Util.Misc
+    ATP.Util.Monad
+    ATP.Util.Parse
+    ATP.Util.Parse.Parse
+    ATP.Util.Prelude
+    ATP.Util.Print
+    ATP.Util.Print.Print
+    ATP.Util.TH
+    ATP.Util.Tuple
+    ATP.Util.UnionFind
 
-  include-dirs: src
-
-  extensions:    NoImplicitPrelude
-                 MultiParamTypeClasses
-                 ScopedTypeVariables
-                 TypeSynonymInstances
-                 OverlappingInstances
-                 FlexibleInstances
-                 DeriveDataTypeable
-                 TemplateHaskell
-                 QuasiQuotes
-                 CPP
-                 TypeApplications
-
-  cpp-options: -Wno-unicode-homoglyph
-
-  ghc-options: -fno-ignore-asserts
-               -- Allow comment lines next to literate lines
-               -optL -q
+test-suite atp-tests
+  import:         shared
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is:        Main.hs
+  ghc-options:    -threaded -rtsopts
+  build-depends:
+    ATP,
+    HUnit          >= 1.6,
+    QuickCheck     >= 2.14

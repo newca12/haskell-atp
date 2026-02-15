@@ -9,7 +9,6 @@
 >   ( module Prelude
 >   , Impossible(..)
 >   , throwImpossible
->   , (<$>)
 >   , error'
 >   , first, second
 >   , (<>), (<+>)
@@ -34,7 +33,6 @@
 
 > import Prelude hiding (print, putStr, putStrLn, (<>))
 > import ATP.Util.Impossible
-> import Control.Applicative ((<$>))
 > import Control.Arrow (first, second)
 > import qualified ATP.Util.Debug as Debug
 > import ATP.Util.Debug ( trace'

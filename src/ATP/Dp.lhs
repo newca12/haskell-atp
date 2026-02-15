@@ -81,10 +81,10 @@ clauses.
 >       neg = map F.opp neg'
 >       posOnly = pos \\ neg
 >       negOnly = neg \\ pos
->       pure = posOnly ∪ map F.opp negOnly in
->   case pure of
+>       pureL = posOnly ∪ map F.opp negOnly in
+>   case pureL of
 >     [] -> Nothing
->     _ -> Just (filter (\cl -> null $ Set.intersect cl pure) clauses)
+>     _ -> Just (filter (\cl -> null $ Set.intersect cl pureL) clauses)
 
 Rule for eliminating atomic formulas
 

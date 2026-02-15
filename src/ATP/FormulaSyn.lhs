@@ -87,7 +87,7 @@
 > type Clauses = [Clause]
 > type Env = Map Var Term
 
-> instance Print Env where
+> instance {-# OVERLAPPING #-} Print Env where
 >   pPrint m = PP.set (map pr $ Map.toList m)
 >     where pr (x, t) = PP.hsep [pPrint x, PP.text "↦", pPrint t]
 
